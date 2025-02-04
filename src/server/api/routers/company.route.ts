@@ -226,6 +226,14 @@ export const companyRouter = createTRPCRouter({
       };
     }),
 
+  createLoginLink: protectedProcedure
+    .input(companyRouterValidationSchema.linkWebhookTrigger)
+    .query(async ({ input }) => {
+      const { stripeAccountId } = input;
+      const loginLink = await stripe.accounts.createLoginLink(stripeAccountId);
+      return loginLink;
+    }),
+
   completeOnboarding: protectedProcedure
     .input(companyRouterValidationSchema.completeOnboarding)
     .mutation(async ({ input, ctx }) => {

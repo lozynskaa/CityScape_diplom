@@ -20,7 +20,7 @@ export default function CompanySelect() {
   };
 
   return (
-    <div className="flex h-full flex-1 flex-col items-center justify-center">
+    <div className="mx-auto flex h-full flex-1 flex-col items-center justify-center">
       <p className="mb-4 text-center text-sm text-gray-600">
         Company not selected, please select it to continue.
       </p>

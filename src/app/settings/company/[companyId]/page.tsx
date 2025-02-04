@@ -15,6 +15,7 @@ import { Textarea } from "~/app/_components/ui/textarea";
 import { type Company } from "~/server/db//company.schema";
 import { Spinner } from "~/app/_components/ui/spinner";
 import { useParams, useRouter } from "next/navigation";
+import { skipToken } from "@tanstack/react-query";
 
 export default function Company() {
   const { companyId } = useParams<{ companyId: string }>();
@@ -27,6 +28,14 @@ export default function Company() {
     api.company.getPrivateCompany.useQuery({
       id: companyId,
     });
+  const { data: loginLink, isFetching: isFetchingLogin } =
+    api.company.createLoginLink.useQuery(
+      !!currentCompany && currentCompany.stripeLinked
+        ? {
+            stripeAccountId: currentCompany.stripeAccountId,
+          }
+        : skipToken,
+    );
   const { mutateAsync: updateCompany } =
     api.company.updateCompany.useMutation();
   const { mutateAsync: linkStripe } =
@@ -96,6 +105,9 @@ export default function Company() {
 
   const handleLinkStripe = async () => {
     if (!currentCompany) return;
+    if (currentCompany.stripeLinked) {
+      return window.open(loginLink?.url, "_blank");
+    }
     const stripeLinkage = await linkStripe({
       stripeAccountId: currentCompany.stripeAccountId,
       id: currentCompany.id,
@@ -103,7 +115,7 @@ export default function Company() {
     router.push(stripeLinkage.url);
   };
 
-  if (isFetching) {
+  if (isFetching || isFetchingLogin) {
     return <Spinner />;
   }
 
@@ -111,10 +123,7 @@ export default function Company() {
     <div className="w-full space-y-8 px-12 py-8">
       <div className="flex flex-row items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-950">Company Dashboard</h1>
-        <Button
-          onClick={handleLinkStripe}
-          disabled={!!currentCompany?.stripeLinked}
-        >
+        <Button onClick={handleLinkStripe}>
           {currentCompany?.stripeLinked
             ? "Open Stripe Dashboard"
             : "Connect with Stripe"}

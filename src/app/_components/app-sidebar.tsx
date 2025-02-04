@@ -5,6 +5,7 @@ import {
   Building2,
   CalendarFold,
   CalendarPlus,
+  Home,
   NotebookPen,
   NotebookText,
   User,
@@ -63,6 +64,11 @@ const sidebarItems = [
           `/settings/company/${companyId}/posts/new-post`,
       },
     ],
+  },
+  {
+    title: "Go Home",
+    icon: Home,
+    href: "/",
   },
 ];
 
