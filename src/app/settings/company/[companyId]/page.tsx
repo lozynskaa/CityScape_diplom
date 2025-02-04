@@ -17,6 +17,8 @@ import { Spinner } from "~/app/_components/ui/spinner";
 import { useParams } from "next/navigation";
 import { LabeledItem } from "~/app/_components/ui/labeled-item";
 import DatePicker from "~/app/_components/ui/date-picker";
+import PhoneInput from "~/app/_components/ui/phone-input";
+import CountrySelect from "~/app/_components/ui/country-select";
 
 const requiredFields = [
   "name",
@@ -212,18 +214,20 @@ export default function Company() {
           />
         </LabeledItem>
 
-        <Input
-          placeholder="Enter country code"
-          label="Recipient Country Code"
-          value={updatedCompanyData.country}
-          onChange={(e) =>
-            e.target.value.length <= 3 &&
-            setUpdatedCompanyData((prev) => ({
-              ...prev,
-              country: e.target.value,
-            }))
-          }
-        />
+        <LabeledItem label="Recipient Country" wrapperClassName="relative">
+          <div className="flex w-full rounded-md border border-input bg-white">
+            <CountrySelect
+              onChange={(value) =>
+                setUpdatedCompanyData((prev) => ({ ...prev, country: value }))
+              }
+              value={updatedCompanyData.country}
+            />
+            <span className="inline-flex items-center">
+              {updatedCompanyData.country}
+            </span>
+          </div>
+        </LabeledItem>
+
         <Input
           placeholder="Enter IBAN"
           label="Company IBAN"
@@ -244,18 +248,15 @@ export default function Company() {
             setUpdatedCompanyData((prev) => ({ ...prev, okpo: e.target.value }))
           }
         />
-        <Input
-          placeholder="Enter phone number"
-          label="Company Phone Number"
-          type="number"
-          value={updatedCompanyData.phone}
-          onChange={(e) =>
-            setUpdatedCompanyData((prev) => ({
-              ...prev,
-              phone: e.target.value,
-            }))
-          }
-        />
+        <LabeledItem label="Company Phone Number">
+          <PhoneInput
+            value={updatedCompanyData.phone}
+            onChange={(value) =>
+              setUpdatedCompanyData((prev) => ({ ...prev, phone: value }))
+            }
+            country={updatedCompanyData.country}
+          />
+        </LabeledItem>
         <Textarea
           placeholder="Enter description"
           label="Company Description"

@@ -8,6 +8,8 @@ import { Button } from "~/app/_components/ui/button";
 import { api } from "~/trpc/react";
 import { LabeledItem } from "~/app/_components/ui/labeled-item";
 import DatePicker from "~/app/_components/ui/date-picker";
+import PhoneInput from "~/app/_components/ui/phone-input";
+import CountrySelect from "~/app/_components/ui/country-select";
 
 const defaultBirthday = new Date();
 defaultBirthday.setFullYear(defaultBirthday.getFullYear() - 22);
@@ -161,15 +163,20 @@ export default function NewCompanyPage() {
           />
         </LabeledItem>
 
-        <Input
-          placeholder="Enter country code"
-          label="Recipient Country Code"
-          value={companyDetails.country}
-          onChange={(e) =>
-            e.target.value.length <= 3 &&
-            setCompanyDetails((prev) => ({ ...prev, country: e.target.value }))
-          }
-        />
+        <LabeledItem label="Recipient Country" wrapperClassName="relative">
+          <div className="flex w-full rounded-md border border-input bg-white">
+            <CountrySelect
+              onChange={(value) =>
+                setCompanyDetails((prev) => ({ ...prev, country: value }))
+              }
+              value={companyDetails.country}
+            />
+            <span className="inline-flex items-center">
+              {companyDetails.country}
+            </span>
+          </div>
+        </LabeledItem>
+
         <Input
           placeholder="Enter IBAN"
           label="Company IBAN"
@@ -190,18 +197,15 @@ export default function NewCompanyPage() {
             setCompanyDetails((prev) => ({ ...prev, okpo: e.target.value }))
           }
         />
-        <Input
-          placeholder="Enter phone number"
-          label="Company Phone Number"
-          type="number"
-          value={companyDetails.phoneNumber}
-          onChange={(e) =>
-            setCompanyDetails((prev) => ({
-              ...prev,
-              phoneNumber: e.target.value,
-            }))
-          }
-        />
+        <LabeledItem label="Company Phone Number">
+          <PhoneInput
+            value={companyDetails.phoneNumber}
+            onChange={(value) =>
+              setCompanyDetails((prev) => ({ ...prev, phoneNumber: value }))
+            }
+            country={companyDetails.country}
+          />
+        </LabeledItem>
         <Textarea
           placeholder="Enter description"
           label="Company Description"
