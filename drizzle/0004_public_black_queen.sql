@@ -1,0 +1,1 @@
+ALTER TABLE "work-diplom_jar" ADD COLUMN "currency" varchar(255);

@@ -9,8 +9,10 @@ type Props = React.ComponentProps<"input"> & {
 const Input = React.forwardRef<HTMLInputElement, Props>(
   ({ className, type, label, ...props }, ref) => {
     return (
-      <div className="space-y-2">
-        {label && <p className="text-base text-gray-950">{label}</p>}
+      <div className="w-full space-y-2">
+        {label && (
+          <p className="text-base font-medium text-gray-950">{label}</p>
+        )}
         <input
           type={type}
           className={cn(

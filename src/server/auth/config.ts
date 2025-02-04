@@ -5,7 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "~/server/db";
 import { accounts, users, verificationTokens } from "~/server/db/schema";
 import { type JWT } from "@auth/core/jwt";
-import { api } from "~/trpc/server";
+import { api } from "~/server/api/trpc";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -75,11 +75,14 @@ export const authConfig = {
     verificationTokensTable: verificationTokens,
   }),
   callbacks: {
-    session: ({ token, user, session }) => {
+    session: ({ token, session }) => {
       return {
         ...session,
         token,
-        user: session.user ?? user ?? token.user,
+        user: {
+          ...session.user,
+          id: token.sub,
+        },
       };
     },
   },

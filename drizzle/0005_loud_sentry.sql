@@ -1,0 +1,1 @@
+ALTER TABLE "work-diplom_company" ADD COLUMN "main_category" varchar(255);

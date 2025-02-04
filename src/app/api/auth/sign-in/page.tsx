@@ -1,9 +1,8 @@
-import { redirect } from "next/navigation";
 import { Button } from "~/app/_components/ui/button";
 import { Input } from "~/app/_components/ui/input";
 import { Textarea } from "~/app/_components/ui/textarea";
 import { signIn } from "~/server/auth";
-import { api } from "~/trpc/server";
+import { api } from "~/server/api/trpc";
 
 async function handleSignIn(formData: FormData) {
   "use server";
@@ -37,9 +36,13 @@ async function handleSignUp(formData: FormData) {
     bio: (bio as string) || "",
   });
 
-  if (!user) {
-    // Handle error
-    return;
+  if (user) {
+    return signIn("credentials", {
+      redirect: true,
+      redirectTo: "/onboarding",
+      email,
+      password,
+    });
   }
 }
 
@@ -50,7 +53,10 @@ export default async function SignUp() {
         <h1 className="text-2xl font-bold">Sign in or create an account</h1>
       </div>
       <div className="flex flex-col items-start gap-16 md:flex-row">
-        <form className="flex flex-col gap-y-3 px-4 py-3" action={handleSignIn}>
+        <form
+          className="flex flex-col items-center gap-y-3 px-4 py-3"
+          action={handleSignIn}
+        >
           <Input
             name="email"
             label="Username or email"
@@ -62,12 +68,24 @@ export default async function SignUp() {
             type="password"
             className="rounded-full"
           />
-          <Button
-            className="w-96 rounded-full bg-emerald-400 text-sm font-bold text-gray-950"
-            type="submit"
-          >
+          <Button className="w-96 rounded-full text-sm font-bold" type="submit">
             Sign In
           </Button>
+          <p className="mt-auto text-sm text-gray-400">Or sign in with</p>
+          <div className="flex w-full flex-col items-start justify-between gap-3 sm:flex-row">
+            <Button
+              className="flex-1 rounded-full text-sm font-bold"
+              variant="ghost"
+            >
+              Google
+            </Button>
+            <Button
+              className="flex-1 rounded-full text-sm font-bold"
+              variant="ghost"
+            >
+              LinkedIn
+            </Button>
+          </div>
         </form>
         <form className="flex flex-col gap-y-3 px-4 py-3" action={handleSignUp}>
           <div className="flex flex-col items-start justify-between gap-3 sm:flex-row">
@@ -87,7 +105,7 @@ export default async function SignUp() {
           />
           <Textarea name="bio" label="Bio" className="rounded-xl" />
           <Button
-            className="w-96 rounded-full bg-emerald-400 text-sm font-bold text-gray-950"
+            className="w-96 rounded-full bg-emerald-400 text-sm font-bold text-gray-950 hover:bg-emerald-500 focus:bg-emerald-500 active:bg-emerald-500"
             type="submit"
           >
             Create new account

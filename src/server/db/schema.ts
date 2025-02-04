@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
   numeric,
@@ -34,6 +35,7 @@ export const users = createTable("user", {
     mode: "date",
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
+  onboardingCompleted: boolean("onboarding_completed").default(false),
   image: varchar("image", { length: 255 }),
   emailVerified: timestamp("email_verified", {
     mode: "date",
@@ -108,6 +110,9 @@ export const companies = createTable("company", {
   description: text("description"),
   location: varchar("location", { length: 255 }),
   website: varchar("website", { length: 255 }),
+  email: varchar("email", { length: 255 }),
+  imageUrl: varchar("image_url", { length: 255 }),
+  category: varchar("main_category", { length: 255 }),
   createdAt: timestamp("created_at", {
     mode: "date",
     withTimezone: true,
@@ -197,6 +202,9 @@ export const jars = createTable("jar", {
   currentAmount: numeric("current_amount", { precision: 10, scale: 2 }).default(
     "0",
   ),
+  currency: varchar("currency", { length: 255 }),
+  purpose: varchar("purpose", { length: 255 }),
+  imageUrl: varchar("image_url", { length: 255 }),
   createdAt: timestamp("created_at", {
     mode: "date",
     withTimezone: true,
