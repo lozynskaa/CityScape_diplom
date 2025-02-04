@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 const headerLinks = [
   {
-    name: "Projects",
+    name: "Home",
     href: "/",
   },
   {
@@ -23,8 +23,8 @@ const headerLinks = [
     href: "/about",
   },
   {
-    name: "Impact",
-    href: "/about",
+    name: "Posts",
+    href: "/posts",
   },
 ];
 
@@ -45,7 +45,7 @@ export default async function Header() {
     <header className="flex w-full flex-row items-center justify-between border-b border-gray-200 px-10 py-5">
       <h1 className="flex-1 text-2xl font-bold">CityScape</h1>
       <nav className="flex flex-1 flex-row items-center justify-end gap-x-8">
-        <ul className="flex flex-row items-center gap-x-9">
+        <ul className="hidden flex-row items-center gap-x-9 md:flex">
           {headerLinks.map((link) => (
             <li
               key={link.name}
@@ -63,28 +63,34 @@ export default async function Header() {
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent className="mr-10 w-[calc(100vw_-_64px)] md:w-40">
               <DropdownMenuLabel>Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem>
-                  <User />
-                  <span className="text-sm font-medium text-gray-950">
-                    My Profile
-                  </span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <SquareChartGantt />
-                  <span className="text-sm font-medium text-gray-950">
-                    My Projects
-                  </span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings />
-                  <span className="text-sm font-medium text-gray-950">
-                    My Settings
-                  </span>
-                </DropdownMenuItem>
+                <Link href="/settings/profile">
+                  <DropdownMenuItem>
+                    <User />
+                    <span className="text-sm font-medium text-gray-950">
+                      My Profile
+                    </span>
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/my-companies">
+                  <DropdownMenuItem>
+                    <SquareChartGantt />
+                    <span className="text-sm font-medium text-gray-950">
+                      My Companies
+                    </span>
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/settings">
+                  <DropdownMenuItem>
+                    <Settings />
+                    <span className="text-sm font-medium text-gray-950">
+                      My Settings
+                    </span>
+                  </DropdownMenuItem>
+                </Link>
                 <form action={handleLogout}>
                   <Button
                     className="h-min w-full cursor-default appearance-none justify-start bg-transparent px-2 py-1.5 text-left shadow-none outline-none hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100"
