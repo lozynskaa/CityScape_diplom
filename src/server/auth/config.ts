@@ -13,6 +13,7 @@ import {
   type User as UserDB,
 } from "~/server/db/schema";
 import { type JWT } from "@auth/core/jwt";
+import { hashPassword, verifyPassword } from "~/lib/password";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -68,7 +69,7 @@ export const authConfig = {
 
         // Handle credential-based sign-in
 
-        const isPasswordValid = await Bun.password.verify(
+        const isPasswordValid = await verifyPassword(
           password,
           user.passwordHash,
         );
@@ -97,7 +98,7 @@ export const authConfig = {
           .select()
           .from(users)
           .where(eq(users.email, profile.email));
-        const passwordHash: string = await Bun.password.hash(
+        const passwordHash: string = await hashPassword(
           profile.at_hash as string,
         );
         if (!existingUser) {

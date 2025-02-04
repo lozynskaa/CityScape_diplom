@@ -92,7 +92,7 @@ export default function AppSidebar() {
                   </SidebarMenuButton>
                   <SidebarMenuSub>
                     <If condition={Array.isArray(item.subItems)}>
-                      {item.subItems!.map((subItem) => (
+                      {item.subItems?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton
                             href={subItem.href(params.companyId)}

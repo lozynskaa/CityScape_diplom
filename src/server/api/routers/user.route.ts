@@ -1,10 +1,12 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import crypto from "crypto";
 import { type AdapterAccount } from "next-auth/adapters";
 import { accounts, users } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { createImageURL } from "~/lib/image";
+import { hashPassword, verifyPassword } from "~/lib/password";
 
 const userRouterValidationSchema = {
   createUser: z.object({
@@ -65,7 +67,7 @@ export const userRouter = createTRPCRouter({
         imageUrl = await createImageURL(`user-image-${uuid}`, image.file);
       }
 
-      const passwordHash: string = await Bun.password.hash(password);
+      const passwordHash: string = await hashPassword(password);
 
       // Create a new user
       const [user] = await ctx.db
@@ -180,10 +182,10 @@ export const userRouter = createTRPCRouter({
           });
         }
 
-        const isPasswordValid = /*await Bun.password.verify(
+        const isPasswordValid = await verifyPassword(
           password,
           user.passwordHash,
-        ); */ true;
+        );
 
         if (!isPasswordValid) {
           throw new TRPCError({

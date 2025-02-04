@@ -87,7 +87,7 @@ export default function Profile() {
       <h1 className="text-2xl font-bold text-gray-950">Profile</h1>
       <div className="flex flex-row items-center gap-x-4">
         <Avatar className="h-40 w-40 rounded-full object-cover">
-          <AvatarImage src={user.image ?? ""} alt="@shadcn" />
+          <AvatarImage src={user?.image ?? ""} alt="@shadcn" />
           <AvatarFallback>
             <div className="flex h-40 w-40 items-center justify-center rounded-full bg-gray-200 text-center text-3xl font-bold uppercase">
               {initials}

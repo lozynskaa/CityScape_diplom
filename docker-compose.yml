@@ -1,5 +1,35 @@
 version: "3.9"
 services:
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    entrypoint:
+      ["/bin/sh", "-c", "bunx drizzle-kit generate && bunx drizzle-kit migrate"]
+
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgrseql@db:5432/diplom
+    volumes:
+      - .:/app
+    networks:
+      - app-network
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: diplom
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
   app:
     build:
       context: .
@@ -22,35 +52,6 @@ services:
       - app-network
     depends_on:
       - db
-
-  migrations:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    working_dir: /app
-    entrypoint:
-      ["/bin/sh", "-c", "bunx drizzle-kit generate && bunx drizzle-kit migrate"]
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgrseql@db:5432/diplom
-    volumes:
-      - .:/app
-    networks:
-      - app-network
-    depends_on:
-      - db
-
-  db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: diplom
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - app-network
 
 networks:
   app-network:

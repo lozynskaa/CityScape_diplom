@@ -67,12 +67,12 @@ export default async function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="h-8 w-8 cursor-pointer">
-                <AvatarImage src={session!.user.image ?? ""} alt="@shadcn" />
+                <AvatarImage src={session?.user?.image ?? ""} alt="@shadcn" />
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="mr-10 w-[calc(100vw_-_64px)] md:w-40">
-              <DropdownMenuLabel>{session!.user.name}</DropdownMenuLabel>
+              <DropdownMenuLabel>{session?.user?.name}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <Link href="/settings/profile">
