@@ -1,7 +1,7 @@
 import {
   boolean,
   numeric,
-  pgEnum,
+  // pgEnum,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -10,7 +10,12 @@ import { users } from "./user.schema";
 import { events } from "./event.schema";
 import { relations, sql } from "drizzle-orm";
 
-export const donationTypes = pgEnum("donation_type", ["card", "crypto"]);
+// const donationStatusEnum = pgEnum("donation_status", [
+//   "none",
+//   "pending",
+//   "success",
+//   "error",
+// ]);
 
 export const donations = createTable("donation", {
   id: varchar("id", { length: 255 })
@@ -25,10 +30,10 @@ export const donations = createTable("donation", {
     mode: "date",
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
-  donationType: donationTypes("donation_type").notNull(),
   receiptUrl: varchar("receipt_url", { length: 255 }),
   transactionId: varchar("transaction_id", { length: 255 }),
   currency: varchar("currency", { length: 10 }).notNull().default("USD"),
+  status: varchar("status", { length: 10 }).default("none").notNull(),
 });
 
 export type Donation = typeof donations.$inferSelect;

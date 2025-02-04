@@ -53,8 +53,7 @@ contentByStep.set(1, {
   description:
     "Let's get started by setting up your company profile and creating a fundraising event. Once you've completed these steps, you'll be able to take part in city-wide charity events.",
   title: "Welcome to CityScape!",
-  disabled: (state: CompanyInfoState) =>
-    !state.category || !state.name || !state.companyEmail,
+  disabled: (state: CompanyInfoState) => !state.name || !state.companyEmail,
 });
 contentByStep.set(2, {
   component: SecondStep,
@@ -97,6 +96,8 @@ export default function Onboarding() {
 
   const { mutate: completeOnboarding } =
     api.company.completeOnboarding.useMutation();
+  const { mutateAsync: createStripeCompany } =
+    api.company.createStripeCompany.useMutation();
 
   const {
     component: StepContent,
@@ -108,6 +109,9 @@ export default function Onboarding() {
 
   const handleNextStep = async () => {
     if (step === 2) {
+      const { companyAccount } = await createStripeCompany({
+        email: companyInfo.companyEmail,
+      });
       completeOnboarding({
         //company
         category: companyInfo.category,
@@ -117,6 +121,7 @@ export default function Onboarding() {
         name: companyInfo.name,
         website: companyInfo.website,
         companyImage: companyInfo.companyImage,
+        stripeAccountId: companyAccount.id,
         //event
         eventDate: companyInfo.eventDate,
         eventDescription: companyInfo.eventDescription,

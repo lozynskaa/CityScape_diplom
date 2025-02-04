@@ -1,6 +1,6 @@
 {
-  "id": "fc11ad6b-a047-4f42-8dc1-3998688ccdef",
-  "prevId": "3b731b64-17f7-46a9-b20e-48c429c293de",
+  "id": "3f86a038-dabd-4a68-a824-04dc1faca4f5",
+  "prevId": "cae867d6-e379-46f1-a512-b2eeb0d8e557",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -170,6 +170,19 @@
           "primaryKey": false,
           "notNull": false,
           "default": "CURRENT_TIMESTAMP"
+        },
+        "stripe_account_id": {
+          "name": "stripe_account_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stripe_linked": {
+          "name": "stripe_linked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         }
       },
       "indexes": {},
@@ -233,13 +246,6 @@
           "notNull": false,
           "default": "CURRENT_TIMESTAMP"
         },
-        "donation_type": {
-          "name": "donation_type",
-          "type": "donation_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
         "receipt_url": {
           "name": "receipt_url",
           "type": "varchar(255)",
@@ -258,6 +264,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'USD'"
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'none'"
         }
       },
       "indexes": {},

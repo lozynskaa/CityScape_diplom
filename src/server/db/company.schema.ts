@@ -1,4 +1,4 @@
-import { text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { boolean, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createTable } from "./table-create";
 import { relations, sql } from "drizzle-orm";
 import { posts } from "./post.schema";
@@ -23,6 +23,8 @@ export const companies = createTable("company", {
     mode: "date",
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
+  stripeAccountId: varchar("stripe_account_id", { length: 255 }).notNull(),
+  stripeLinked: boolean("stripe_linked").default(false),
 });
 
 export type Company = typeof companies.$inferSelect;

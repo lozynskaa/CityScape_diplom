@@ -9,7 +9,7 @@ import { format } from "date-fns";
 import { useState } from "react";
 
 type Props = {
-  event: Event & { isUserApplied?: boolean };
+  event: Event & { isUserApplied?: boolean; paymentEnabled?: boolean | null };
   settingsTab?: boolean;
   handleApplyToEvent?: (id: string) => void;
 };
@@ -85,10 +85,11 @@ export default function EventCard({
               {localApplied ? "Applied" : "Apply to event"}
             </Button>
             <Link
-              href={`/company/${event.companyId}/events/${event.id}`}
+              href={`/event/${event.id}/quick-donate`}
               className="w-30 inline-block h-10"
             >
               <Button
+                disabled={!event.paymentEnabled}
                 className="w-30 h-10 rounded-full text-sm font-bold"
                 variant="ghost"
               >

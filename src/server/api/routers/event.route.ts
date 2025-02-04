@@ -18,6 +18,7 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import {
+  companies,
   donations,
   events,
   type User,
@@ -26,6 +27,7 @@ import {
 } from "~/server/db/schema";
 import { type Event } from "~/server/db/event.schema";
 import { TRPCError } from "@trpc/server";
+import { Company } from "~/server/db/company.schema";
 
 const eventRouterValidationSchema = {
   createEvent: z.object({
@@ -166,7 +168,41 @@ export const eventRouter = createTRPCRouter({
     .input(eventRouterValidationSchema.getRandomEvents)
     .query(async ({ input, ctx }) => {
       const { limit } = input;
-      const userId = ctx.session!.user.id;
+      const userId = ctx.session?.user?.id;
+
+      if (userId) {
+        const randomEvents = await ctx.db
+          .select({
+            id: events.id,
+            name: events.name,
+            createdAt: events.createdAt,
+            description: events.description,
+            purpose: events.purpose,
+            location: events.location,
+            imageUrl: events.imageUrl,
+            goalAmount: events.goalAmount,
+            date: events.date,
+            companyId: events.companyId,
+            currentAmount: events.currentAmount,
+            currency: events.currency,
+            category: events.category,
+            withoutDonations: events.withoutDonations,
+            isUserApplied: sql<boolean>`CASE WHEN ${userEvents.userId} IS NOT NULL THEN true ELSE false END`,
+            paymentEnabled: sql<boolean>`CASE WHEN ${companies.stripeLinked} IS true THEN true ELSE false END`,
+          })
+          .from(events)
+          .leftJoin(companies, eq(events.companyId, companies.id))
+          .leftJoin(
+            userEvents,
+            and(
+              eq(events.id, userEvents.eventId),
+              eq(userEvents.userId, userId),
+            ),
+          )
+          .limit(limit)
+          .orderBy(desc(events.createdAt));
+        return randomEvents;
+      }
 
       const randomEvents = await ctx.db
         .select({
@@ -184,13 +220,8 @@ export const eventRouter = createTRPCRouter({
           currency: events.currency,
           category: events.category,
           withoutDonations: events.withoutDonations,
-          isUserApplied: sql<boolean>`CASE WHEN ${userEvents.userId} IS NOT NULL THEN true ELSE false END`,
         })
         .from(events)
-        .leftJoin(
-          userEvents,
-          and(eq(events.id, userEvents.eventId), eq(userEvents.userId, userId)),
-        )
         .limit(limit)
         .orderBy(desc(events.createdAt));
       return randomEvents;
@@ -246,7 +277,12 @@ export const eventRouter = createTRPCRouter({
     .input(eventRouterValidationSchema.getEvent)
     .query(async ({ input, ctx }) => {
       const { id } = input;
-      const userId = ctx.session!.user.id;
+      const userId = ctx.session?.user?.id;
+
+      if (!userId) {
+        return [];
+      }
+
       const companyEvents = await ctx.db
         .select({
           id: events.id,
@@ -264,8 +300,10 @@ export const eventRouter = createTRPCRouter({
           category: events.category,
           withoutDonations: events.withoutDonations,
           isUserApplied: sql<boolean>`CASE WHEN ${userEvents.userId} IS NOT NULL THEN true ELSE false END`,
+          paymentEnabled: sql<boolean>`CASE WHEN ${companies.stripeLinked} IS true THEN true ELSE false END`,
         })
         .from(events)
+        .leftJoin(companies, eq(events.companyId, companies.id))
         .leftJoin(
           userEvents,
           and(eq(events.id, userEvents.eventId), eq(userEvents.userId, userId)),
@@ -287,7 +325,7 @@ export const eventRouter = createTRPCRouter({
         eventCategory,
         eventLocation,
       } = input;
-      let filterEvents: Event[] = [];
+      let filterEvents: Array<{ event: Event; company?: Company | null }> = [];
       let eventsCount = 0;
 
       const whereStatement: Array<SQLWrapper | undefined> = [];
@@ -329,6 +367,7 @@ export const eventRouter = createTRPCRouter({
             .select()
             .from(events)
             .where(and(...whereStatement))
+            .leftJoin(companies, eq(events.companyId, companies.id))
             .limit(limit)
             .offset((page - 1) * limit);
           const countQuery = await ctx.db
@@ -337,10 +376,16 @@ export const eventRouter = createTRPCRouter({
           eventsCount = countQuery?.[0]?.count ?? 0;
           break;
       }
+      const mappedEvents = filterEvents.map(({ event, company }) => {
+        return {
+          ...event,
+          paymentEnabled: !!company?.stripeLinked,
+        };
+      });
       return {
         page: input.page,
         limit: input.limit,
-        events: filterEvents,
+        events: mappedEvents,
         eventsCount,
       };
     }),

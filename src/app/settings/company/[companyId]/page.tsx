@@ -14,10 +14,11 @@ import { Input } from "~/app/_components/ui/input";
 import { Textarea } from "~/app/_components/ui/textarea";
 import { type Company } from "~/server/db//company.schema";
 import { Spinner } from "~/app/_components/ui/spinner";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 export default function Company() {
   const { companyId } = useParams<{ companyId: string }>();
+  const router = useRouter();
 
   const [updatedCompanyData, setUpdatedCompanyData] = useState<
     Partial<Company>
@@ -28,6 +29,8 @@ export default function Company() {
     });
   const { mutateAsync: updateCompany } =
     api.company.updateCompany.useMutation();
+  const { mutateAsync: linkStripe } =
+    api.company.linkStripeCompany.useMutation();
 
   useEffect(() => {
     if (currentCompany) {
@@ -81,13 +84,32 @@ export default function Company() {
     }
   };
 
+  const handleLinkStripe = async () => {
+    if (!currentCompany) return;
+    const stripeLinkage = await linkStripe({
+      stripeAccountId: currentCompany.stripeAccountId,
+      id: currentCompany.id,
+    });
+    router.push(stripeLinkage.url);
+  };
+
   if (isFetching) {
     return <Spinner />;
   }
 
   return (
     <div className="w-full space-y-8 px-12 py-8">
-      <h1 className="text-2xl font-bold text-gray-950">Company Dashboard</h1>
+      <div className="flex flex-row items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-950">Company Dashboard</h1>
+        <Button
+          onClick={handleLinkStripe}
+          disabled={!!currentCompany?.stripeLinked}
+        >
+          {currentCompany?.stripeLinked
+            ? "Open Stripe Dashboard"
+            : "Connect with Stripe"}
+        </Button>
+      </div>
 
       <div className="flex flex-row items-center gap-x-4">
         <Avatar className="h-40 w-40 rounded-full object-cover">

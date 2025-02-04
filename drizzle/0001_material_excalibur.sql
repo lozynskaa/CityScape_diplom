@@ -1,1 +1,0 @@
-ALTER TABLE "work-diplom_donation" RENAME COLUMN "jar_id" TO "event_id";

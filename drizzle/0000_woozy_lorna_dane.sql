@@ -21,17 +21,18 @@ CREATE TABLE IF NOT EXISTS "work-diplom_company" (
 	"website" varchar(255),
 	"email" varchar(255) NOT NULL,
 	"image_url" varchar(255),
-	"created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+	"created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+	"stripe_account_id" varchar(255) NOT NULL,
+	"stripe_linked" boolean DEFAULT false
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "work-diplom_donation" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
 	"user_id" varchar(255),
-	"jar_id" varchar(255) NOT NULL,
+	"event_id" varchar(255) NOT NULL,
 	"anonymous" boolean DEFAULT false,
 	"amount" numeric(10, 2) NOT NULL,
 	"donation_date" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-	"donation_type" "donation_type" NOT NULL,
 	"receipt_url" varchar(255),
 	"transaction_id" varchar(255),
 	"currency" varchar(10) DEFAULT 'USD' NOT NULL

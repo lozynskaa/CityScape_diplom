@@ -1,4 +1,4 @@
-import { count, eq, like, or } from "drizzle-orm";
+import { and, count, eq, like, or } from "drizzle-orm";
 import { z } from "zod";
 
 import {
@@ -8,7 +8,8 @@ import {
 } from "~/server/api/trpc";
 import { companies, events, users } from "~/server/db/schema";
 import { TRPCError } from "@trpc/server";
-import { Company } from "~/server/db/company.schema";
+import { type Company } from "~/server/db/company.schema";
+import { stripe } from "~/server/stripe";
 
 const companyRouterValidationSchema = {
   createCompany: z.object({
@@ -17,6 +18,7 @@ const companyRouterValidationSchema = {
     description: z.string(),
     website: z.string().url().optional(),
     image: z.string().url().optional(),
+    stripeAccountId: z.string(),
   }),
   updateCompany: z.object({
     name: z.string().min(1),
@@ -25,6 +27,16 @@ const companyRouterValidationSchema = {
     website: z.string().url().optional(),
     image: z.string().url().optional(),
     id: z.string(),
+  }),
+  createStripeCompany: z.object({
+    email: z.string().email(),
+  }),
+  linkStripeCompany: z.object({
+    stripeAccountId: z.string(),
+    id: z.string(),
+  }),
+  linkWebhookTrigger: z.object({
+    stripeAccountId: z.string(),
   }),
   completeOnboarding: z.object({
     name: z.string().min(1),
@@ -42,6 +54,7 @@ const companyRouterValidationSchema = {
     eventImage: z.string().url().optional(),
     goalAmount: z.number().min(0).default(0).optional(),
     currency: z.string().default("USD").optional(),
+    stripeAccountId: z.string(),
   }),
   getRandomCompanies: z.object({
     limit: z.number().min(1).max(100).default(10),
@@ -61,7 +74,14 @@ export const companyRouter = createTRPCRouter({
   createCompany: protectedProcedure
     .input(companyRouterValidationSchema.createCompany)
     .mutation(async ({ input, ctx }) => {
-      const { name, companyEmail, description, website, image } = input;
+      const {
+        name,
+        companyEmail,
+        description,
+        website,
+        image,
+        stripeAccountId,
+      } = input;
 
       if (!ctx.session.user.email) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -85,6 +105,7 @@ export const companyRouter = createTRPCRouter({
           website,
           email: companyEmail,
           imageUrl: image,
+          stripeAccountId,
         })
         .returning();
 
@@ -111,6 +132,60 @@ export const companyRouter = createTRPCRouter({
       return company;
     }),
 
+  createStripeCompany: protectedProcedure
+    .input(companyRouterValidationSchema.createStripeCompany)
+    .mutation(async ({ input }) => {
+      const { email } = input;
+      const companyAccount = await stripe.accounts.create({
+        type: "express", // You can also choose 'standard' or 'custom' depending on your needs
+        country: "US", // Specify the company’s country
+        email, // The business email
+        business_type: "individual", // You can adjust depending on the business type
+      });
+
+      return {
+        companyAccount,
+      };
+    }),
+
+  linkStripeCompany: protectedProcedure
+    .input(companyRouterValidationSchema.linkStripeCompany)
+    .mutation(async ({ input }) => {
+      const { stripeAccountId, id } = input;
+
+      const companyAccountLinkage = await stripe.accountLinks.create({
+        type: "account_onboarding", // You can also choose 'standard' or 'custom' depending on your needs
+        account: stripeAccountId,
+        return_url: `http://localhost:3000/settings/company/${id}`,
+        refresh_url: `http://localhost:3000/settings/company/${id}`,
+      });
+
+      return companyAccountLinkage;
+    }),
+
+  linkWebhookTrigger: protectedProcedure
+    .input(companyRouterValidationSchema.linkWebhookTrigger)
+    .mutation(async ({ input, ctx }) => {
+      const userId = ctx.session.user.id;
+      const { stripeAccountId } = input;
+
+      await ctx.db
+        .update(companies)
+        .set({
+          stripeLinked: true,
+        })
+        .where(
+          and(
+            eq(companies.founderId, userId),
+            eq(companies.stripeAccountId, stripeAccountId),
+          ),
+        );
+
+      return {
+        success: true,
+      };
+    }),
+
   completeOnboarding: protectedProcedure
     .input(companyRouterValidationSchema.completeOnboarding)
     .mutation(async ({ input, ctx }) => {
@@ -130,6 +205,7 @@ export const companyRouter = createTRPCRouter({
         goalAmount,
         currency,
         category,
+        stripeAccountId,
       } = input;
 
       const userId = ctx.session.user.id;
@@ -143,10 +219,12 @@ export const companyRouter = createTRPCRouter({
           website,
           email: companyEmail,
           imageUrl: companyImage,
+          stripeAccountId: stripeAccountId,
         })
         .returning();
 
       if (!company) {
+        await stripe.accounts.del(stripeAccountId);
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Company not found",
@@ -218,60 +296,7 @@ export const companyRouter = createTRPCRouter({
       let companiesCount = 0;
 
       switch (input.category) {
-        // case "All":
-        //   filterCompanies = await ctx.db
-        //     .select()
-        //     .from(companies)
-        //     .where(
-        //       input.search
-        //         ? or(
-        //             eq(companies.name, input.search),
-        //             eq(companies.description, input.search),
-        //           )
-        //         : undefined,
-        //     )
-        //     .limit(input.limit)
-        //     .offset((input.page - 1) * input.limit);
-        //   const countQuery = await ctx.db
-        //     .select({ count: count() })
-        //     .from(companies);
-        //   companiesCount = countQuery?.[0]?.count ?? 0;
-        //   break;
-        // case "Featured":
-        //   filterCompanies = await ctx.db
-        //     .select()
-        //     .from(companies)
-        //     .limit(input.limit)
-        //     .offset((input.page - 1) * input.limit);
-        //   const countQuery2 = await ctx.db
-        //     .select({ count: count() })
-        //     .from(companies);
-        //   companiesCount = countQuery2?.[0]?.count ?? 0;
-        //   break;
-        // case "New":
-        //   filterCompanies = await ctx.db
-        //     .select()
-        //     .from(companies)
-        //     .limit(input.limit)
-        //     .offset((input.page - 1) * input.limit);
-        //   const countQuery3 = await ctx.db
-        //     .select({ count: count() })
-        //     .from(companies);
-        //   companiesCount = countQuery3?.[0]?.count ?? 0;
-        //   break;
-        // case "Trending":
-        //   filterCompanies = await ctx.db
-        //     .select()
-        //     .from(companies)
-        //     .limit(input.limit)
-        //     .offset((input.page - 1) * input.limit);
-        //   const countQuery4 = await ctx.db
-        //     .select({ count: count() })
-        //     .from(companies);
-        //   companiesCount = countQuery4?.[0]?.count ?? 0;
-        // break;
         default:
-        case "All":
           filterCompanies = await ctx.db
             .select()
             .from(companies)
