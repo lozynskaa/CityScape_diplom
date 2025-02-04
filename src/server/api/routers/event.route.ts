@@ -30,6 +30,7 @@ import { TRPCError } from "@trpc/server";
 import { type Company } from "~/server/db/company.schema";
 import { createImageURL } from "~/lib/image";
 import { hereMaps } from "~/server/maps/here-maps";
+import { sgService } from "~/server/email/sendgrid";
 
 const eventRouterValidationSchema = {
   createEvent: z.object({
@@ -211,6 +212,32 @@ export const eventRouter = createTRPCRouter({
           message: "Event not found",
         });
       }
+
+      const eventUsers = await ctx.db
+        .select({
+          id: users.id,
+          email: users.email,
+          eventName: events.name,
+        })
+        .from(donations)
+        .leftJoin(users, eq(donations.userId, users.id))
+        .leftJoin(events, eq(donations.eventId, events.id))
+        .where(eq(donations.eventId, id));
+
+      const emailPromises: Promise<void>[] = [];
+
+      for (const user of eventUsers) {
+        if (user.email && user.eventName) {
+          emailPromises.push(
+            sgService.onEventUpdate(user.email, user.eventName, "update"),
+          );
+        }
+      }
+
+      Promise.all(emailPromises).catch((error) => {
+        console.error("Error sending email:", error);
+      });
+
       return event;
     }),
 
@@ -547,6 +574,30 @@ export const eventRouter = createTRPCRouter({
     .input(eventRouterValidationSchema.getEvent)
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
+      const eventUsers = await ctx.db
+        .select({
+          id: users.id,
+          email: users.email,
+          eventName: events.name,
+        })
+        .from(donations)
+        .leftJoin(users, eq(donations.userId, users.id))
+        .leftJoin(events, eq(donations.eventId, events.id))
+        .where(eq(donations.eventId, id));
+
+      const emailPromises: Promise<void>[] = [];
+
+      for (const user of eventUsers) {
+        if (user.email && user.eventName) {
+          emailPromises.push(
+            sgService.onEventUpdate(user.email, user.eventName, "update"),
+          );
+        }
+      }
+
+      Promise.all(emailPromises).catch((error) => {
+        console.error("Error sending email:", error);
+      });
       await ctx.db.delete(events).where(eq(events.id, id));
     }),
 

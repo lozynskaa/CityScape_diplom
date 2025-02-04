@@ -17,6 +17,7 @@ import { Input } from "./ui/input";
 import { LabeledItem } from "./ui/labeled-item";
 import { Switch } from "./ui/switch";
 import { Textarea } from "./ui/textarea";
+import clsx from "clsx";
 
 const eventCategories = [
   {
@@ -274,11 +275,14 @@ export default function CreateEventForm({
         }
       />
 
-      <If condition={mapMarkers.length > 0}>
-        <div className="col-span-2">
-          <Map markers={mapMarkers} />
-        </div>
-      </If>
+      <div
+        className={clsx(
+          "col-span-2",
+          mapMarkers.length === 0 && "invisible h-0",
+        )}
+      >
+        <Map markers={mapMarkers} />
+      </div>
 
       <ItemSelectBlock
         items={currencies}

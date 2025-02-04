@@ -11,6 +11,8 @@ import {
 import { companies } from "~/server/db/company.schema";
 import { donations } from "~/server/db/donations.schema";
 import { events } from "~/server/db/event.schema";
+import { users } from "~/server/db/user.schema";
+import { sgService } from "~/server/email/sendgrid";
 import { checkoutService } from "~/server/payment/checkout";
 
 const donationRouterValidationSchema = {
@@ -130,23 +132,60 @@ export const donationRouter = createTRPCRouter({
       const { donationId, amount } = input;
 
       const [donation] = await ctx.db
-        .select()
+        .select({
+          donation: donations,
+          event: events,
+        })
         .from(donations)
+        .leftJoin(events, eq(donations.eventId, events.id))
         .where(eq(donations.id, donationId));
 
-      if (!donation) {
+      if (!donation?.donation || !donation?.event) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Donation not found",
         });
       }
 
+      const isDonationGoalReached =
+        Number(donation.event.goalAmount) <=
+        Number(donation.event.currentAmount) + Number(amount);
+
+      if (isDonationGoalReached) {
+        const [eventData] = await ctx.db
+          .select({
+            creatorEmail: users.email,
+            companyEmail: companies.email,
+            eventName: events.name,
+          })
+          .from(events)
+          .leftJoin(companies, eq(events.companyId, companies.id))
+          .leftJoin(users, eq(events.creatorId, users.id))
+          .where(eq(events.id, donation.donation.eventId));
+
+        if (eventData?.companyEmail && eventData.eventName) {
+          sgService
+            .onGoalReach(eventData.companyEmail, eventData.eventName)
+            .catch((error) => {
+              console.error("Error sending email:", error);
+            });
+        }
+
+        if (eventData?.creatorEmail && eventData.eventName) {
+          sgService
+            .onGoalReach(eventData.creatorEmail, eventData.eventName)
+            .catch((error) => {
+              console.error("Error sending email:", error);
+            });
+        }
+      }
+
       await ctx.db
         .update(events)
         .set({
-          currentAmount: sql`${events.currentAmount} + ${amount ?? donation.amount}`,
+          currentAmount: sql`${events.currentAmount} + ${amount ?? donation.donation.amount}`,
         })
-        .where(eq(events.id, donation.eventId));
+        .where(eq(events.id, donation.donation.eventId));
     }),
 
   updateDonationStatus: publicProcedure

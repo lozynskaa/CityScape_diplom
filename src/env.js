@@ -26,6 +26,8 @@ export const env = createEnv({
     AUTH_TRUST_HOST: z.string(),
     HERE_APP_ID: z.string(),
     HERE_API_KEY: z.string(),
+    SENDGRID_API_KEY: z.string(),
+    SENDGRID_DEFAULT_SENDER: z.string(),
   },
 
   /**
@@ -56,6 +58,8 @@ export const env = createEnv({
     AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST,
     HERE_APP_ID: process.env.HERE_APP_ID,
     HERE_API_KEY: process.env.HERE_API_KEY,
+    SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
+    SENDGRID_DEFAULT_SENDER: process.env.SENDGRID_DEFAULT_SENDER,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
