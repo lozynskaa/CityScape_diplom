@@ -4,7 +4,7 @@ import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 import { db } from "~/server/db";
-import { accounts, users, verificationTokens } from "~/server/db/schema";
+import { accounts, users, verificationTokens, type User as UserDB } from "~/server/db/schema";
 import { type JWT } from "@auth/core/jwt";
 
 /**
@@ -19,15 +19,13 @@ declare module "next-auth" {
     token: JWT;
     user: {
       id: string;
+      
       // ...other properties
       // role: UserRole;
-    } & DefaultSession["user"];
+    } & UserDB;
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  // interface User extends UserDB {}
 }
 
 /**
@@ -92,13 +90,13 @@ export const authConfig = {
     verificationTokensTable: verificationTokens,
   }),
   callbacks: {
-    session: ({ token, session }) => {
+    session: async({ token, session, user }) => {
+      const [dbUser] = await db.select().from(users).where(eq(users.id, token.sub!)).limit(1);
       return {
         ...session,
         token,
         user: {
-          ...session.user,
-          id: token.sub,
+          ...dbUser
         },
       };
     },

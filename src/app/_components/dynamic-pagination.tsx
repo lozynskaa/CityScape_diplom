@@ -66,7 +66,9 @@ export default function DynamicPagination({
         <PaginationItem>
           <PaginationNext
             className={
-              currentPage === totalPages ? "pointer-events-none opacity-50" : ""
+              currentPage === totalPages || totalPages === 0
+                ? "pointer-events-none opacity-50"
+                : ""
             }
             href="#"
             onClick={() => onPageChange(currentPage + 1)}

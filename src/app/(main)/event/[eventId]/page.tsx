@@ -87,12 +87,14 @@ export default async function EventPage({ params }: Props) {
           <h1 className="text-2xl font-bold text-gray-950">
             Event applicants ({event.eventUsers?.length})
           </h1>
-          <Button
-            className="w-22 rounded-full font-bold"
-            disabled={isCurrentUserApplied}
-          >
-            {isCurrentUserApplied ? "Applied" : "Apply to this event"}
-          </Button>
+          {!!session?.user?.id && (
+            <Button
+              className="w-22 rounded-full font-bold"
+              disabled={isCurrentUserApplied}
+            >
+              {isCurrentUserApplied ? "Applied" : "Apply to this event"}
+            </Button>
+          )}
         </div>
 
         {event?.eventUsers?.length > 0 ? (

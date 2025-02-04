@@ -7,5 +7,8 @@ export default async function OnboardingLayout({
   if (!session?.user?.id) {
     redirect("/api/auth/sign-in");
   }
+  if (session?.user?.onboardingCompleted) {
+    redirect("/");
+  }
   return { children };
 }

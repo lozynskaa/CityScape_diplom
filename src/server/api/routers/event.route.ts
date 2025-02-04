@@ -468,6 +468,16 @@ export const eventRouter = createTRPCRouter({
       };
     }),
 
+  getCategories: publicProcedure.query(async ({ ctx }) => {
+    const categoryRows = await ctx.db
+      .selectDistinct({
+        category: events.category,
+      })
+      .from(events);
+    const categories = categoryRows.map((row) => row.category);
+    return categories ?? [];
+  }),
+
   applyToEvent: protectedProcedure
     .input(eventRouterValidationSchema.getEvent)
     .mutation(async ({ input, ctx }) => {

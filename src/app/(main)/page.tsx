@@ -10,8 +10,17 @@ import {
 import CompanyCard from "../_components/company-card";
 import EventCard from "../_components/quick-event-card";
 import { api, HydrateClient } from "~/trpc/server";
+import { redirect } from "next/navigation";
+import { auth } from "~/server/auth";
+
+const handleSearchEvents = async (formData: FormData) => {
+  "use server";
+  const search = formData.get("search") as string;
+  redirect(`/event?search=${search}`);
+};
 
 export default async function Home() {
+  const session = await auth();
   const quickCompanies = await api.company.getRandomCompanies({
     limit: 10,
   });
@@ -40,16 +49,23 @@ export default async function Home() {
           <p className="text-center text-base text-white">
             Be a part of the change you want to see in your community
           </p>
-          <div className="mt-8 flex w-2/3 flex-row items-center rounded-xl bg-white px-4 py-2 md:w-1/2 lg:w-1/3">
+          <form
+            className="mt-8 flex w-2/3 flex-row items-center rounded-xl bg-white px-4 py-2 md:w-1/2 lg:w-1/3"
+            action={handleSearchEvents}
+          >
             <Search className="h-8 w-8 font-bold text-gray-500" />
             <Input
+              name="search"
               className="h-16 flex-1 border-none focus:border-none focus:outline-none focus:ring-offset-0 focus-visible:ring-0"
               placeholder="Search for events"
             />
-            <Button className="h-12 w-24 rounded-full text-sm font-bold">
+            <Button
+              type="submit"
+              className="h-12 w-24 rounded-full text-sm font-bold"
+            >
               Search
             </Button>
-          </div>
+          </form>
         </div>
         <div className="space-y-4">
           <h1 className="text-2xl font-bold text-gray-950">
@@ -89,6 +105,7 @@ export default async function Home() {
               {quickEvents.map((event, index) => (
                 <CarouselItem key={index} className="basis-1/3">
                   <EventCard
+                    userId={session?.user?.id}
                     event={event}
                     handleApplyToEvent={handleApplyToEvent}
                   />

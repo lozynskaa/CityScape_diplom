@@ -1,20 +1,34 @@
 "use client";
 
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import CategoryBadge from "~/app/_components/category-badge";
 import DynamicPagination from "~/app/_components/dynamic-pagination";
 import ExploreCard from "~/app/_components/explore-card";
+import { Button } from "~/app/_components/ui/button";
+import { Calendar } from "~/app/_components/ui/calendar";
 import { Input } from "~/app/_components/ui/input";
+import { LabeledItem } from "~/app/_components/ui/labeled-item";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/app/_components/ui/popover";
 import { Spinner } from "~/app/_components/ui/spinner";
 import { useDebounce } from "~/hooks/use-debounce";
 import { useWritableSearchParams } from "~/hooks/use-writable-search-params";
 import { api } from "~/trpc/react";
 
-const categories = ["All", "Featured", "New", "Trending"];
+const categories = ["All", "New", "My applies"];
 
 //TODO: Add event category filter and event location filter input
 export default function EventsListPage() {
   const { set, searchParams } = useWritableSearchParams();
   const debouncedSearch = useDebounce(searchParams.get("search") ?? "", 500);
+  const debouncedLocation = useDebounce(
+    searchParams.get("location") ?? "",
+    500,
+  );
 
   const input = {
     search: debouncedSearch ?? "",
@@ -27,6 +41,7 @@ export default function EventsListPage() {
       | "Trending"
       | "All",
     eventCategory: searchParams.get("eventCategory") ?? "",
+    eventLocation: debouncedLocation ?? "",
     eventDate: {
       startDate: searchParams.get("startDate")
         ? new Date(searchParams.get("startDate")!)
@@ -40,8 +55,18 @@ export default function EventsListPage() {
   const { data = { events: [], eventsCount: 0 }, isFetching } =
     api.event.getEventsWithFilters.useQuery(input);
 
+  const { data: categoriesData = [] } = api.event.getCategories.useQuery();
+
   const handleChangeFilter = (
-    type: "category" | "search" | "page" | "limit",
+    type:
+      | "startDate"
+      | "endDate"
+      | "eventLocation"
+      | "eventCategory"
+      | "category"
+      | "search"
+      | "page"
+      | "limit",
     value: string,
   ) => set(type, value);
 
@@ -60,6 +85,77 @@ export default function EventsListPage() {
               onClick={() => handleChangeFilter("category", category)}
             />
           ))}
+        </div>
+        <LabeledItem label="Event Category">
+          <div className="flex flex-row items-center gap-x-4">
+            {categoriesData.map((category) => (
+              <CategoryBadge
+                selected={category === input.category}
+                key={category}
+                category={category}
+                onClick={() => handleChangeFilter("eventCategory", category)}
+              />
+            ))}
+          </div>
+        </LabeledItem>
+
+        <div className="flex flex-row items-center gap-x-4">
+          <Input
+            label="Event Location"
+            placeholder="Enter location"
+            defaultValue={input.eventLocation}
+            onChange={(e) =>
+              handleChangeFilter("eventLocation", e.target.value)
+            }
+          />
+          <LabeledItem label="Start Date">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button className="w-full items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
+                  <CalendarIcon />
+                  {input.eventDate.startDate ? (
+                    format(input.eventDate.startDate, "PPP")
+                  ) : (
+                    <span>Pick a start date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={input.eventDate.startDate ?? undefined}
+                  onSelect={(date) =>
+                    date && set("startDate", date.toISOString())
+                  }
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </LabeledItem>
+          <LabeledItem label="End Date">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button className="w-full items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
+                  <CalendarIcon />
+                  {input.eventDate.endDate ? (
+                    format(input.eventDate.endDate, "PPP")
+                  ) : (
+                    <span>Pick a end date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={input.eventDate.endDate ?? undefined}
+                  onSelect={(date) =>
+                    date && set("endDate", date.toISOString())
+                  }
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </LabeledItem>
         </div>
       </div>
       <Input

@@ -3,6 +3,7 @@ import CompanyBlock from "~/app/_components/company-block";
 import Post from "~/app/_components/post-card";
 import EventCard from "~/app/_components/quick-event-card";
 import { Button } from "~/app/_components/ui/button";
+import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export default async function CompanyPage({ params }: Props) {
+  const session = await auth();
   const { companyId } = await params;
   const companyData = await api.company.getCompany({ id: companyId });
   const companyEvents = await api.event.getEventsByCompany({ id: companyId });
@@ -35,7 +37,7 @@ export default async function CompanyPage({ params }: Props) {
         {firstThreeEvents.length ? (
           firstThreeEvents.map((event) => (
             <div key={event.id}>
-              <EventCard event={event} />
+              <EventCard event={event} userId={session?.user?.id} />
             </div>
           ))
         ) : (

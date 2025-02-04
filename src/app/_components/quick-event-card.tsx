@@ -6,18 +6,20 @@ import Image from "next/image";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type Props = {
   event: Event & { isUserApplied?: boolean; paymentEnabled?: boolean | null };
   settingsTab?: boolean;
   handleApplyToEvent?: (id: string) => void;
+  userId?: string;
 };
 
 export default function EventCard({
   event,
   settingsTab,
   handleApplyToEvent,
+  userId,
 }: Props) {
   const [localApplied, setLocalApplied] = useState(!!event.isUserApplied);
 
@@ -27,6 +29,66 @@ export default function EventCard({
       setLocalApplied(true);
     }
   };
+
+  const buttonsList = useMemo(() => {
+    const baseList = [];
+
+    if (settingsTab) {
+      baseList.push(
+        <Link
+          href={`/settings/company/${event.companyId}/events/${event.id}`}
+          className="w-30 inline-block h-10"
+        >
+          <Button
+            className="w-30 h-10 rounded-full text-sm font-bold"
+            variant="ghost"
+          >
+            View details
+          </Button>
+        </Link>,
+      );
+      return baseList;
+    }
+    if (userId) {
+      baseList.push(
+        <Button
+          onClick={handleApply}
+          className="w-30 h-10 rounded-full text-sm font-bold"
+          disabled={localApplied}
+        >
+          {localApplied ? "Applied" : "Apply to event"}
+        </Button>,
+      );
+    }
+    if (event?.paymentEnabled) {
+      baseList.push(
+        <Link
+          href={`/event/${event.id}/quick-donate`}
+          className="w-30 inline-block h-10"
+        >
+          <Button
+            disabled={!event.paymentEnabled}
+            className="w-30 h-10 rounded-full text-sm font-bold"
+            variant="ghost"
+          >
+            Quick donate
+          </Button>
+        </Link>,
+      );
+    }
+    baseList.push(
+      <Link href={`/event/${event.id}`} className="w-30 inline-block h-10">
+        <Button
+          className="w-30 h-10 rounded-full text-sm font-bold"
+          variant="ghost"
+        >
+          Learn More
+        </Button>
+      </Link>,
+    );
+    return baseList;
+  }, [userId, event, localApplied, settingsTab]);
+
   return (
     <div className="flex h-full w-full flex-row justify-between gap-x-8 rounded-lg bg-white py-4">
       <div className="flex w-full flex-col gap-y-4">
@@ -63,52 +125,10 @@ export default function EventCard({
             </div>
           </div>
         )}
-        {settingsTab ? (
-          <Link
-            href={`/settings/company/${event.companyId}/events/${event.id}`}
-            className="w-30 inline-block h-10"
-          >
-            <Button
-              className="w-30 h-10 rounded-full text-sm font-bold"
-              variant="ghost"
-            >
-              View details
-            </Button>
-          </Link>
-        ) : (
-          <div className="flex flex-row items-center gap-x-2">
-            <Button
-              onClick={handleApply}
-              className="w-30 h-10 rounded-full text-sm font-bold"
-              disabled={localApplied}
-            >
-              {localApplied ? "Applied" : "Apply to event"}
-            </Button>
-            <Link
-              href={`/event/${event.id}/quick-donate`}
-              className="w-30 inline-block h-10"
-            >
-              <Button
-                disabled={!event.paymentEnabled}
-                className="w-30 h-10 rounded-full text-sm font-bold"
-                variant="ghost"
-              >
-                Quick donate
-              </Button>
-            </Link>
-            <Link
-              href={`/company/${event.companyId}/events/${event.id}`}
-              className="w-30 inline-block h-10"
-            >
-              <Button
-                className="w-30 h-10 rounded-full text-sm font-bold"
-                variant="ghost"
-              >
-                Learn More
-              </Button>
-            </Link>
-          </div>
-        )}
+
+        <div className="flex flex-row items-center gap-x-2">
+          {buttonsList.map((button) => button)}
+        </div>
       </div>
       <Image
         src={event.imageUrl ?? DefaultCompanyImage}

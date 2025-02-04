@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/app/_components/ui/alert-dialog";
+import { useRouter } from "next/navigation";
 
 export type CompanyInfoState = {
   //company
@@ -96,6 +97,7 @@ const DEFAULT_STATE: CompanyInfoState = {
 };
 
 export default function Onboarding() {
+  const router = useRouter()
   const [step, setStep] = useState(1);
   const [companyInfo, setCompanyInfo] =
     useState<CompanyInfoState>(DEFAULT_STATE);
@@ -122,7 +124,7 @@ export default function Onboarding() {
         ...companyInfo,
         stripeAccountId: companyAccount.id,
       });
-      return setStep(1);
+      return router.push("/");
     }
     setStep((prev) => prev + 1);
   };

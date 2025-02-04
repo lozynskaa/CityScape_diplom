@@ -1,0 +1,1 @@
+ALTER TABLE "work-diplom_event" ADD COLUMN "creator_id" varchar(255) NOT NULL;
