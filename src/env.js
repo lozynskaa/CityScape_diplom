@@ -11,12 +11,12 @@ export const env = createEnv({
       process.env.NODE_ENV === "production"
         ? z.string()
         : z.string().optional(),
+    OAUTH_CLIENT_ID: z.string(),
+    OAUTH_CLIENT_SECRET: z.string(),
     DATABASE_URL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    LIQPAY_PUBLIC_KEY: z.string(),
-    LIQPAY_PRIVATE_KEY: z.string(),
     WEBHOOK_BASE_URL: z.string(),
   },
 
@@ -35,10 +35,10 @@ export const env = createEnv({
    */
   runtimeEnv: {
     AUTH_SECRET: process.env.AUTH_SECRET,
+    OAUTH_CLIENT_ID: process.env.OAUTH_CLIENT_ID,
+    OAUTH_CLIENT_SECRET: process.env.OAUTH_CLIENT_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
-    LIQPAY_PUBLIC_KEY: process.env.LIQPAY_PUBLIC_KEY,
-    LIQPAY_PRIVATE_KEY: process.env.LIQPAY_PRIVATE_KEY,
     WEBHOOK_BASE_URL: process.env.WEBHOOK_BASE_URL,
   },
   /**

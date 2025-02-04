@@ -15,7 +15,6 @@ import {
 import { TRPCError } from "@trpc/server";
 import { type Company } from "~/server/db/company.schema";
 import { createImageURL } from "~/lib/createImageURL";
-import { liqpay } from "~/server/payment/liqpay";
 
 const companyRouterValidationSchema = {
   createCompany: z.object({
@@ -135,24 +134,6 @@ export const companyRouter = createTRPCRouter({
         );
       }
 
-      try {
-        const liqPayCompany = await liqpay.api("request", {
-          action: "agent_shop_create",
-          version: "3",
-          phone: phone,
-          site: website,
-          description: description,
-          email: companyEmail,
-          name: name,
-          iban: iBan,
-          okpo: okpo,
-          company: name,
-        });
-        console.log("🚀 ~ .mutation ~ liqPayCompany:", liqPayCompany);
-      } catch (error) {
-        console.log("🚀 ~ .mutation ~ error:", error);
-      }
-
       const [company] = await ctx.db
         .insert(companies)
         .values({
@@ -247,23 +228,6 @@ export const companyRouter = createTRPCRouter({
           eventImage.file,
         );
       }
-
-      // const liqPayCompany = await liqpay.api("registration/request", {
-      //   action: "agent_shop_register",
-      //   version: "3",
-      //   phone: phone,
-      //   url_site: website,
-      //   description: description,
-      //   email: companyEmail,
-      //   name: name,
-      // });
-
-      // if (!liqPayCompany) {
-      //   throw new TRPCError({
-      //     code: "INTERNAL_SERVER_ERROR",
-      //     message: "Error creating company on LiqPay",
-      //   });
-      // }
 
       const [company] = await ctx.db
         .insert(companies)

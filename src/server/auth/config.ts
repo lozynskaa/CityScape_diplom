@@ -2,6 +2,8 @@ import { eq } from "drizzle-orm";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import { type GoogleProfile } from "next-auth/providers/google";
 
 import { db } from "~/server/db";
 import {
@@ -79,6 +81,41 @@ export const authConfig = {
         return user;
       },
     }),
+    GoogleProvider({
+      clientId: process.env.OAUTH_CLIENT_ID,
+      clientSecret: process.env.OAUTH_CLIENT_SECRET,
+      allowDangerousEmailAccountLinking: true,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
+      async profile(profile: GoogleProfile) {
+        const [existingUser] = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, profile.email));
+        const passwordHash: string = await Bun.password.hash(
+          profile.at_hash as string,
+        );
+        if (!existingUser) {
+          const [newUser] = await db
+            .insert(users)
+            .values({
+              name: profile.name ?? "",
+              email: profile.email,
+              passwordHash: passwordHash,
+              bio: "",
+              image: profile.picture,
+            })
+            .returning();
+          return newUser!;
+        }
+        return existingUser;
+      },
+    }),
     /**
      * ...add more providers here.
      *
@@ -95,7 +132,7 @@ export const authConfig = {
     verificationTokensTable: verificationTokens,
   }),
   callbacks: {
-    session: async ({ token, session, user }) => {
+    session: async ({ token, session }) => {
       const [dbUser] = await db
         .select()
         .from(users)
@@ -108,6 +145,9 @@ export const authConfig = {
           ...dbUser,
         },
       };
+    },
+    async signIn() {
+      return true;
     },
   },
   session: {

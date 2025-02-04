@@ -12,6 +12,8 @@ type Props = {
   }>;
 };
 
+export const revalidate = 60;
+
 export default async function CompanyPage({ params }: Props) {
   const session = await auth();
   const { companyId } = await params;

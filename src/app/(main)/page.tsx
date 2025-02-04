@@ -14,6 +14,8 @@ import { redirect } from "next/navigation";
 import { auth } from "~/server/auth";
 import { type Event } from "~/server/db/event.schema";
 
+export const revalidate = 60;
+
 const handleSearchEvents = async (formData: FormData) => {
   "use server";
   const search = formData.get("search") as string;

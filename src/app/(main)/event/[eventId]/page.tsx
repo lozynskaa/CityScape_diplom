@@ -15,6 +15,8 @@ type Props = {
   params: Promise<{ eventId: string }>;
 };
 
+export const revalidate = 60;
+
 export default async function EventPage({ params }: Props) {
   const { eventId } = await params;
 

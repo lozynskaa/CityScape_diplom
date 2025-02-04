@@ -17,6 +17,15 @@ async function handleSignIn(formData: FormData) {
   });
 }
 
+async function handleSignInGoogle() {
+  "use server";
+
+  await signIn("google", {
+    redirect: true,
+    redirectTo: "/",
+  });
+}
+
 // Define a server action for creating a new account
 async function handleSignUp(formData: FormData) {
   "use server";
@@ -52,40 +61,33 @@ export default async function SignUp() {
         <h1 className="text-2xl font-bold">Sign in or create an account</h1>
       </div>
       <div className="flex flex-col items-start gap-16 md:flex-row">
-        <form
-          className="flex flex-col items-center gap-y-3 px-4 py-3"
-          action={handleSignIn}
-        >
-          <Input
-            name="email"
-            label="Username or email"
-            className="rounded-full"
-          />
-          <Input
-            name="password"
-            label="Password"
-            type="password"
-            className="rounded-full"
-          />
-          <Button className="w-96 rounded-full text-sm font-bold" type="submit">
-            Sign In
-          </Button>
+        <div className="flex flex-col items-center gap-y-3 px-4 py-3">
+          <form action={handleSignIn} className="flex flex-col gap-y-3">
+            <Input name="email" label="Email" className="rounded-full" />
+            <Input
+              name="password"
+              label="Password"
+              type="password"
+              className="rounded-full"
+            />
+            <Button
+              className="w-96 rounded-full text-sm font-bold"
+              type="submit"
+            >
+              Sign In
+            </Button>
+          </form>
           <p className="mt-auto text-sm text-gray-400">Or sign in with</p>
           <div className="flex w-full flex-col items-start justify-between gap-3 sm:flex-row">
             <Button
               className="flex-1 rounded-full text-sm font-bold"
               variant="outline"
+              onClick={handleSignInGoogle}
             >
               Google
             </Button>
-            <Button
-              className="flex-1 rounded-full text-sm font-bold"
-              variant="outline"
-            >
-              Facebook
-            </Button>
           </div>
-        </form>
+        </div>
         <form className="flex flex-col gap-y-3 px-4 py-3" action={handleSignUp}>
           <div className="flex flex-col items-start justify-between gap-3 sm:flex-row">
             <Input
