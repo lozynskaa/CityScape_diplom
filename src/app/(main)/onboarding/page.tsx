@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { FirstStep } from "./step_1";
 import { Button } from "~/app/_components/ui/button";
 import { SecondStep } from "./step_2";
@@ -17,127 +17,60 @@ import {
   AlertDialogTrigger,
 } from "~/app/_components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
-
-export type CompanyInfoState = {
-  //company
-  company: {
-    name: string;
-    description?: string;
-    companyEmail: string;
-    website: string;
-    companyIBAN: string;
-    companyImage?: {
-      file: string;
-      fileName: string;
-    };
-    okpo: string;
-    phoneNumber: string;
-    firstName: string;
-    lastName: string;
-    dateOfBirth: Date;
-    country: string;
-  };
-  //event
-  event: {
-    category: string;
-    eventName: string;
-    eventDescription?: string;
-    eventDate: Date;
-    eventPurpose: string;
-    eventLocation: string;
-    eventImage?: {
-      file: string;
-      fileName: string;
-    };
-    goalAmount: number;
-    includeDonations: boolean;
-    currency: string;
-  };
-};
+import { type CreateCompanyDetails } from "~/app/_components/create-company-form";
+import { type CreateEventDetails } from "~/app/_components/create-event-form";
 
 type ContentData = {
   component: typeof FirstStep | typeof SecondStep;
-  loadFileKey: "companyImage" | "eventImage";
   description: string;
   title: string;
-  stateKey: keyof CompanyInfoState;
-  disabled: (state: CompanyInfoState) => boolean;
+  disabled: (state: CreateCompanyDetails | CreateEventDetails) => boolean;
 };
 
 const contentByStep = new Map<number, ContentData>();
 
 contentByStep.set(1, {
   component: FirstStep,
-  loadFileKey: "companyImage",
-  stateKey: "company",
   description:
     "Let's get started by setting up your company profile and creating a fundraising event. Once you've completed these steps, you'll be able to take part in city-wide charity events.",
   title: "Welcome to CityScape!",
-  disabled: (state: CompanyInfoState) =>
-    !state.company.name ||
-    !state.company.companyEmail ||
-    !state.company.companyIBAN ||
-    state.company.companyIBAN.length > 34 ||
-    !state.company.phoneNumber ||
-    !state.company.okpo ||
-    !state.company.website,
+  disabled: (state: CreateCompanyDetails) =>
+    !state.name ||
+    !state.email ||
+    !state.iBan ||
+    state.iBan.length > 34 ||
+    !state.phone ||
+    !state.okpo ||
+    !state.website ||
+    !state.firstName ||
+    !state.lastName ||
+    !state.dateOfBirth ||
+    !state.country,
 });
 contentByStep.set(2, {
   component: SecondStep,
-  loadFileKey: "eventImage",
-  stateKey: "event",
   description:
     "Let's get started by setting up your company profile and creating a fundraising event. Once you've completed these steps, you'll be able to take part in city-wide charity events.",
   title: "Create you first fundraising event!",
-  disabled: (state: CompanyInfoState) =>
-    !state.event.eventPurpose ||
-    !state.event.eventName ||
-    !state.event.currency ||
-    !state.event.eventLocation ||
-    !state.event.eventDate,
+  disabled: (state: CreateEventDetails) =>
+    !state.category ||
+    !state.purpose ||
+    !state.name ||
+    !state.currency ||
+    !state.location ||
+    !state.date,
 });
 
 const defaultBirthday = new Date();
 defaultBirthday.setFullYear(defaultBirthday.getFullYear() - 22);
 
-const DEFAULT_STATE: CompanyInfoState = {
-  //company
-  company: {
-    name: "",
-    description: "",
-    companyEmail: "",
-    website: "",
-    companyIBAN: "",
-    okpo: "",
-    phoneNumber: "",
-    firstName: "",
-    lastName: "",
-    dateOfBirth: defaultBirthday,
-    country: "",
-  },
-  //event
-  event: {
-    category: "",
-    eventName: "",
-    eventDescription: "",
-    eventLocation: "",
-    eventDate: new Date(),
-    eventPurpose: "",
-    goalAmount: 0,
-    includeDonations: false,
-    currency: "USD",
-  },
-};
-
 export default function Onboarding() {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [companyInfo, setCompanyInfo] = useState<CompanyInfoState["company"]>(
-    DEFAULT_STATE.company,
-  );
-  const [eventInfo, setEventInfo] = useState<CompanyInfoState["event"]>(
-    DEFAULT_STATE.event,
-  );
+  const [disabled, setDisabled] = useState(true);
+
+  const companyDetailsRef = useRef<CreateCompanyDetails>({});
+  const eventDetailsRef = useRef<CreateEventDetails>({});
 
   const { mutate: completeOnboarding } =
     api.company.completeOnboarding.useMutation();
@@ -146,13 +79,42 @@ export default function Onboarding() {
     component: StepContent,
     description,
     title,
-    loadFileKey,
-    stateKey,
-    disabled,
+    disabled: disabledCallback,
   } = contentByStep.get(step) ?? ({} as ContentData);
 
   const handleNextStep = async () => {
     if (step === 2) {
+      const filledCompanyDetails =
+        companyDetailsRef.current as Required<CreateCompanyDetails>;
+      const companyInfo = {
+        name: filledCompanyDetails.name,
+        website: filledCompanyDetails.website ?? "",
+        okpo: filledCompanyDetails.okpo,
+        dateOfBirth: filledCompanyDetails.dateOfBirth,
+        firstName: filledCompanyDetails.firstName,
+        lastName: filledCompanyDetails.lastName,
+        country: filledCompanyDetails.country,
+        companyEmail: filledCompanyDetails.email,
+        companyIBAN: filledCompanyDetails.iBan,
+        phoneNumber: filledCompanyDetails.phone,
+        companyImage: filledCompanyDetails.imageFile,
+        description: filledCompanyDetails.description ?? "",
+      };
+
+      const filledEventDetails =
+        eventDetailsRef.current as Required<CreateEventDetails>;
+      const eventInfo = {
+        category: filledEventDetails.category,
+        eventName: filledEventDetails.name,
+        eventDescription: filledEventDetails.description ?? "",
+        eventDate: filledEventDetails.date ?? new Date(),
+        eventLocation: filledEventDetails.location ?? "",
+        eventImage: filledEventDetails.imageFile,
+        eventPurpose: filledEventDetails.purpose ?? "",
+        goalAmount: Number(filledEventDetails.goalAmount),
+        currency: filledEventDetails.currency ?? "USD",
+        includeDonations: !filledEventDetails.withoutDonations,
+      };
       completeOnboarding({
         company: companyInfo,
         event: eventInfo,
@@ -162,42 +124,11 @@ export default function Onboarding() {
     setStep((prev) => prev + 1);
   };
 
-  const handleLoadFile =
-    (key: "eventImage" | "companyImage") =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-
-        reader.onload = () => {
-          const base64Data = reader.result as string; // e.g., "data:image/png;base64,..."
-
-          const parsedFile = {
-            file: base64Data,
-            fileName: file.name,
-          };
-          setCompanyInfo((prev) => ({ ...prev, [key]: parsedFile }));
-        };
-      }
-    };
-
   const handleSkipOnboarding = () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("skipOnboarding", "true");
       window.location.href = "/";
     }
-  };
-
-  const stateByKey = {
-    company: {
-      state: companyInfo,
-      setState: setCompanyInfo,
-    },
-    event: {
-      state: eventInfo,
-      setState: setEventInfo,
-    },
   };
 
   return (
@@ -219,9 +150,9 @@ export default function Onboarding() {
         </p>
       </div>
       <StepContent
-        companyDetails={stateByKey[stateKey].state}
-        setCompanyDetails={stateByKey[stateKey].setState}
-        handleLoadFile={handleLoadFile(loadFileKey)}
+        details={step === 1 ? companyDetailsRef : eventDetailsRef}
+        disabledCallback={disabledCallback}
+        setDisabled={setDisabled}
       />
       <footer className="flex w-96 flex-row items-center justify-center gap-x-4">
         <AlertDialog>
@@ -252,10 +183,7 @@ export default function Onboarding() {
 
         <Button
           className="flex-1 rounded-full text-sm font-bold"
-          disabled={disabled({
-            company: companyInfo,
-            event: eventInfo,
-          })}
+          disabled={disabled}
           onClick={handleNextStep}
         >
           Continue

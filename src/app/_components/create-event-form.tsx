@@ -1,0 +1,230 @@
+"use client";
+import { type MutableRefObject, useEffect, useState } from "react";
+import { type Event } from "~/server/db/event.schema";
+import { Input } from "./ui/input";
+import { LabeledItem } from "./ui/labeled-item";
+import DatePicker from "./ui/date-picker";
+import { Textarea } from "./ui/textarea";
+import Image from "next/image";
+import { ItemSelectBlock } from "./item-select";
+import { Switch } from "./ui/switch";
+
+const eventCategories = [
+  {
+    name: "Charity",
+    id: "Charity",
+  },
+  {
+    name: "Education",
+    id: "Education",
+  },
+  {
+    name: "Environment",
+    id: "Environment",
+  },
+  {
+    name: "Health",
+    id: "Health",
+  },
+  {
+    name: "Volunteering",
+    id: "Volunteering",
+  },
+  {
+    name: "Other",
+    id: "Other",
+  },
+];
+
+const currencies = [
+  {
+    name: "USD",
+    id: "USD",
+    symbol: "$",
+  },
+  {
+    name: "EUR",
+    id: "EUR",
+    symbol: "€",
+  },
+  {
+    name: "GBP",
+    id: "GBP",
+    symbol: "£",
+  },
+  {
+    name: "UAH",
+    id: "UAH",
+    symbol: "₴",
+  },
+  {
+    name: "PLN",
+    id: "PLN",
+    symbol: "zł",
+  },
+];
+
+export type CreateEventDetails = Omit<Partial<Event>, "imageUrl"> & {
+  imageFile?: { file: string; fileName: string };
+};
+
+type Props = {
+  predefinedEvent?: Event;
+  eventDetailsRef: MutableRefObject<CreateEventDetails>;
+  disabledCallback: (state: CreateEventDetails) => boolean;
+  setDisabled: (state: boolean) => void;
+};
+
+export default function CreateEventForm({
+  predefinedEvent,
+  eventDetailsRef,
+  disabledCallback,
+  setDisabled,
+}: Props) {
+  const [eventDetails, setEventDetails] = useState<CreateEventDetails>({});
+
+  useEffect(() => {
+    eventDetailsRef.current = eventDetails;
+    if (disabledCallback) {
+      const isDisabled = disabledCallback(eventDetails);
+      setDisabled(isDisabled);
+    }
+  }, [eventDetails]);
+
+  useEffect(() => {
+    if (predefinedEvent) {
+      setEventDetails(eventDetails);
+    }
+  }, [predefinedEvent]);
+
+  const handleLoadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onload = () => {
+        const base64Data = reader.result as string; // e.g., "data:image/png;base64,..."
+
+        const parsedFile = {
+          file: base64Data,
+          fileName: file.name,
+        };
+        setEventDetails((prev) => ({ ...prev, imageFile: parsedFile }));
+      };
+    }
+  };
+
+  return (
+    <form className="grid w-full grid-cols-2 gap-5">
+      <Input
+        placeholder="Enter event name"
+        label="Event Name"
+        value={eventDetails.name}
+        onChange={(e) =>
+          setEventDetails((prev) => ({
+            ...prev,
+            name: e.target.value,
+          }))
+        }
+      />
+      <ItemSelectBlock
+        items={eventCategories}
+        set={(id) => setEventDetails((prev) => ({ ...prev, category: id }))}
+        title={eventDetails.category ?? "Select Category"}
+        label="Event Category"
+      />
+      <LabeledItem label="Include Donations">
+        <Switch
+          checked={!eventDetails.withoutDonations}
+          onCheckedChange={(value) =>
+            setEventDetails((prev) => ({
+              ...prev,
+              withoutDonations: !value,
+            }))
+          }
+        />
+      </LabeledItem>
+
+      <Input
+        placeholder="Enter event goal"
+        type="number"
+        label="Event Goal"
+        disabled={!!eventDetails.withoutDonations}
+        value={eventDetails.goalAmount}
+        onChange={(e) =>
+          setEventDetails((prev) => ({
+            ...prev,
+            goalAmount: e.target.value,
+          }))
+        }
+      />
+      <LabeledItem label="Event Date">
+        <DatePicker
+          selectedDate={eventDetails.date}
+          onSelect={(date) =>
+            setEventDetails((prev) => ({ ...prev, date: date }))
+          }
+        />
+      </LabeledItem>
+
+      <Input
+        placeholder="Enter event location"
+        label="Event Location"
+        value={eventDetails.location ?? ""}
+        onChange={(e) =>
+          setEventDetails((prev) => ({
+            ...prev,
+            location: e.target.value,
+          }))
+        }
+      />
+
+      <Textarea
+        placeholder="Enter event description"
+        label="Event Description"
+        value={eventDetails.description ?? ""}
+        onChange={(e) =>
+          setEventDetails((prev) => ({
+            ...prev,
+            description: e.target.value,
+          }))
+        }
+      />
+      <Textarea
+        placeholder="Enter event purpose"
+        label="Event Purpose"
+        value={eventDetails.purpose ?? ""}
+        onChange={(e) =>
+          setEventDetails((prev) => ({
+            ...prev,
+            purpose: e.target.value,
+          }))
+        }
+      />
+
+      <ItemSelectBlock
+        items={currencies}
+        set={(id) => setEventDetails((prev) => ({ ...prev, currency: id }))}
+        title={eventDetails.currency ?? "Select Currency"}
+        label="Donation Currency"
+      />
+
+      <Input
+        type="file"
+        label="Event Logo"
+        accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*"
+        onChange={handleLoadFile}
+      />
+      {eventDetails.imageFile && (
+        <Image
+          width={200}
+          height={200}
+          className="col-span-2 justify-self-center"
+          src={eventDetails.imageFile.file}
+          alt="Event Logo"
+        />
+      )}
+    </form>
+  );
+}

@@ -1,9 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import { useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { Progress } from "~/app/_components/ui/progress";
-import { type Event } from "~/server/db/event.schema";
 import { api } from "~/trpc/react";
 import { Spinner } from "~/app/_components/ui/spinner";
 import {
@@ -13,13 +11,10 @@ import {
 } from "~/app/_components/ui/carousel";
 import DonorItem, { type DonationItemType } from "~/app/_components/donor-item";
 import { Button } from "~/app/_components/ui/button";
-import { Input } from "~/app/_components/ui/input";
-import { LabeledItem } from "~/app/_components/ui/labeled-item";
-import { Textarea } from "~/app/_components/ui/textarea";
-import { Switch } from "~/app/_components/ui/switch";
 import ApplicantItem from "~/app/_components/applicant-item";
-import { ItemSelectBlock } from "~/app/_components/item-select";
-import DatePicker from "~/app/_components/ui/date-picker";
+import CreateEventForm, {
+  type CreateEventDetails,
+} from "~/app/_components/create-event-form";
 
 const requiredFields = [
   "name",
@@ -30,7 +25,11 @@ const requiredFields = [
   "category",
   "location",
   "date",
-];
+] as const;
+
+const disabledCallback = (eventDetails: CreateEventDetails) => {
+  return !requiredFields.every((field) => eventDetails[field]);
+};
 
 export default function EventPage() {
   const { eventId } = useParams<{
@@ -38,9 +37,7 @@ export default function EventPage() {
     eventId: string;
   }>();
 
-  const [updatedEventData, setUpdatedEventData] = useState<
-    Partial<Event> & { imageFile?: { file: string; fileName: string } }
-  >({});
+  const eventDetailsRef = useRef<CreateEventDetails>({});
   const {
     data: currentEvent = null,
     isFetching,
@@ -50,72 +47,44 @@ export default function EventPage() {
   });
   const { mutateAsync: updateEvent } = api.event.updateEvent.useMutation();
 
-  useEffect(() => {
-    if (currentEvent && isFetched) {
-      setUpdatedEventData({
-        name: currentEvent.name,
-        description: currentEvent.description,
-        purpose: currentEvent.purpose,
-        goalAmount: currentEvent.goalAmount,
-        currency: currentEvent.currency,
-        withoutDonations: currentEvent.withoutDonations,
-        location: currentEvent.location,
-        date: currentEvent.date,
-        category: currentEvent.category,
-      });
-    }
-  }, [isFetched]);
-
-  const handleLoadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-
-      reader.onload = () => {
-        const base64Data = reader.result as string; // e.g., "data:image/png;base64,..."
-
-        const parsedFile = {
-          file: base64Data,
-          fileName: file.name,
-        };
-        setUpdatedEventData((prev) => ({ ...prev, imageFile: parsedFile }));
-      };
-    }
-  };
-
   const handleSave = async () => {
-    if (
-      currentEvent &&
-      updatedEventData &&
-      requiredFields.every(
-        (key) => key in currentEvent || key in updatedEventData,
-      )
-    ) {
+    if (currentEvent && !disabledCallback(eventDetailsRef.current)) {
       const result = await updateEvent({
         id: currentEvent?.id ?? "",
-        name: updatedEventData?.name ?? currentEvent?.name,
+        name: eventDetailsRef.current?.name ?? currentEvent?.name,
         description:
-          updatedEventData?.description ?? currentEvent?.description ?? "",
-        purpose: updatedEventData?.purpose ?? currentEvent?.purpose ?? "",
-        image: updatedEventData?.imageFile,
+          eventDetailsRef.current?.description ??
+          currentEvent?.description ??
+          "",
+        purpose:
+          eventDetailsRef.current?.purpose ?? currentEvent?.purpose ?? "",
+        image: eventDetailsRef.current?.imageFile,
         goalAmount: +(
-          updatedEventData?.goalAmount ??
+          eventDetailsRef.current?.goalAmount ??
           currentEvent?.goalAmount ??
           "0"
         ),
-        currency: updatedEventData?.currency ?? currentEvent?.currency ?? "",
-        includeDonations: !updatedEventData?.withoutDonations,
-        location: updatedEventData?.location ?? currentEvent?.location ?? "",
-        date: updatedEventData?.date ?? currentEvent?.date ?? new Date(),
-        category: updatedEventData?.category ?? currentEvent?.category ?? "",
+        currency:
+          eventDetailsRef.current?.currency ?? currentEvent?.currency ?? "",
+        includeDonations: !eventDetailsRef.current?.withoutDonations,
+        location:
+          eventDetailsRef.current?.location ?? currentEvent?.location ?? "",
+        date: eventDetailsRef.current?.date ?? currentEvent?.date ?? new Date(),
+        category:
+          eventDetailsRef.current?.category ?? currentEvent?.category ?? "",
       });
 
       if (result) {
-        setUpdatedEventData(result);
+        eventDetailsRef.current = result;
       }
     }
   };
+
+  useEffect(() => {
+    if (currentEvent && isFetched) {
+      eventDetailsRef.current = currentEvent;
+    }
+  }, [isFetched]);
 
   if (isFetching || !currentEvent) {
     return <Spinner />;
@@ -203,121 +172,12 @@ export default function EventPage() {
         <Button onClick={handleSave}>Save changes</Button>
       </div>
 
-      <div className="grid w-full grid-cols-2 gap-5">
-        <Input
-          placeholder="Enter event name"
-          label="Event Name"
-          value={updatedEventData.name}
-          onChange={(e) =>
-            setUpdatedEventData((prev) => ({
-              ...prev,
-              name: e.target.value,
-            }))
-          }
-        />
-        <ItemSelectBlock
-          items={[{ id: "Category 1", name: "Category 1" }]}
-          set={(id) =>
-            setUpdatedEventData((prev) => ({ ...prev, eventCategory: id }))
-          }
-          title="Select Category"
-          label="Event Category"
-        />
-
-        <LabeledItem label="Include Donations">
-          <Switch
-            checked={!updatedEventData.withoutDonations}
-            onCheckedChange={(value) =>
-              setUpdatedEventData((prev) => ({
-                ...prev,
-                withoutDonations: !value,
-              }))
-            }
-          />
-        </LabeledItem>
-
-        <Input
-          placeholder="Enter event goal"
-          type="number"
-          label="Event Goal"
-          disabled={!!updatedEventData.withoutDonations}
-          value={updatedEventData.goalAmount}
-          onChange={(e) =>
-            setUpdatedEventData((prev) => ({
-              ...prev,
-              goalAmount: e.target.value,
-            }))
-          }
-        />
-        <LabeledItem label="Event Date">
-          <DatePicker
-            selectedDate={updatedEventData.date}
-            onSelect={(date) =>
-              setUpdatedEventData((prev) => ({ ...prev, date: date }))
-            }
-          />
-        </LabeledItem>
-
-        <Input
-          placeholder="Enter event location"
-          label="Event Location"
-          value={updatedEventData.location ?? ""}
-          onChange={(e) =>
-            setUpdatedEventData((prev) => ({
-              ...prev,
-              location: e.target.value,
-            }))
-          }
-        />
-
-        <Textarea
-          placeholder="Enter event description"
-          label="Event Description"
-          value={updatedEventData.description ?? ""}
-          onChange={(e) =>
-            setUpdatedEventData((prev) => ({
-              ...prev,
-              description: e.target.value,
-            }))
-          }
-        />
-        <Textarea
-          placeholder="Enter event purpose"
-          label="Event Purpose"
-          value={updatedEventData.purpose ?? ""}
-          onChange={(e) =>
-            setUpdatedEventData((prev) => ({
-              ...prev,
-              purpose: e.target.value,
-            }))
-          }
-        />
-
-        <ItemSelectBlock
-          items={[{ id: "USD", name: "USD" }]}
-          set={(id) =>
-            setUpdatedEventData((prev) => ({ ...prev, currency: id }))
-          }
-          title="Select Currency"
-          label="Donation Currency"
-        />
-
-        <Input
-          type="file"
-          label="Event Logo"
-          accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*"
-          onChange={handleLoadFile}
-        />
-        {updatedEventData.imageFile && (
-          <Image
-            width={200}
-            height={200}
-            className="col-span-2 justify-self-center"
-            src={updatedEventData.imageFile.file}
-            alt="Event Logo"
-          />
-        )}
-      </div>
+      <CreateEventForm
+        predefinedEvent={currentEvent}
+        eventDetailsRef={eventDetailsRef}
+        disabledCallback={disabledCallback}
+        setDisabled={() => null}
+      />
     </div>
   );
 }
