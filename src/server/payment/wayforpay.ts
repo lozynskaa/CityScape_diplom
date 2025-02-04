@@ -59,37 +59,34 @@ export class WayForPay {
   }
 
   async addMerchantAccount(data: {
+    partnerCode: string;
     site: string;
     phone: string;
     email: string;
     description: string;
     compensationCardHolder: string;
-    compensationAccount: string;
-    compensationAccountMfo: string;
-    compensationAccountOkpo: string;
+    compensationAccountIban: string;
     compensationAccountName: string;
-    merchantAccount?: string;
   }) {
-    const requiredKeys = ["merchantAccount", "site", "phone", "email"];
+    const requiredKeys = ["merchantAccount", "partnerCode", "phone", "email"];
 
     const payload = {
       ...data,
       merchantAccount: this.merchantAccount,
-      signature: "",
+      merchantSignature: "",
     };
 
-    const signature = this.createSignature(data, requiredKeys);
+    const signature = this.createSignature(payload, requiredKeys);
 
-    payload.signature = signature;
+    payload.merchantSignature = signature;
+    console.log("🚀 ~ WayForPay ~ payload:", payload);
 
-    const response = await this.axios.post<
-      AxiosResponse<{
-        reason: string;
-        reasonCode: string;
-        merchantAccount: string;
-        secretKey: string;
-      }>
-    >("/mms/addMerchant.php", payload);
+    const response = await this.axios.post<{
+      reason: string;
+      reasonCode: string;
+      merchantAccount: string;
+      secretKey: string;
+    }>("/mms/addPartner.php", payload);
     return response.data;
   }
 
@@ -168,13 +165,13 @@ export class WayForPay {
       ...data,
       transactionType: "P2P_ACCOUNT",
       merchantAccount: "test_merch_p2p",
-      signature: "",
+      merchantSignature: "",
       apiVersion: 1,
     };
 
     const signature = this.createSignature(filledData, requiredKeys);
 
-    filledData.signature = signature;
+    filledData.merchantSignature = signature;
 
     const response = await this.axios.post<{
       merchantAccount: string;

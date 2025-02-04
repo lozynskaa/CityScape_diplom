@@ -24,7 +24,7 @@ export type CompanyInfoState = {
     name: string;
     description?: string;
     companyEmail: string;
-    website?: string;
+    website: string;
     companyIBAN: string;
     companyImage?: {
       file: string;
@@ -73,7 +73,10 @@ contentByStep.set(1, {
     !state.company.name ||
     !state.company.companyEmail ||
     !state.company.companyIBAN ||
-    state.company.companyIBAN.length > 34,
+    state.company.companyIBAN.length > 34 ||
+    !state.company.phoneNumber ||
+    !state.company.okpo ||
+    !state.company.website,
 });
 contentByStep.set(2, {
   component: SecondStep,
@@ -187,7 +190,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-y-8 pt-10">
+    <div className="flex flex-col items-center justify-center gap-y-8 py-10">
       <div className="w-2/3 space-y-2">
         <p className="text-base font-medium text-gray-950">Onboarding</p>
         <div className="h-3 w-full rounded-full bg-gray-100">

@@ -15,6 +15,8 @@ import {
 import { TRPCError } from "@trpc/server";
 import { type Company } from "~/server/db/company.schema";
 import { createImageURL } from "~/lib/createImageURL";
+import { wayforpay } from "~/server/payment/wayforpay";
+import { parseIban } from "~/lib/iban";
 
 const companyRouterValidationSchema = {
   createCompany: z.object({
@@ -22,7 +24,7 @@ const companyRouterValidationSchema = {
       name: z.string().min(1),
       companyEmail: z.string().email(),
       description: z.string(),
-      website: z.string().url().optional(),
+      website: z.string().url(),
       image: z
         .object({
           file: z.string(), // Bun's File object
@@ -38,7 +40,7 @@ const companyRouterValidationSchema = {
     name: z.string().min(1),
     companyEmail: z.string().email(),
     description: z.string(),
-    website: z.string().url().optional(),
+    website: z.string().url(),
     image: z
       .object({
         file: z.string(), // Bun's File object
@@ -61,7 +63,7 @@ const companyRouterValidationSchema = {
           fileName: z.string(),
         })
         .optional(),
-      website: z.string().url().optional(),
+      website: z.string().url(),
       companyIBAN: z.string().max(34),
       okpo: z.string(),
       phoneNumber: z.string(),
@@ -112,17 +114,8 @@ export const companyRouter = createTRPCRouter({
         okpo,
         phoneNumber: phone,
       } = input.company;
-      if (!ctx.session.user.email) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
-      const [existingUser] = await ctx.db
-        .select({ id: users.id })
-        .from(users)
-        .where(eq(users.email, ctx.session.user.email));
 
-      if (!existingUser) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
+      const userId = ctx.session.user.id;
 
       let imageUrl: string | undefined = undefined;
 
@@ -137,7 +130,7 @@ export const companyRouter = createTRPCRouter({
       const [company] = await ctx.db
         .insert(companies)
         .values({
-          founderId: existingUser?.id,
+          founderId: userId,
           name,
           description,
           website,
@@ -146,8 +139,6 @@ export const companyRouter = createTRPCRouter({
           iBan,
           okpo,
           phone,
-          liqPayPublicKey: "",
-          liqPayPrivateKey: "",
         })
         .returning();
 
@@ -197,6 +188,7 @@ export const companyRouter = createTRPCRouter({
         okpo,
         phoneNumber: phone,
       } = input.company;
+
       const {
         category,
         eventImage,
@@ -210,7 +202,14 @@ export const companyRouter = createTRPCRouter({
         currency,
       } = input.event;
 
-      const userId = ctx.session.user.id;
+      const [existingUser] = await ctx.db
+        .select({ id: users.id, name: users.name })
+        .from(users)
+        .where(eq(users.id, ctx.session.user.id));
+
+      if (!existingUser) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
 
       let companyImageURL: string | undefined = undefined;
       let eventImageURL: string | undefined = undefined;
@@ -241,8 +240,6 @@ export const companyRouter = createTRPCRouter({
           iBan,
           okpo,
           phone,
-          liqPayPublicKey: "",
-          liqPayPrivateKey: "",
         })
         .returning();
 
