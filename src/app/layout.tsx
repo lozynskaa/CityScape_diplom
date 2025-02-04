@@ -26,13 +26,14 @@ export default function RootLayout({
     <html lang="en" className={`${jakartaSans.variable}`}>
       <head>
         <script
+          id="widget-wfp-script"
           type="text/javascript"
-          src="https://static.liqpay.ua/libjs/sdk_button.js"
+          src="https://secure.wayforpay.com/server/pay-widget.js"
         />
       </head>
       <body>
         <div className="flex min-h-screen flex-col items-center justify-center overflow-y-auto bg-gray-900 p-8">
-          <div className="w-full flex-1 rounded-2xl bg-white">
+          <div className="w-full flex-1 rounded-2xl bg-gray-50">
             <TRPCReactProvider>{children}</TRPCReactProvider>
           </div>
         </div>

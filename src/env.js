@@ -17,7 +17,7 @@ export const env = createEnv({
       .default("development"),
     LIQPAY_PUBLIC_KEY: z.string(),
     LIQPAY_PRIVATE_KEY: z.string(),
-    LIQPAY_WEBHOOK_BASE_URL: z.string(),
+    WEBHOOK_BASE_URL: z.string(),
   },
 
   /**
@@ -39,7 +39,7 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     LIQPAY_PUBLIC_KEY: process.env.LIQPAY_PUBLIC_KEY,
     LIQPAY_PRIVATE_KEY: process.env.LIQPAY_PRIVATE_KEY,
-    LIQPAY_WEBHOOK_BASE_URL: process.env.LIQPAY_WEBHOOK_BASE_URL,
+    WEBHOOK_BASE_URL: process.env.WEBHOOK_BASE_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

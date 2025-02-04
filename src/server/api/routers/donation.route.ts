@@ -1,34 +1,22 @@
 import { TRPCError } from "@trpc/server";
 import { eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
-import { parseIban } from "~/lib/iban";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { companies } from "~/server/db/company.schema";
 import { donations } from "~/server/db/donations.schema";
 import { events } from "~/server/db/event.schema";
-import { users } from "~/server/db/user.schema";
-import { liqpay } from "~/server/payment/liqpay";
+import { wayforpay } from "~/server/payment/wayforpay";
 
 const donationRouterValidationSchema = {
-  createTransactionForm: z.object({
+  initializePayment: z.object({
     amount: z.number(),
     currency: z.string(),
-    eventCompanyId: z.string(),
     eventId: z.string(),
     anonymous: z.boolean().optional().default(false),
   }),
-  updateDonation: z.object({
-    amount: z.number(),
-    currency: z.string(),
-    eventCompanyId: z.string(),
-    transactionId: z.string(),
-    eventId: z.string(),
-    donationId: z.string(),
-  }),
   initializePayoutToCompany: z.object({
-    orderData: z.string(),
-    transactionId: z.string(),
+    donationId: z.string(),
     amount: z.number(),
     currency: z.string(),
   }),
@@ -42,10 +30,10 @@ const donationRouterValidationSchema = {
 };
 
 export const donationRouter = createTRPCRouter({
-  createTransactionForm: publicProcedure
-    .input(donationRouterValidationSchema.createTransactionForm)
+  initializePayment: publicProcedure
+    .input(donationRouterValidationSchema.initializePayment)
     .mutation(async ({ input, ctx }) => {
-      const { amount, currency, eventId, eventCompanyId, anonymous } = input;
+      const { amount, currency, eventId, anonymous } = input;
 
       const userId = ctx?.session?.user.id;
 
@@ -62,52 +50,69 @@ export const donationRouter = createTRPCRouter({
           anonymous,
           userId,
           eventId,
+          status: "pending",
           // donationDate: new Date(),
           // receiptUrl: paymentTransfer.receipt_url,
         })
         .returning();
 
-      const formHTML = liqpay.cnb_form({
-        action: "pay",
-        amount: amount,
-        currency: currency,
-        description: `Donation for event ${event?.name}.`,
-        order_id: `${eventId}/${eventCompanyId}/${userId}/${anonymous}/${donation?.id}`,
-        version: "3",
-        return_url: process.env.LIQPAY_WEBHOOK_BASE_URL + "/donation/success",
-        server_url:
-          process.env.LIQPAY_WEBHOOK_BASE_URL + "/api/webhooks/liqpay",
+      if (!donation || !event) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Donation or donation event not found",
+        });
+      }
+
+      const response = await wayforpay.initPayment({
+        merchantDomainName: "www.671d-178-212-96-198.ngrok-free.app",
+        amount: amount.toFixed(2),
+        // returnUrl: "http://localhost:3000/donation/success",
+        serviceUrl:
+          "https://671d-178-212-96-198.ngrok-free.app/webhooks/wayforpay",
+        orderReference: donation.id,
+        orderDate: `${Date.now()}`,
+        currency,
+        productName: [event.name],
+        productPrice: [amount.toFixed(2)],
+        productCount: [1],
       });
 
-      return formHTML;
+      return response;
     }),
 
   initializePayoutToCompany: publicProcedure
     .input(donationRouterValidationSchema.initializePayoutToCompany)
     .mutation(async ({ input, ctx }) => {
-      const { transactionId, orderData, amount, currency } = input;
-      const [eventId, eventCompanyId, userId, anonymous, donationId] =
-        orderData.split("/");
+      const { donationId, amount, currency } = input;
 
-      if (!eventId || !eventCompanyId || !userId || !anonymous || !donationId) {
+      const [donation] = await ctx.db
+        .select()
+        .from(donations)
+        .where(eq(donations.id, donationId));
+
+      if (!donation) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Invalid order data",
+          code: "NOT_FOUND",
+          message: "Donation not found",
+        });
+      }
+
+      const [event] = await ctx.db
+        .select()
+        .from(events)
+        .where(eq(events.id, donation.eventId));
+
+      if (!event) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Event not found",
         });
       }
 
       const [company] = await ctx.db
         .select()
         .from(companies)
-        .where(eq(companies.id, eventCompanyId));
-
-      const [user] = await ctx.db
-        .select()
-        .from(users)
-        .where(eq(users.id, userId));
-
-      const [firstName = "UNKNOWN", lastName = "USER"] =
-        user?.name.split(" ") ?? [];
+        .where(eq(companies.id, event.companyId));
 
       if (!company) {
         throw new TRPCError({
@@ -116,64 +121,25 @@ export const donationRouter = createTRPCRouter({
         });
       }
 
-      const { mfo, account } = parseIban(company.iBan);
-
-      try {
-        const payoutData = await liqpay.api("request", {
-          action: "p2pcredit",
-          version: "3",
-          amount: amount,
-          currency: currency,
-          description: `Donation for event ${company.name}. Payout to ${company.name}.`,
-          order_id: `${transactionId}/${donationId}`,
-          receiver_last_name: firstName,
-          receiver_first_name: lastName,
-          receiver_card: "4242424242424242",
-          // receiver_company: company.iBan,
-          // receiver_account: account,
-          // receiver_okpo: company.okpo,
-          // receiver_mfo: mfo,
-          receiver_email: company.email,
-        });
-        console.log("🚀 ~ .mutation ~ payoutData:", payoutData);
-      } catch (error) {
-        console.log("🚀 ~ .mutation ~ error:", error);
-      }
-
-      return true;
-    }),
-
-  updateDonation: publicProcedure
-    .input(donationRouterValidationSchema.updateDonation)
-    .mutation(async ({ input, ctx }) => {
-      const { amount, currency, transactionId, eventId, donationId } = input;
-
       await ctx.db
-        .update(events)
+        .update(donations)
         .set({
-          currentAmount: sql`${events.currentAmount} + ${amount.toFixed(2)}`,
+          amount: amount.toFixed(2),
+          currency,
         })
-        .where(eq(events.id, eventId));
+        .where(eq(donations.id, donation.id));
 
-      try {
-        const [donation] = await ctx.db
-          .update(donations)
-          .set({
-            transactionId,
-            status: "pending",
-            amount: Number(amount).toFixed(2),
-            currency,
-          })
-          .where(eq(donations.id, donationId))
-          .returning();
-        return donation;
-      } catch (err) {
-        console.error("Error creating transaction:", err);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Error creating transaction",
-        });
-      }
+      const payoutResult = await wayforpay.initMerchantPayout({
+        orderReference: donationId,
+        amount,
+        currency,
+        iban: company.iBan,
+        okpo: company.okpo,
+        accountName: company.name,
+        description: `Donation to ${company.name}. Event: ${event.name}`,
+      });
+
+      return payoutResult;
     }),
 
   removeDonatedAmount: publicProcedure
@@ -197,6 +163,31 @@ export const donationRouter = createTRPCRouter({
         .update(events)
         .set({
           currentAmount: sql`${events.currentAmount} - ${donation.amount}`,
+        })
+        .where(eq(events.id, donation.eventId));
+    }),
+
+  addDonatedAmount: publicProcedure
+    .input(donationRouterValidationSchema.removeDonatedAmount)
+    .mutation(async ({ input, ctx }) => {
+      const { donationId } = input;
+
+      const [donation] = await ctx.db
+        .select()
+        .from(donations)
+        .where(eq(donations.id, donationId));
+
+      if (!donation) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Donation not found",
+        });
+      }
+
+      await ctx.db
+        .update(events)
+        .set({
+          currentAmount: sql`${events.currentAmount} + ${donation.amount}`,
         })
         .where(eq(events.id, donation.eventId));
     }),

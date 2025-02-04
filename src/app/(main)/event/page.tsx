@@ -25,7 +25,6 @@ const categories = [
   { label: "My applies", value: "my_applies" },
 ];
 
-//TODO: Add event category filter and event location filter input
 export default function EventsListPage() {
   const { set, searchParams } = useWritableSearchParams();
   const debouncedSearch = useDebounce(searchParams.get("search") ?? "", 500);
@@ -114,7 +113,10 @@ export default function EventsListPage() {
           <LabeledItem label="Start Date">
             <Popover>
               <PopoverTrigger asChild>
-                <Button className="w-full items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
+                <Button
+                  className="h-9 w-full items-center justify-start"
+                  variant="outline"
+                >
                   <CalendarIcon />
                   {input.eventDate.startDate ? (
                     format(input.eventDate.startDate, "PPP")
@@ -138,7 +140,10 @@ export default function EventsListPage() {
           <LabeledItem label="End Date">
             <Popover>
               <PopoverTrigger asChild>
-                <Button className="w-full items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
+                <Button
+                  className="h-9 w-full items-center justify-start"
+                  variant="outline"
+                >
                   <CalendarIcon />
                   {input.eventDate.endDate ? (
                     format(input.eventDate.endDate, "PPP")

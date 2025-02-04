@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import Post from "~/app/_components/post-card";
-import { FullPageSpinner, Spinner } from "~/app/_components/ui/spinner";
+import { FullPageSpinner } from "~/app/_components/ui/spinner";
 import { useDebounce } from "~/hooks/use-debounce";
 import { useWritableSearchParams } from "~/hooks/use-writable-search-params";
 import { api } from "~/trpc/react";
@@ -67,7 +67,7 @@ export default function PostsListPage() {
     };
   }, [handleObserver]);
 
-  if (true) {
+  if (isFetching) {
     return <FullPageSpinner />;
   }
 

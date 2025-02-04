@@ -1,7 +1,7 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useParams } from "next/navigation";
+import { useState } from "react";
 import { Button } from "~/app/_components/ui/button";
 import { Input } from "~/app/_components/ui/input";
 import { Spinner } from "~/app/_components/ui/spinner";
@@ -16,21 +16,20 @@ export default function QuickDonatePage() {
   const { data: event, isLoading } = api.event.getEvent.useQuery({
     id: eventId,
   });
-  const { mutateAsync: createTransactionForm } =
-    api.donation.createTransactionForm.useMutation();
+  const { mutateAsync: initializePayment } =
+    api.donation.initializePayment.useMutation();
 
   const handlePaymentCreate = async () => {
     if (!event?.currency) return;
 
     // Call the backend to create the transaction
-    const formHTML = await createTransactionForm({
+    const paymentData = await initializePayment({
       amount: amountValue,
       currency: event.currency,
       eventId,
-      eventCompanyId: event.companyId,
       anonymous: false,
     });
-    setEmbeddedFormHTML(formHTML);
+    setEmbeddedFormHTML(paymentData);
     setStep(2);
   };
 
@@ -58,6 +57,7 @@ export default function QuickDonatePage() {
             />
             <Button
               className="w-22 rounded-full font-bold"
+              type="submit"
               onClick={handlePaymentCreate}
             >
               Donate
@@ -68,7 +68,8 @@ export default function QuickDonatePage() {
           <div className="flex flex-col items-center justify-center gap-y-4">
             <h1 className="text-4xl font-bold">{event?.name}</h1>
             <p className="text-2xl font-bold">Amount: ${amountValue}</p>
-            <div dangerouslySetInnerHTML={{ __html: embeddedFormHTML }}></div>
+
+            <div dangerouslySetInnerHTML={{ __html: embeddedFormHTML }} />
           </div>
         )}
       </div>

@@ -91,28 +91,13 @@ export default function Company() {
     }
   };
 
-  const handleLinkBraintree = async () => {
-    if (!currentCompany) return;
-    if (currentCompany.braintreeLinked && currentCompany.braintreeAccountId) {
-      const loginLink = `https://www.braintreegateway.com/login?merchant_id=${currentCompany.braintreeAccountId}`;
-      return window.open(loginLink, "_blank");
-    }
-  };
-
   if (isFetching) {
     return <Spinner />;
   }
 
   return (
     <div className="w-full space-y-8 px-12 py-8">
-      <div className="flex flex-row items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-950">Company Dashboard</h1>
-        <Button onClick={handleLinkBraintree}>
-          {currentCompany?.braintreeLinked
-            ? "Open Braintree Dashboard"
-            : "Connect with Braintree"}
-        </Button>
-      </div>
+      <h1 className="text-2xl font-bold text-gray-950">Company Dashboard</h1>
 
       <div className="flex flex-row items-center gap-x-4">
         <Avatar className="h-40 w-40 rounded-full object-cover">

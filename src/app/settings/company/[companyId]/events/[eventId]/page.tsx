@@ -161,9 +161,9 @@ export default function EventPage() {
               axis: "x",
             }}
             orientation="vertical"
-            className="max-h-[300px] w-full py-4"
+            className="w-full py-4"
           >
-            <CarouselContent>
+            <CarouselContent className="max-h-[300px]">
               {currentEvent.donationUsers.map((userDonation, index) => (
                 <CarouselItem key={index} className="basis-1/5">
                   <DonorItem donation={userDonation as DonationItemType} />

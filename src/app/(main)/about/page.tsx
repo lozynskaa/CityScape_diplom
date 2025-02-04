@@ -2,7 +2,7 @@ import React from "react";
 
 export default function About() {
   return (
-    <div className="flex min-h-screen w-full flex-col bg-gradient-to-br from-primary-foreground to-gray-100 text-gray-800">
+    <div className="flex min-h-screen w-full flex-col rounded-2xl bg-gradient-to-br from-primary-foreground to-gray-100 text-gray-800">
       <header className="bg-primary py-8 text-white shadow-lg">
         <div className="container mx-auto flex flex-col items-center gap-2 px-6 text-center">
           <h1 className="text-4xl font-bold">About Our Project</h1>

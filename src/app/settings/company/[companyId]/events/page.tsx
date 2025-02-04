@@ -29,11 +29,11 @@ export default function EventSelect() {
           axis: "x",
         }}
         orientation="vertical"
-        className="h-[516px] w-full py-4"
+        className="w-full py-4"
       >
-        <CarouselContent>
-          {events.map((event, index) => (
-            <CarouselItem key={index} className="basis-1/5">
+        <CarouselContent className="h-[calc(100vh-10rem)]">
+          {events.map((event) => (
+            <CarouselItem key={event.id} className="basis-1/5">
               <EventCard event={event} settingsTab />
             </CarouselItem>
           ))}

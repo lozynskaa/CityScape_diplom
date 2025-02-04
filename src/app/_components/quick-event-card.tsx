@@ -90,7 +90,7 @@ export default function EventCard({
   }, [userId, event, localApplied, settingsTab]);
 
   return (
-    <div className="flex h-full w-full flex-row justify-between gap-x-8 rounded-lg bg-white py-4">
+    <div className="flex h-full w-full flex-row justify-between gap-x-8 rounded-lg bg-white p-4">
       <div className="flex w-full flex-col gap-y-4">
         <div className="grid grid-cols-2 gap-x-2 gap-y-1">
           <p className="col-span-2 text-lg font-bold text-gray-950">

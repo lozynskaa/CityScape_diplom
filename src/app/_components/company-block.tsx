@@ -10,16 +10,10 @@ type Props = {
 };
 
 export default function CompanyBlock({ company }: Props) {
-  const {
-    id: companyId,
-    name,
-    description,
-    website,
-    email,
-    imageUrl,
-  } = company;
+  const { name, description, website, email, imageUrl } = company;
   const handleMessageCompany = () => {
-    console.log("message company:" + companyId);
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}`;
+    window.open(gmailUrl, "_blank");
   };
   return (
     <div className="flex flex-row items-center gap-x-4">
