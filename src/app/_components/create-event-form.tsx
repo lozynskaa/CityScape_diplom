@@ -1,5 +1,5 @@
 "use client";
-import { type MutableRefObject, useEffect, useState } from "react";
+import { type MutableRefObject, useEffect, useMemo, useState } from "react";
 import { type Event } from "~/server/db/event.schema";
 import { Input } from "./ui/input";
 import { LabeledItem } from "./ui/labeled-item";
@@ -8,6 +8,12 @@ import { Textarea } from "./ui/textarea";
 import Image from "next/image";
 import { ItemSelectBlock } from "./item-select";
 import { Switch } from "./ui/switch";
+import { AutoComplete } from "./autocomplete";
+import { useLoadingDebounce } from "~/hooks/use-debounce";
+import { useWritableSearchParams } from "~/hooks/use-writable-search-params";
+import { api } from "~/trpc/react";
+import { skipToken } from "@tanstack/react-query";
+import Map from "./map";
 
 const eventCategories = [
   {
@@ -82,6 +88,23 @@ export default function CreateEventForm({
   setDisabled,
 }: Props) {
   const [eventDetails, setEventDetails] = useState<CreateEventDetails>({});
+  const { set, searchParams } = useWritableSearchParams();
+  const locationValue = searchParams.get("location") ?? "";
+  const { pending, debouncedValue: debouncedLocation } = useLoadingDebounce(
+    locationValue,
+    2000,
+  );
+  const { data: addressAutosuggestions = [], isLoading } =
+    api.event.autosuggestEventAddress.useQuery(
+      debouncedLocation
+        ? {
+            query: debouncedLocation,
+          }
+        : skipToken,
+      {
+        refetchOnWindowFocus: false,
+      },
+    );
 
   useEffect(() => {
     eventDetailsRef.current = eventDetails;
@@ -96,6 +119,10 @@ export default function CreateEventForm({
       setEventDetails(predefinedEvent);
     }
   }, [predefinedEvent]);
+
+  const handleChangeLocationValue = (value: string) => {
+    set("location", value);
+  };
 
   const handleLoadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -114,6 +141,31 @@ export default function CreateEventForm({
       };
     }
   };
+
+  const eventAddressMap = useMemo(
+    () =>
+      addressAutosuggestions.reduce(
+        (acc, event) => {
+          acc[event.id] = event;
+          return acc;
+        },
+        {} as Record<string, (typeof addressAutosuggestions)[number]>,
+      ),
+    [addressAutosuggestions],
+  );
+
+  const mapMarkers = useMemo(() => {
+    if (!eventDetails.latitude || !eventDetails.longitude) {
+      return [];
+    }
+    return [
+      {
+        lat: Number(eventDetails.latitude) ?? 0,
+        lng: Number(eventDetails.longitude) ?? 0,
+        title: eventDetails.name,
+      },
+    ];
+  }, [eventDetails.latitude, eventDetails.longitude, eventDetails.name]);
 
   return (
     <form className="grid w-full grid-cols-2 gap-5">
@@ -168,17 +220,28 @@ export default function CreateEventForm({
         />
       </LabeledItem>
 
-      <Input
-        placeholder="Enter event location"
-        label="Event Location"
-        value={eventDetails.location ?? ""}
-        onChange={(e) =>
-          setEventDetails((prev) => ({
-            ...prev,
-            location: e.target.value,
-          }))
-        }
-      />
+      <LabeledItem label="Event Location">
+        <AutoComplete
+          items={addressAutosuggestions}
+          isLoading={isLoading || pending}
+          searchValue={locationValue}
+          selectedValue={eventDetails.location ?? ""}
+          onSearchValueChange={handleChangeLocationValue}
+          onSelectedValueChange={(value) => {
+            const location = eventAddressMap[value];
+            if (location) {
+              setEventDetails((prev) => ({
+                ...prev,
+                location: location.value,
+                latitude: `${location.position.lat}`,
+                longitude: `${location.position.lng}`,
+              }));
+            }
+          }}
+        />
+      </LabeledItem>
+
+      <Map markers={mapMarkers} />
 
       <Textarea
         placeholder="Enter event description"

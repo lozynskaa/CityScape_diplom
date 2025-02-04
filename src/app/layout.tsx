@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-sync-scripts */
 import "~/styles/globals.css";
 
 import { Plus_Jakarta_Sans } from "next/font/google";
@@ -6,6 +5,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "~/trpc/react";
+import Head from "next/head";
 
 const jakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -24,6 +24,12 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${jakartaSans.variable}`}>
+      <Head>
+        <link
+          rel="stylesheet"
+          href="https://js.api.here.com/v3/3.1/mapsjs-ui.css"
+        />
+      </Head>
       <body>
         <div className="min-h-screen overflow-y-auto bg-gray-900 p-8">
           <div className="flex min-h-[calc(100vh-4rem)] w-full flex-1 flex-col items-center justify-center rounded-2xl bg-gray-50">

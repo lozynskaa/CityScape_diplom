@@ -29,6 +29,7 @@ import { type Event } from "~/server/db/event.schema";
 import { TRPCError } from "@trpc/server";
 import { type Company } from "~/server/db/company.schema";
 import { createImageURL } from "~/lib/image";
+import { hereMaps } from "~/server/maps/here-maps";
 
 const eventRouterValidationSchema = {
   createEvent: z.object({
@@ -37,6 +38,8 @@ const eventRouterValidationSchema = {
     purpose: z.string(),
     date: z.date(),
     location: z.string(),
+    longitude: z.string(),
+    latitude: z.string(),
     includeDonations: z.boolean().default(false),
     image: z
       .object({
@@ -56,6 +59,8 @@ const eventRouterValidationSchema = {
     purpose: z.string(),
     date: z.date(),
     location: z.string(),
+    longitude: z.number(),
+    latitude: z.number(),
     includeDonations: z.boolean().default(false),
     image: z
       .object({
@@ -85,6 +90,9 @@ const eventRouterValidationSchema = {
       startDate: z.date().optional(),
       endDate: z.date().optional(),
     }),
+  }),
+  autosuggestEventAddress: z.object({
+    query: z.string(),
   }),
 };
 
@@ -514,5 +522,14 @@ export const eventRouter = createTRPCRouter({
         .limit(limit)
         .orderBy(desc(events.createdAt));
       return randomEvent;
+    }),
+
+  autosuggestEventAddress: publicProcedure
+    .input(eventRouterValidationSchema.autosuggestEventAddress)
+    .query(async ({ input }) => {
+      const { query } = input;
+
+      const items = await hereMaps.autosuggestAddress(query);
+      return items;
     }),
 });

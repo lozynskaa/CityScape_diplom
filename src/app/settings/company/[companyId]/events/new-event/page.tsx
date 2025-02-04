@@ -17,6 +17,8 @@ const requiredFields = [
   "imageFile",
   "category",
   "location",
+  "latitude",
+  "longitude",
   "date",
 ] as const;
 
@@ -26,6 +28,7 @@ const disabledCallback = (state: CreateEventDetails) => {
 
 export default function NewEventPage() {
   const { companyId } = useParams<{ companyId: string }>();
+
   const [disabled, setDisabled] = useState(true);
   const router = useRouter();
   const eventDetailsRef = useRef<CreateEventDetails>({});
@@ -43,6 +46,8 @@ export default function NewEventPage() {
         currency: filledEventDetails.currency ?? "USD",
         purpose: filledEventDetails.purpose ?? "",
         image: filledEventDetails.imageFile,
+        longitude: filledEventDetails.longitude ?? "",
+        latitude: filledEventDetails.latitude ?? "",
         companyId,
         category: filledEventDetails.category ?? "",
         includeDonations: !filledEventDetails.withoutDonations,

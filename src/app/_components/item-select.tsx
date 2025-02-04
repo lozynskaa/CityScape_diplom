@@ -28,7 +28,8 @@ export function ItemSelectBlock<T extends { id: string; name: string }>({
       <LabeledItem label={label}>
         <DropdownMenuTrigger asChild>
           <Button
-            className="h9 w-full items-start justify-start"
+            size="sm"
+            className="h9 w-full items-center justify-start"
             variant="outline"
           >
             {title}

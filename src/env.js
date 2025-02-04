@@ -24,6 +24,8 @@ export const env = createEnv({
     NEXTAUTH_URL: z.string(),
     NEXTAUTH_SECRET: z.string(),
     AUTH_TRUST_HOST: z.string(),
+    HERE_APP_ID: z.string(),
+    HERE_API_KEY: z.string(),
   },
 
   /**
@@ -52,6 +54,8 @@ export const env = createEnv({
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST,
+    HERE_APP_ID: process.env.HERE_APP_ID,
+    HERE_API_KEY: process.env.HERE_API_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
