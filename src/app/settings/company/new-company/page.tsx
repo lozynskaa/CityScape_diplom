@@ -24,6 +24,9 @@ type CompanyDetails = {
     file: string;
     fileName: string;
   };
+  companyIBAN: string;
+  okpo: string;
+  phoneNumber: string;
 };
 
 export default function NewCompanyPage() {
@@ -33,6 +36,9 @@ export default function NewCompanyPage() {
     website: "",
     description: "",
     companyImage: undefined,
+    companyIBAN: "",
+    okpo: "",
+    phoneNumber: "",
   });
 
   const { mutate: createCompany } = api.company.createCompany.useMutation();
@@ -56,11 +62,16 @@ export default function NewCompanyPage() {
   };
   const handleCreateCompany = async () => {
     createCompany({
-      name: companyDetails.name,
-      companyEmail: companyDetails.companyEmail,
-      website: companyDetails.website,
-      description: companyDetails.description,
-      image: companyDetails.companyImage,
+      company: {
+        name: companyDetails.name,
+        companyEmail: companyDetails.companyEmail,
+        website: companyDetails.website,
+        description: companyDetails.description,
+        image: companyDetails.companyImage,
+        companyIBAN: companyDetails.companyIBAN,
+        okpo: companyDetails.okpo,
+        phoneNumber: companyDetails.phoneNumber,
+      },
     });
   };
 
@@ -95,6 +106,38 @@ export default function NewCompanyPage() {
             setCompanyDetails((prev) => ({
               ...prev,
               companyEmail: e.target.value,
+            }))
+          }
+        />
+        <Input
+          placeholder="Enter IBAN"
+          label="Company IBAN"
+          wrapperClassName="col-span-2"
+          value={companyDetails.companyIBAN}
+          onChange={(e) =>
+            setCompanyDetails((prev) => ({
+              ...prev,
+              companyIBAN: e.target.value,
+            }))
+          }
+        />
+        <Input
+          placeholder="Enter OKPO"
+          label="Company OKPO"
+          value={companyDetails.okpo}
+          onChange={(e) =>
+            setCompanyDetails((prev) => ({ ...prev, okpo: e.target.value }))
+          }
+        />
+        <Input
+          placeholder="Enter phone number"
+          label="Company Phone Number"
+          type="number"
+          value={companyDetails.phoneNumber}
+          onChange={(e) =>
+            setCompanyDetails((prev) => ({
+              ...prev,
+              phoneNumber: e.target.value,
             }))
           }
         />

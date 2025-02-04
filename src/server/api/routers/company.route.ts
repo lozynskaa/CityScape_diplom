@@ -15,20 +15,25 @@ import {
 import { TRPCError } from "@trpc/server";
 import { type Company } from "~/server/db/company.schema";
 import { createImageURL } from "~/lib/createImageURL";
-import { gateway } from "~/server/payment/braintree";
+import { liqpay } from "~/server/payment/liqpay";
 
 const companyRouterValidationSchema = {
   createCompany: z.object({
-    name: z.string().min(1),
-    companyEmail: z.string().email(),
-    description: z.string(),
-    website: z.string().url().optional(),
-    image: z
-      .object({
-        file: z.string(), // Bun's File object
-        fileName: z.string(),
-      })
-      .optional(),
+    company: z.object({
+      name: z.string().min(1),
+      companyEmail: z.string().email(),
+      description: z.string(),
+      website: z.string().url().optional(),
+      image: z
+        .object({
+          file: z.string(), // Bun's File object
+          fileName: z.string(),
+        })
+        .optional(),
+      companyIBAN: z.string().max(34),
+      okpo: z.string(),
+      phoneNumber: z.string(),
+    }),
   }),
   updateCompany: z.object({
     name: z.string().min(1),
@@ -47,31 +52,38 @@ const companyRouterValidationSchema = {
     braintreeAccountId: z.string(),
   }),
   completeOnboarding: z.object({
-    name: z.string().min(1),
-    companyEmail: z.string().email(),
-    category: z.string(),
-    description: z.string().optional(),
-    companyImage: z
-      .object({
-        file: z.string(), // Bun's File object
-        fileName: z.string(),
-      })
-      .optional(),
-    website: z.string().url().optional(),
-    eventName: z.string().min(1),
-    eventDescription: z.string().optional(),
-    eventPurpose: z.string(),
-    eventDate: z.date(),
-    eventLocation: z.string(),
-    includeDonations: z.boolean().default(false),
-    eventImage: z
-      .object({
-        file: z.string(), // Bun's File object
-        fileName: z.string(),
-      })
-      .optional(),
-    goalAmount: z.number().min(0).default(0).optional(),
-    currency: z.string().default("USD").optional(),
+    company: z.object({
+      name: z.string().min(1),
+      companyEmail: z.string().email(),
+      description: z.string().optional(),
+      companyImage: z
+        .object({
+          file: z.string(), // Bun's File object
+          fileName: z.string(),
+        })
+        .optional(),
+      website: z.string().url().optional(),
+      companyIBAN: z.string().max(34),
+      okpo: z.string(),
+      phoneNumber: z.string(),
+    }),
+    event: z.object({
+      eventName: z.string().min(1),
+      eventDescription: z.string().optional(),
+      eventPurpose: z.string(),
+      eventDate: z.date(),
+      eventLocation: z.string(),
+      includeDonations: z.boolean().default(false),
+      eventImage: z
+        .object({
+          file: z.string(), // Bun's File object
+          fileName: z.string(),
+        })
+        .optional(),
+      goalAmount: z.number().min(0).default(0).optional(),
+      currency: z.string().default("USD").optional(),
+      category: z.string(),
+    }),
   }),
   getRandomCompanies: z.object({
     limit: z.number().min(1).max(100).default(10),
@@ -91,36 +103,19 @@ export const companyRouter = createTRPCRouter({
   createCompany: protectedProcedure
     .input(companyRouterValidationSchema.createCompany)
     .mutation(async ({ input, ctx }) => {
-      const { name, companyEmail, description, website, image } = input;
-
+      const {
+        name,
+        companyEmail,
+        description,
+        website,
+        image,
+        companyIBAN: iBan,
+        okpo,
+        phoneNumber: phone,
+      } = input.company;
       if (!ctx.session.user.email) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
-      //TODO: add form for all this data here
-      const [firstName = "", lastName = ""] = name.split(" ");
-      const companyAccount = await gateway.merchantAccount.create({
-        individual: {
-          firstName, // Example, use actual data
-          lastName,
-          email: companyEmail,
-          dateOfBirth: "1980-01-01", // Example, adjust as necessary
-          ssn: "123-45-6789", // Example, adjust as necessary
-          address: {
-            streetAddress: "123 Main St",
-            locality: "Chicago",
-            region: "IL",
-            postalCode: "60622",
-          },
-        },
-        funding: {
-          destination: "bank", // Destination type, can be 'bank' or 'paypal'
-          email: companyEmail, // Bank email for payouts
-          mobilePhone: "123-456-7890", // Example, use actual number
-        },
-        masterMerchantAccountId: process.env.BRAINTREE_MERCHANT_ID!,
-        tosAccepted: true, // Terms of Service acceptance flag
-      });
-
       const [existingUser] = await ctx.db
         .select({ id: users.id })
         .from(users)
@@ -140,6 +135,24 @@ export const companyRouter = createTRPCRouter({
         );
       }
 
+      try {
+        const liqPayCompany = await liqpay.api("request", {
+          action: "agent_shop_create",
+          version: "3",
+          phone: phone,
+          site: website,
+          description: description,
+          email: companyEmail,
+          name: name,
+          iban: iBan,
+          okpo: okpo,
+          company: name,
+        });
+        console.log("🚀 ~ .mutation ~ liqPayCompany:", liqPayCompany);
+      } catch (error) {
+        console.log("🚀 ~ .mutation ~ error:", error);
+      }
+
       const [company] = await ctx.db
         .insert(companies)
         .values({
@@ -149,7 +162,11 @@ export const companyRouter = createTRPCRouter({
           website,
           email: companyEmail,
           imageUrl,
-          braintreeAccountId: companyAccount.merchantAccount.id,
+          iBan,
+          okpo,
+          phone,
+          liqPayPublicKey: "",
+          liqPayPrivateKey: "",
         })
         .returning();
 
@@ -186,29 +203,6 @@ export const companyRouter = createTRPCRouter({
       return company;
     }),
 
-  linkWebhookTrigger: protectedProcedure
-    .input(companyRouterValidationSchema.linkWebhookTrigger)
-    .mutation(async ({ input, ctx }) => {
-      const userId = ctx.session.user.id;
-      const { braintreeAccountId } = input;
-
-      await ctx.db
-        .update(companies)
-        .set({
-          braintreeLinked: true,
-        })
-        .where(
-          and(
-            eq(companies.founderId, userId),
-            eq(companies.braintreeAccountId, braintreeAccountId),
-          ),
-        );
-
-      return {
-        success: true,
-      };
-    }),
-
   completeOnboarding: protectedProcedure
     .input(companyRouterValidationSchema.completeOnboarding)
     .mutation(async ({ input, ctx }) => {
@@ -216,19 +210,24 @@ export const companyRouter = createTRPCRouter({
         name,
         companyEmail,
         description,
-        companyImage,
         website,
+        companyImage,
+        companyIBAN: iBan,
+        okpo,
+        phoneNumber: phone,
+      } = input.company;
+      const {
+        category,
+        eventImage,
         eventName,
         eventDescription,
         eventPurpose,
         eventDate,
         eventLocation,
-        includeDonations,
-        eventImage,
         goalAmount,
+        includeDonations,
         currency,
-        category,
-      } = input;
+      } = input.event;
 
       const userId = ctx.session.user.id;
 
@@ -249,30 +248,22 @@ export const companyRouter = createTRPCRouter({
         );
       }
 
-      const [firstName = "", lastName = ""] = name.split(" ");
+      // const liqPayCompany = await liqpay.api("registration/request", {
+      //   action: "agent_shop_register",
+      //   version: "3",
+      //   phone: phone,
+      //   url_site: website,
+      //   description: description,
+      //   email: companyEmail,
+      //   name: name,
+      // });
 
-      const companyAccount = await gateway.merchantAccount.create({
-        individual: {
-          firstName, // Example, use actual data
-          lastName,
-          email: companyEmail,
-          dateOfBirth: "1980-01-01", // Example, adjust as necessary
-          ssn: "123-45-6789", // Example, adjust as necessary
-          address: {
-            streetAddress: "123 Main St",
-            locality: "Chicago",
-            region: "IL",
-            postalCode: "60622",
-          },
-        },
-        funding: {
-          destination: "bank", // Destination type, can be 'bank' or 'paypal'
-          email: companyEmail, // Bank email for payouts
-          mobilePhone: "123-456-7890", // Example, use actual number
-        },
-        masterMerchantAccountId: process.env.BRAINTREE_MERCHANT_ID!,
-        tosAccepted: true, // Terms of Service acceptance flag
-      });
+      // if (!liqPayCompany) {
+      //   throw new TRPCError({
+      //     code: "INTERNAL_SERVER_ERROR",
+      //     message: "Error creating company on LiqPay",
+      //   });
+      // }
 
       const [company] = await ctx.db
         .insert(companies)
@@ -283,14 +274,15 @@ export const companyRouter = createTRPCRouter({
           website,
           email: companyEmail,
           imageUrl: companyImageURL,
-          braintreeAccountId: companyAccount.merchantAccount.id,
+          iBan,
+          okpo,
+          phone,
+          liqPayPublicKey: "",
+          liqPayPrivateKey: "",
         })
         .returning();
 
       if (!company) {
-        // await gateway.merchantAccount.update(companyAccount.merchantAccount.id, {
-        //   status: 'inactive', // Set status to inactive to deactivate the account
-        // });
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Company not found",

@@ -10,5 +10,5 @@ export default async function OnboardingLayout({
   if (session?.user?.onboardingCompleted) {
     redirect("/");
   }
-  return { children };
+  return children;
 }

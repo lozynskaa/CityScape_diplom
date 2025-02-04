@@ -29,6 +29,41 @@
       "when": 1733751548189,
       "tag": "0003_youthful_sinister_six",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1733815461907,
+      "tag": "0004_talented_rhodey",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1733817390659,
+      "tag": "0005_panoramic_tinkerer",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1733861183502,
+      "tag": "0006_youthful_the_phantom",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1733864086843,
+      "tag": "0007_young_young_avengers",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1733940215516,
+      "tag": "0008_dizzy_the_watchers",
+      "breakpoints": true
     }
   ]
 }

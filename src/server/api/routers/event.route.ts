@@ -206,7 +206,7 @@ export const eventRouter = createTRPCRouter({
           .select({
             event: events,
             isUserApplied: sql<boolean>`CASE WHEN ${userEvents.userId} IS NOT NULL THEN true ELSE false END`,
-            paymentEnabled: sql<boolean>`CASE WHEN ${companies.braintreeLinked} IS true THEN true ELSE false END`,
+            paymentEnabled: sql<boolean>`CASE WHEN ${events.withoutDonations} IS true THEN false ELSE true END`,
           })
           .from(events)
           .leftJoin(companies, eq(events.companyId, companies.id))
@@ -340,7 +340,7 @@ export const eventRouter = createTRPCRouter({
         .select({
           event: events,
           isUserApplied: sql<boolean>`CASE WHEN ${userEvents.userId} IS NOT NULL THEN true ELSE false END`,
-          paymentEnabled: sql<boolean>`CASE WHEN ${companies.braintreeLinked} IS true THEN true ELSE false END`,
+          paymentEnabled: sql<boolean>`CASE WHEN ${events.withoutDonations} IS true THEN false ELSE true END`,
         })
         .from(events)
         .leftJoin(companies, eq(events.companyId, companies.id))
@@ -351,7 +351,7 @@ export const eventRouter = createTRPCRouter({
         .where(eq(events.companyId, id));
       return companyEvents.map((event) => ({
         ...event.event,
-        paymentEnabled: !!event.paymentEnabled,
+        paymentEnabled: !!event.paymentEnabled || !event.event.withoutDonations,
         isUserApplied: !!event.isUserApplied,
       }));
     }),
@@ -369,7 +369,10 @@ export const eventRouter = createTRPCRouter({
         eventCategory,
         eventLocation,
       } = input;
-      let filterEvents: Array<{ event: Event; company?: Company | null }> = [];
+      let filterEvents: Array<{
+        event: Event;
+        company?: Company | null;
+      }> = [];
       let eventsCount = 0;
       const userId = ctx.session?.user?.id;
 
@@ -437,6 +440,7 @@ export const eventRouter = createTRPCRouter({
             .from(events)
             .where(and(...whereStatement))
             .leftJoin(companies, eq(events.companyId, companies.id))
+
             .leftJoin(userEvents, eq(events.id, userEvents.eventId))
             .groupBy(events.id, companies.id)
             .orderBy(desc(count(userEvents.eventId)))
@@ -448,10 +452,10 @@ export const eventRouter = createTRPCRouter({
             company,
           }));
       }
-      const mappedEvents = filterEvents.map(({ event, company }) => {
+      const mappedEvents = filterEvents.map(({ event }) => {
         return {
           ...event,
-          paymentEnabled: !!company?.braintreeLinked,
+          paymentEnabled: !event.withoutDonations,
         };
       });
       return {

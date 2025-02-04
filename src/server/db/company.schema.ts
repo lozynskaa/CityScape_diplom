@@ -1,4 +1,4 @@
-import { boolean, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createTable } from "./table-create";
 import { relations, sql } from "drizzle-orm";
 import { posts } from "./post.schema";
@@ -23,10 +23,11 @@ export const companies = createTable("company", {
     mode: "date",
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
-  braintreeAccountId: varchar("braintree_account_id", {
-    length: 255,
-  }).notNull(),
-  braintreeLinked: boolean("braintree_linked").default(false),
+  iBan: varchar("iban", { length: 34 }).notNull(),
+  okpo: varchar("okpo", { length: 255 }).notNull(),
+  phone: varchar("phone", { length: 255 }).notNull(),
+  liqPayPublicKey: varchar("liqpay_public_key", { length: 255 }).notNull(),
+  liqPayPrivateKey: varchar("liqpay_private_key", { length: 255 }).notNull(),
 });
 
 export type Company = typeof companies.$inferSelect;

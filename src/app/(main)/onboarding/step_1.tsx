@@ -5,8 +5,10 @@ import { type CompanyInfoState } from "./page";
 import Image from "next/image";
 
 type Props = {
-  companyDetails: CompanyInfoState;
-  setCompanyDetails: React.Dispatch<React.SetStateAction<CompanyInfoState>>;
+  companyDetails: CompanyInfoState["company"];
+  setCompanyDetails: React.Dispatch<
+    React.SetStateAction<CompanyInfoState["company"]>
+  >;
   handleLoadFile: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
@@ -33,6 +35,41 @@ export function FirstStep({
           setCompanyDetails((prev) => ({
             ...prev,
             companyEmail: e.target.value,
+          }))
+        }
+      />
+      <Input
+        placeholder="Enter IBAN"
+        label="Company IBAN"
+        wrapperClassName="col-span-2"
+        value={companyDetails.companyIBAN}
+        onChange={(e) =>
+          setCompanyDetails((prev) => ({
+            ...prev,
+            companyIBAN: e.target.value,
+          }))
+        }
+      />
+      <Input
+        placeholder="Enter Company OKPO"
+        label="Company OKPO"
+        value={companyDetails.okpo}
+        onChange={(e) =>
+          setCompanyDetails((prev) => ({
+            ...prev,
+            okpo: e.target.value,
+          }))
+        }
+      />
+      <Input
+        placeholder="Enter company phone"
+        label="Company Phone"
+        value={companyDetails.phoneNumber}
+        type="number"
+        onChange={(e) =>
+          setCompanyDetails((prev) => ({
+            ...prev,
+            phoneNumber: e.target.value,
           }))
         }
       />

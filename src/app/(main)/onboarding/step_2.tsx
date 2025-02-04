@@ -17,8 +17,10 @@ import { Switch } from "~/app/_components/ui/switch";
 import { ItemSelectBlock } from "~/app/_components/item-select";
 
 type Props = {
-  companyDetails: CompanyInfoState;
-  setCompanyDetails: React.Dispatch<React.SetStateAction<CompanyInfoState>>;
+  companyDetails: CompanyInfoState["event"];
+  setCompanyDetails: React.Dispatch<
+    React.SetStateAction<CompanyInfoState["event"]>
+  >;
   handleLoadFile: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
@@ -40,10 +42,8 @@ export function SecondStep({
       <div className="w-96">
         <ItemSelectBlock
           items={[{ id: "Category 1", name: "Category 1" }]}
-          set={(id) =>
-            setCompanyDetails((prev) => ({ ...prev, eventCategory: id }))
-          }
-          title="Select Category"
+          set={(id) => setCompanyDetails((prev) => ({ ...prev, category: id }))}
+          title={companyDetails.category ?? "Select Category"}
           label="Event Category"
         />
       </div>
@@ -135,7 +135,7 @@ export function SecondStep({
         <ItemSelectBlock
           items={[{ id: "USD", name: "USD" }]}
           set={(id) => setCompanyDetails((prev) => ({ ...prev, currency: id }))}
-          title="Select Currency"
+          title={companyDetails.currency ?? "Select Currency"}
           label="Donation Currency"
         />
       </div>

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-sync-scripts */
 import "~/styles/globals.css";
 
 import { Plus_Jakarta_Sans } from "next/font/google";
@@ -23,6 +24,12 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${jakartaSans.variable}`}>
+      <head>
+        <script
+          type="text/javascript"
+          src="https://static.liqpay.ua/libjs/sdk_button.js"
+        />
+      </head>
       <body>
         <div className="flex min-h-screen flex-col items-center justify-center overflow-y-auto bg-gray-900 p-8">
           <div className="w-full flex-1 rounded-2xl bg-white">

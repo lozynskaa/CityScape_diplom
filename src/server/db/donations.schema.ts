@@ -10,13 +10,6 @@ import { users } from "./user.schema";
 import { events } from "./event.schema";
 import { relations, sql } from "drizzle-orm";
 
-// const donationStatusEnum = pgEnum("donation_status", [
-//   "none",
-//   "pending",
-//   "success",
-//   "error",
-// ]);
-
 export const donations = createTable("donation", {
   id: varchar("id", { length: 255 })
     .notNull()

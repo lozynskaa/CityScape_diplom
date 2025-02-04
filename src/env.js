@@ -15,10 +15,9 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    BRAINTREE_MERCHANT_ID: z.string(),
-    BRAINTREE_PUBLIC_KEY: z.string(),
-    BRAINTREE_SECRET_KEY: z.string(),
-    BRAINTREE_WEBHOOK_SECRET: z.string(),
+    LIQPAY_PUBLIC_KEY: z.string(),
+    LIQPAY_PRIVATE_KEY: z.string(),
+    LIQPAY_WEBHOOK_BASE_URL: z.string(),
   },
 
   /**
@@ -38,10 +37,9 @@ export const env = createEnv({
     AUTH_SECRET: process.env.AUTH_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
-    BRAINTREE_MERCHANT_ID: process.env.BRAINTREE_MERCHANT_ID,
-    BRAINTREE_PUBLIC_KEY: process.env.BRAINTREE_PUBLIC_KEY,
-    BRAINTREE_SECRET_KEY: process.env.BRAINTREE_SECRET_KEY,
-    BRAINTREE_WEBHOOK_SECRET: process.env.BRAINTREE_WEBHOOK_SECRET,
+    LIQPAY_PUBLIC_KEY: process.env.LIQPAY_PUBLIC_KEY,
+    LIQPAY_PRIVATE_KEY: process.env.LIQPAY_PRIVATE_KEY,
+    LIQPAY_WEBHOOK_BASE_URL: process.env.LIQPAY_WEBHOOK_BASE_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
