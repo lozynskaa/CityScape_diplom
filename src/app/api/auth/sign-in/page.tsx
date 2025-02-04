@@ -2,14 +2,13 @@ import { Button } from "~/app/_components/ui/button";
 import { Input } from "~/app/_components/ui/input";
 import { Textarea } from "~/app/_components/ui/textarea";
 import { signIn } from "~/server/auth";
-import { api } from "~/server/api/root";
+import { api } from "~/trpc/server";
 
 async function handleSignIn(formData: FormData) {
   "use server";
 
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-
   await signIn("credentials", {
     redirect: true,
     redirectTo: "/",

@@ -5,7 +5,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
-} from "~/server/api/root";
+} from "~/server/api/trpc";
 import { events, userEvents } from "~/server/db/schema";
 import { TRPCError } from "@trpc/server";
 
@@ -185,5 +185,17 @@ export const eventRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
       await ctx.db.delete(events).where(eq(events.id, id));
+    }),
+
+  getRandomEvent: publicProcedure
+    .input(eventRouterValidationSchema.getRandomEvents)
+    .query(async ({ ctx, input }) => {
+      const { limit } = input;
+      const randomEvent = await ctx.db
+        .select()
+        .from(events)
+        .limit(limit)
+        .orderBy(desc(events.createdAt));
+      return randomEvent;
     }),
 });

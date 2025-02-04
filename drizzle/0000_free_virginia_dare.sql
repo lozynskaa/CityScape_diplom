@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS "work-diplom_event" (
 	"currency" varchar(255),
 	"purpose" varchar(255),
 	"image_url" varchar(255),
+	"date" timestamp with time zone,
 	"location" varchar(255),
 	"without_donations" boolean DEFAULT false,
 	"created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP

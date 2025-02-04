@@ -1,5 +1,5 @@
 {
-  "id": "e30da8b4-e043-4934-a7d1-bd8556945927",
+  "id": "40de13b3-56c3-4396-9f31-79d091c2270c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -328,6 +328,12 @@
         "image_url": {
           "name": "image_url",
           "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "name": "date",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },

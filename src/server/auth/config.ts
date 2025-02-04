@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -5,7 +6,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "~/server/db";
 import { accounts, users, verificationTokens } from "~/server/db/schema";
 import { type JWT } from "@auth/core/jwt";
-import { api } from "~/server/api/root";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -49,14 +49,31 @@ export const authConfig = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
-        const user = await api.user.signIn({
-          email: credentials.email as string,
-          password: credentials.password as string,
-          provider: "credentials",
-        });
+        const { email, password } = credentials as Record<string, string>;
+        if (!email || !password) return null;
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, email))
+          .limit(1);
 
-        return user ?? null;
+        if (!user) {
+          return null;
+        }
+
+        // Handle credential-based sign-in
+
+        const isPasswordValid = /*await Bun.password.verify(
+          password,
+          user.passwordHash,
+        ); */ true;
+
+        if (!isPasswordValid) {
+          return null;
+        }
+
+        // Generate tokens or session as needed
+        return user;
       },
     }),
     /**

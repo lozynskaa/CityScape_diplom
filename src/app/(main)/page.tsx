@@ -2,7 +2,6 @@ import HomeBg from "../../assets/home-bg.png";
 import { Search } from "lucide-react";
 import { Input } from "../_components/ui/input";
 import { Button } from "../_components/ui/button";
-import { api, HydrateClient } from "~/server/api/root";
 import {
   Carousel,
   CarouselContent,
@@ -10,16 +9,16 @@ import {
 } from "../_components/ui/carousel";
 import CompanyCard from "../_components/company-card";
 import JarCard from "../_components/quick-jar-card";
+import { api, HydrateClient } from "~/trpc/server";
 
 export default async function Home() {
   const quickCompanies = await api.company.getRandomCompanies({
     limit: 10,
   });
 
-  const quickJars = await api.company.getRandomJars({
+  const quickEvents = await api.event.getRandomEvents({
     limit: 10,
   });
-
   return (
     <HydrateClient>
       <div className="my-8 w-full space-y-8 px-10 md:px-20 lg:px-40">
@@ -71,7 +70,7 @@ export default async function Home() {
         </div>
 
         <div>
-          <h1 className="text-2xl font-bold text-gray-950">Quick donations</h1>
+          <h1 className="text-2xl font-bold text-gray-950">Closest events</h1>
           <Carousel
             opts={{
               align: "start",
@@ -81,7 +80,7 @@ export default async function Home() {
             className="h-[516px] w-full py-4"
           >
             <CarouselContent>
-              {quickJars.map((jar, index) => (
+              {quickEvents.map((jar, index) => (
                 <CarouselItem key={index} className="basis-1/3">
                   <JarCard jar={jar} />
                 </CarouselItem>

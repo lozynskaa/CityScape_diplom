@@ -29,7 +29,7 @@ export const users = createTable("user", {
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
   onboardingCompleted: boolean("onboarding_completed").default(false),
-  imageUrl: varchar("image", { length: 255 }),
+  image: varchar("image", { length: 255 }),
   emailVerified: timestamp("email_verified", {
     mode: "date",
     withTimezone: true,
