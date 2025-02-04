@@ -9,6 +9,11 @@ import PhoneInput from "./ui/phone-input";
 import { Textarea } from "./ui/textarea";
 import Image from "next/image";
 
+const defaultRecipientBirthDate = new Date();
+defaultRecipientBirthDate.setFullYear(
+  defaultRecipientBirthDate.getFullYear() - 21,
+);
+
 export type CreateCompanyDetails = Omit<Partial<Company>, "imageUrl"> & {
   imageFile?: { file: string; fileName: string };
 };
@@ -104,6 +109,7 @@ export default function CreateCompanyForm({
       />
       <LabeledItem label="Recipient Date of Birth">
         <DatePicker
+          defaultYear={defaultRecipientBirthDate.getFullYear()}
           selectedDate={companyDetails.dateOfBirth}
           onSelect={(date) =>
             setCompanyDetails((prev) => ({ ...prev, dateOfBirth: date }))

@@ -8,12 +8,14 @@ type Props = {
   onSelect: (date: Date) => void;
   selectedDate?: Date | null;
   placeholder?: string;
+  defaultYear?: number;
 };
 
 export default function DatePicker({
   onSelect,
   selectedDate,
   placeholder,
+  defaultYear,
 }: Props) {
   return (
     <Popover>
@@ -32,6 +34,7 @@ export default function DatePicker({
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <Calendar
+          toYear={defaultYear}
           mode="single"
           selected={selectedDate ?? undefined}
           onSelect={(date) => date && onSelect(date)}
