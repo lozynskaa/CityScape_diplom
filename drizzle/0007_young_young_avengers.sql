@@ -1,1 +1,0 @@
-ALTER TABLE "work-diplom_donation" ADD COLUMN "braintree_status" varchar(10) DEFAULT 'none' NOT NULL;

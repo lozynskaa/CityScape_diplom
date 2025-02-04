@@ -33,8 +33,10 @@ const requiredFields = [
   "currency",
   "purpose",
   "category",
-  "location",
+  "longitude",
+  "latitude",
   "date",
+  "locationName",
 ] as const;
 
 const disabledCallback = (eventDetails: CreateEventDetails) => {
@@ -59,6 +61,7 @@ export default function EventPage() {
 
   const handleSave = async () => {
     if (currentEvent && !disabledCallback(eventDetailsRef.current)) {
+      const [currentLongitude, currentLatitude] = currentEvent.location;
       const result = await updateEvent({
         id: currentEvent?.id ?? "",
         name: eventDetailsRef.current?.name ?? currentEvent?.name,
@@ -77,11 +80,19 @@ export default function EventPage() {
         currency:
           eventDetailsRef.current?.currency ?? currentEvent?.currency ?? "",
         includeDonations: !eventDetailsRef.current?.withoutDonations,
-        location:
-          eventDetailsRef.current?.location ?? currentEvent?.location ?? "",
+        locationName:
+          eventDetailsRef.current?.locationName ??
+          currentEvent?.locationName ??
+          "",
+        locationId:
+          eventDetailsRef.current?.locationId ?? currentEvent?.locationId ?? "",
         date: eventDetailsRef.current?.date ?? currentEvent?.date ?? new Date(),
         category:
           eventDetailsRef.current?.category ?? currentEvent?.category ?? "",
+        latitude:
+          eventDetailsRef.current?.latitude ?? `${currentLatitude}` ?? "0",
+        longitude:
+          eventDetailsRef.current?.longitude ?? `${currentLongitude}` ?? "0",
       });
 
       if (result) {

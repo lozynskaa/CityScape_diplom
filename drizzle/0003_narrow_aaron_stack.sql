@@ -1,0 +1,1 @@
+ALTER TABLE "work-diplom_event" ADD COLUMN "location_id" varchar(255);

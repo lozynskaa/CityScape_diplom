@@ -1,6 +1,6 @@
 {
-  "id": "3f86a038-dabd-4a68-a824-04dc1faca4f5",
-  "prevId": "cae867d6-e379-46f1-a512-b2eeb0d8e557",
+  "id": "d1ca1d78-a71f-46e5-ae3c-a0d24fdadc14",
+  "prevId": "f0f1015f-3f15-49d4-b374-5736e86118bd",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -171,18 +171,47 @@
           "notNull": false,
           "default": "CURRENT_TIMESTAMP"
         },
-        "stripe_account_id": {
-          "name": "stripe_account_id",
+        "iban": {
+          "name": "iban",
+          "type": "varchar(34)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "okpo": {
+          "name": "okpo",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
         },
-        "stripe_linked": {
-          "name": "stripe_linked",
-          "type": "boolean",
+        "phone": {
+          "name": "phone",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "default": false
+          "notNull": true
+        },
+        "date_of_birth": {
+          "name": "date_of_birth",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "country": {
+          "name": "country",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},
@@ -350,8 +379,20 @@
           "primaryKey": false,
           "notNull": false
         },
+        "creator_id": {
+          "name": "creator_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "location": {
           "name": "location",
+          "type": "geometry(point)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location_name": {
+          "name": "location_name",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false

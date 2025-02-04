@@ -111,7 +111,7 @@ export default function EventCard({
             {event.description}
           </p>
           <p className="line-clamp-1 text-base text-gray-950">
-            Location: {event.location}
+            Location: {event.locationName}
           </p>
           <p className="line-clamp-1 text-base text-gray-950">
             Date:

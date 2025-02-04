@@ -9,7 +9,7 @@ type Props = {
 };
 
 export default function EventBlock({ event }: Props) {
-  const { name, description, imageUrl, location, date, purpose, category } =
+  const { name, description, imageUrl, locationName, date, purpose, category } =
     event;
 
   return (
@@ -25,7 +25,7 @@ export default function EventBlock({ event }: Props) {
           <h3 className="text-2xl font-bold">{name}</h3>
           <p className="text-sm text-gray-600">{category}</p>
           <p className="block text-sm text-gray-600 hover:text-gray-500">
-            Location: {location}. Date: {format(date!, "dd/MM/yyyy")}
+            Location: {locationName}. Date: {format(date!, "dd/MM/yyyy")}
           </p>
         </div>
       </div>

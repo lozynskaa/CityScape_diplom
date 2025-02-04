@@ -1,2 +1,0 @@
-ALTER TABLE "work-diplom_company" RENAME COLUMN "liqpay_public_key" TO "merchant_account";--> statement-breakpoint
-ALTER TABLE "work-diplom_company" RENAME COLUMN "liqpay_private_key" TO "merchant_secret";

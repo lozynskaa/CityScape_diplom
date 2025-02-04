@@ -16,6 +16,7 @@ import {
 import ApplicantItem from "~/app/_components/applicant-item";
 import DonorItem, { type DonationItemType } from "~/app/_components/donor-item";
 import EventBlock from "~/app/_components/event-block";
+import Map from "~/app/_components/map";
 import { Button } from "~/app/_components/ui/button";
 import {
   Carousel,
@@ -80,13 +81,33 @@ export default function EventPage() {
     return data;
   }, [event]);
 
+  const isCurrentUserApplied = useMemo(
+    () =>
+      event
+        ? event.eventUsers.some((user) => user.id === session?.data?.user?.id)
+        : false,
+    [event?.eventUsers, session?.data?.user?.id],
+  );
+
+  const eventMarkers = useMemo(() => {
+    if (!event?.location) {
+      return [];
+    }
+    const [longitude, latitude] = event.location;
+    return [
+      {
+        title: event.name,
+        id: event.id,
+        lat: latitude,
+        lng: longitude,
+        loc: event?.location,
+      },
+    ];
+  }, [event?.locationName]);
+
   if (isLoadingEvent || !event) {
     return <FullPageSpinner />;
   }
-
-  const isCurrentUserApplied = event.eventUsers.some(
-    (user) => user.id === session?.data?.user?.id,
-  );
 
   const handleApplyToEvent = () => {
     mutate({ id: event.id });
@@ -216,6 +237,8 @@ export default function EventPage() {
             </ResponsiveContainer>
           </div>
         </If>
+
+        <Map markers={eventMarkers} />
       </div>
     </div>
   );

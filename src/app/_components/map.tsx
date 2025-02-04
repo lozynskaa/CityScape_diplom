@@ -1,10 +1,13 @@
+import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { memo, useEffect, useRef } from "react";
+import { DEFAULT_LOCATION } from "~/lib/location";
 
-type Marker = {
+export type Marker = {
   lat: number;
   lng: number;
-  title?: string;
+  title: string;
+  id?: string;
 };
 
 type HereMapProps = {
@@ -12,17 +15,21 @@ type HereMapProps = {
   markers?: Marker[];
 };
 
-const defaultCenter = { lat: 50.4501, lng: 30.5234 };
+const defaultCenter = {
+  lat: DEFAULT_LOCATION.latitude,
+  lng: DEFAULT_LOCATION.longitude,
+};
 
 const apiKey = "DPlThiZyJRk3Pe2S2hKmiRqPi45f6LzrMYu6r8C0uyE";
 
 const Map = memo(({ zoom = 14, markers = [] }: HereMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  console.log("🚀 ~ Map ~ rerender");
+  const router = useRouter();
 
   useEffect(() => {
     if (!mapRef.current || !apiKey || !window.H) return;
     const H = window.H;
+    const abortController = new AbortController();
 
     const platform = new H.service.Platform({
       apikey: apiKey,
@@ -36,7 +43,9 @@ const Map = memo(({ zoom = 14, markers = [] }: HereMapProps) => {
       pixelRatio: window.devicePixelRatio || 1,
     });
     // add a resize listener to make sure that the map occupies the whole container
-    window.addEventListener("resize", () => map.getViewPort().resize());
+    window.addEventListener("resize", () => map.getViewPort().resize(), {
+      signal: abortController.signal,
+    });
 
     //Step 3: make the map interactive
     // MapEvents enables the event system
@@ -46,10 +55,17 @@ const Map = memo(({ zoom = 14, markers = [] }: HereMapProps) => {
     H.ui.UI.createDefault(map, defaultLayers);
 
     // Add markers
-    markers.forEach(({ lat, lng, title }, index) => {
+    markers.forEach(({ lat, lng, title, id }, index) => {
       const marker = new H.map.Marker({ lat, lng });
-      if (title) {
-        marker.setData(title);
+      marker.setData(title);
+      if (id) {
+        marker.addEventListener(
+          "longpress",
+          () => router.push(`/event/${id}`),
+          {
+            signal: abortController.signal,
+          },
+        );
       }
       map.addObject(marker);
       if (index === 0) {
@@ -59,7 +75,7 @@ const Map = memo(({ zoom = 14, markers = [] }: HereMapProps) => {
 
     // Cleanup on unmount
     return () => {
-      window.removeEventListener("resize", () => map.getViewPort().resize());
+      abortController.abort();
       map.dispose();
     };
   }, [zoom, markers]);

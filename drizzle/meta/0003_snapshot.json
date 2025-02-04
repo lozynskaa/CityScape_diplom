@@ -1,6 +1,6 @@
 {
-  "id": "ece0719b-f796-4684-afc3-ff413d27b904",
-  "prevId": "8cf59fdb-0a60-4c88-8100-ec12ab09e95e",
+  "id": "626315c4-6449-436b-b5b0-dbf21c770b1d",
+  "prevId": "2e309f0d-5554-4d4a-bf78-760f0df0e07d",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -171,18 +171,47 @@
           "notNull": false,
           "default": "CURRENT_TIMESTAMP"
         },
-        "braintree_account_id": {
-          "name": "braintree_account_id",
+        "iban": {
+          "name": "iban",
+          "type": "varchar(34)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "okpo": {
+          "name": "okpo",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
         },
-        "braintree_linked": {
-          "name": "braintree_linked",
-          "type": "boolean",
+        "phone": {
+          "name": "phone",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "default": false
+          "notNull": true
+        },
+        "date_of_birth": {
+          "name": "date_of_birth",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "country": {
+          "name": "country",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},
@@ -358,6 +387,18 @@
         },
         "location": {
           "name": "location",
+          "type": "geometry(point)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location_name": {
+          "name": "location_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location_id": {
+          "name": "location_id",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
@@ -377,7 +418,23 @@
           "default": "CURRENT_TIMESTAMP"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "spatial_index": {
+          "name": "spatial_index",
+          "columns": [
+            {
+              "expression": "location",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gist",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "work-diplom_event_company_id_work-diplom_company_id_fk": {
           "name": "work-diplom_event_company_id_work-diplom_company_id_fk",

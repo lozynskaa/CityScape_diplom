@@ -1,5 +1,6 @@
 import axios from "axios";
 import { type AutosuggestDisplayItem, type AutosuggestResponse } from "./maps";
+import { DEFAULT_LOCATION } from "~/lib/location";
 
 class HereMapsService {
   private apiKey: string = process.env.HERE_API_KEY!;
@@ -13,7 +14,7 @@ class HereMapsService {
           params: {
             q: address,
             apiKey: this.apiKey,
-            at: "50.44934377191716,30.519383276149625",
+            at: `${DEFAULT_LOCATION.latitude},${DEFAULT_LOCATION.longitude}`,
           },
         },
       );
@@ -29,11 +30,7 @@ class HereMapsService {
 
       return items;
     } catch (error) {
-      console.log(
-        "🚀 ~ HereMapsService ~ autosuggestAddress ~ error:",
-        error,
-        this.apiKey,
-      );
+      console.log("🚀 ~ HereMapsService ~ autosuggestAddress ~ error:", error);
     }
   }
 }

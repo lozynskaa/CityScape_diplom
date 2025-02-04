@@ -37,7 +37,8 @@ const eventRouterValidationSchema = {
     description: z.string().optional(),
     purpose: z.string(),
     date: z.date(),
-    location: z.string(),
+    locationName: z.string(),
+    locationId: z.string(),
     longitude: z.string(),
     latitude: z.string(),
     includeDonations: z.boolean().default(false),
@@ -58,9 +59,10 @@ const eventRouterValidationSchema = {
     description: z.string().optional(),
     purpose: z.string(),
     date: z.date(),
-    location: z.string(),
-    longitude: z.number(),
-    latitude: z.number(),
+    locationName: z.string(),
+    locationId: z.string(),
+    longitude: z.string(),
+    latitude: z.string(),
     includeDonations: z.boolean().default(false),
     image: z
       .object({
@@ -73,6 +75,11 @@ const eventRouterValidationSchema = {
     category: z.string(),
   }),
   getRandomEvents: z.object({
+    limit: z.number().min(1).max(100).default(10),
+  }),
+  getClosestEvents: z.object({
+    longitude: z.string(),
+    latitude: z.string(),
     limit: z.number().min(1).max(100).default(10),
   }),
   getEvent: z.object({
@@ -105,13 +112,16 @@ export const eventRouter = createTRPCRouter({
         description,
         purpose,
         date,
-        location,
+        locationName,
+        locationId,
         includeDonations,
         image,
         goalAmount,
         currency,
         companyId,
         category,
+        latitude,
+        longitude,
       } = input;
 
       const userId = ctx.session?.user?.id;
@@ -130,12 +140,14 @@ export const eventRouter = createTRPCRouter({
           category,
           purpose,
           date,
-          location,
+          locationName,
+          locationId,
           withoutDonations: !includeDonations,
           imageUrl,
           goalAmount: `${goalAmount ?? 0}`,
           currency,
           creatorId: userId,
+          location: sql`ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)`, // Longitude, Latitude
         })
         .returning();
 
@@ -157,12 +169,15 @@ export const eventRouter = createTRPCRouter({
         description,
         purpose,
         date,
-        location,
+        locationName,
+        locationId,
         includeDonations,
         image,
         goalAmount,
         currency,
         category,
+        latitude,
+        longitude,
       } = input;
 
       let imageUrl: string | undefined = undefined;
@@ -178,12 +193,14 @@ export const eventRouter = createTRPCRouter({
           description,
           purpose,
           date,
-          location,
+          locationName,
+          locationId,
           withoutDonations: !includeDonations,
           imageUrl,
           goalAmount: `${goalAmount ?? 0}`,
           currency,
           category,
+          location: sql`ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)`,
         })
         .where(eq(events.id, id))
         .returning();
@@ -234,6 +251,27 @@ export const eventRouter = createTRPCRouter({
         .limit(limit)
         .orderBy(desc(events.createdAt));
       return randomEvents;
+    }),
+
+  getClosestEvents: publicProcedure
+    .input(eventRouterValidationSchema.getClosestEvents)
+    .query(async ({ input, ctx }) => {
+      const { longitude, latitude, limit } = input;
+
+      const closestEvents = await ctx.db
+        .select({
+          event: events,
+          distance: sql`ST_Distance(${events.location}, ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326))`,
+        })
+        .from(events)
+        .orderBy(
+          sql`${events.location} <-> ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)`,
+        )
+        .limit(limit); // Get the 5 closest events
+
+      return closestEvents.map((event) => ({
+        ...event.event,
+      }));
     }),
 
   getEvent: publicProcedure

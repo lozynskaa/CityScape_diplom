@@ -1,19 +1,22 @@
 "use client";
-import { type MutableRefObject, useEffect, useMemo, useState } from "react";
-import { type Event } from "~/server/db/event.schema";
-import { Input } from "./ui/input";
-import { LabeledItem } from "./ui/labeled-item";
-import DatePicker from "./ui/date-picker";
-import { Textarea } from "./ui/textarea";
 import Image from "next/image";
-import { ItemSelectBlock } from "./item-select";
-import { Switch } from "./ui/switch";
-import { AutoComplete } from "./autocomplete";
+import { type MutableRefObject, useEffect, useMemo, useState } from "react";
 import { useLoadingDebounce } from "~/hooks/use-debounce";
 import { useWritableSearchParams } from "~/hooks/use-writable-search-params";
+import { type Event } from "~/server/db/event.schema";
 import { api } from "~/trpc/react";
+
 import { skipToken } from "@tanstack/react-query";
-import Map from "./map";
+
+import { AutoComplete } from "./autocomplete";
+import { ItemSelectBlock } from "./item-select";
+import Map, { type Marker } from "./map";
+import DatePicker from "./ui/date-picker";
+import If from "./ui/if";
+import { Input } from "./ui/input";
+import { LabeledItem } from "./ui/labeled-item";
+import { Switch } from "./ui/switch";
+import { Textarea } from "./ui/textarea";
 
 const eventCategories = [
   {
@@ -70,8 +73,13 @@ const currencies = [
   },
 ];
 
-export type CreateEventDetails = Omit<Partial<Event>, "imageUrl"> & {
+export type CreateEventDetails = Omit<
+  Partial<Event>,
+  "imageUrl" | "location"
+> & {
   imageFile?: { file: string; fileName: string };
+  longitude?: string;
+  latitude?: string;
 };
 
 type Props = {
@@ -164,7 +172,7 @@ export default function CreateEventForm({
         lng: Number(eventDetails.longitude) ?? 0,
         title: eventDetails.name,
       },
-    ];
+    ] as Marker[];
   }, [eventDetails.latitude, eventDetails.longitude, eventDetails.name]);
 
   return (
@@ -225,14 +233,16 @@ export default function CreateEventForm({
           items={addressAutosuggestions}
           isLoading={isLoading || pending}
           searchValue={locationValue}
-          selectedValue={eventDetails.location ?? ""}
+          selectedValue={eventDetails.locationId ?? ""}
           onSearchValueChange={handleChangeLocationValue}
           onSelectedValueChange={(value) => {
             const location = eventAddressMap[value];
             if (location) {
+              set("location", location.label);
               setEventDetails((prev) => ({
                 ...prev,
-                location: location.value,
+                locationName: location.label,
+                locationId: location.value,
                 latitude: `${location.position.lat}`,
                 longitude: `${location.position.lng}`,
               }));
@@ -240,8 +250,6 @@ export default function CreateEventForm({
           }}
         />
       </LabeledItem>
-
-      <Map markers={mapMarkers} />
 
       <Textarea
         placeholder="Enter event description"
@@ -265,6 +273,12 @@ export default function CreateEventForm({
           }))
         }
       />
+
+      <If condition={mapMarkers.length > 0}>
+        <div className="col-span-2">
+          <Map markers={mapMarkers} />
+        </div>
+      </If>
 
       <ItemSelectBlock
         items={currencies}

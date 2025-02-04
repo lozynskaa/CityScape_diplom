@@ -16,7 +16,7 @@ const requiredFields = [
   "purpose",
   "imageFile",
   "category",
-  "location",
+  "locationName",
   "latitude",
   "longitude",
   "date",
@@ -51,7 +51,8 @@ export default function NewEventPage() {
         companyId,
         category: filledEventDetails.category ?? "",
         includeDonations: !filledEventDetails.withoutDonations,
-        location: filledEventDetails.location ?? "",
+        locationName: filledEventDetails.locationName ?? "",
+        locationId: filledEventDetails.locationId ?? "",
         date: filledEventDetails.date ?? new Date(),
       });
       router.push(`/settings/company/${companyId}/events/${newEvent.id}`);

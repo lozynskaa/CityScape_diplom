@@ -57,7 +57,7 @@ contentByStep.set(2, {
     !state.purpose ||
     !state.name ||
     !state.currency ||
-    !state.location ||
+    !state.locationName ||
     !state.date,
 });
 
@@ -108,12 +108,15 @@ export default function Onboarding() {
         eventName: filledEventDetails.name,
         eventDescription: filledEventDetails.description ?? "",
         eventDate: filledEventDetails.date ?? new Date(),
-        eventLocation: filledEventDetails.location ?? "",
+        eventLocation: filledEventDetails.locationName ?? "",
+        eventLocationId: filledEventDetails.locationId ?? "",
         eventImage: filledEventDetails.imageFile,
         eventPurpose: filledEventDetails.purpose ?? "",
         goalAmount: Number(filledEventDetails.goalAmount),
         currency: filledEventDetails.currency ?? "USD",
         includeDonations: !filledEventDetails.withoutDonations,
+        latitude: filledEventDetails.latitude,
+        longitude: filledEventDetails.longitude,
       };
       completeOnboarding({
         company: companyInfo,

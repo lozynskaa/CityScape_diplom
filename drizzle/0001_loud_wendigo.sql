@@ -22,8 +22,13 @@ CREATE TABLE IF NOT EXISTS "work-diplom_company" (
 	"email" varchar(255) NOT NULL,
 	"image_url" varchar(255),
 	"created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-	"stripe_account_id" varchar(255) NOT NULL,
-	"stripe_linked" boolean DEFAULT false
+	"iban" varchar(34) NOT NULL,
+	"okpo" varchar(255) NOT NULL,
+	"phone" varchar(255) NOT NULL,
+	"date_of_birth" timestamp with time zone NOT NULL,
+	"first_name" varchar(255) NOT NULL,
+	"last_name" varchar(255) NOT NULL,
+	"country" varchar(255) NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "work-diplom_donation" (
@@ -35,7 +40,8 @@ CREATE TABLE IF NOT EXISTS "work-diplom_donation" (
 	"donation_date" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
 	"receipt_url" varchar(255),
 	"transaction_id" varchar(255),
-	"currency" varchar(10) DEFAULT 'USD' NOT NULL
+	"currency" varchar(10) DEFAULT 'USD' NOT NULL,
+	"status" varchar(10) DEFAULT 'none' NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "work-diplom_event" (
@@ -50,7 +56,9 @@ CREATE TABLE IF NOT EXISTS "work-diplom_event" (
 	"purpose" varchar(255),
 	"image_url" varchar(255),
 	"date" timestamp with time zone,
-	"location" varchar(255),
+	"creator_id" varchar(255) NOT NULL,
+	"location" geometry(point) NOT NULL,
+	"location_name" varchar(255),
 	"without_donations" boolean DEFAULT false,
 	"created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );

@@ -1,5 +1,5 @@
-import { and, count, eq, like, or, sum } from "drizzle-orm";
-import { z } from "zod";
+import { and, count, eq, like, or, sql, sum } from "drizzle-orm";
+import { optional, z } from "zod";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -80,6 +80,7 @@ const companyRouterValidationSchema = {
       eventPurpose: z.string(),
       eventDate: z.date(),
       eventLocation: z.string(),
+      eventLocationId: z.string(),
       includeDonations: z.boolean().default(false),
       eventImage: z
         .object({
@@ -90,6 +91,8 @@ const companyRouterValidationSchema = {
       goalAmount: z.number().min(0).default(0).optional(),
       currency: z.string().default("USD").optional(),
       category: z.string(),
+      longitude: z.string().nullable(),
+      latitude: z.string().nullable(),
     }),
   }),
   getRandomCompanies: z.object({
@@ -209,9 +212,12 @@ export const companyRouter = createTRPCRouter({
         eventPurpose,
         eventDate,
         eventLocation,
+        eventLocationId,
         goalAmount,
         includeDonations,
         currency,
+        longitude,
+        latitude,
       } = input.event;
 
       const userId = ctx.session.user.id;
@@ -268,12 +274,14 @@ export const companyRouter = createTRPCRouter({
           purpose: eventPurpose,
           imageUrl: eventImageURL,
           date: eventDate,
-          location: eventLocation,
+          locationName: eventLocation,
+          locationId: eventLocationId,
           withoutDonations: !includeDonations,
           goalAmount: `${goalAmount}`,
           currency,
           category,
           creatorId: userId,
+          location: sql`ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)`, // Longitude, Latitude
         })
         .returning();
 

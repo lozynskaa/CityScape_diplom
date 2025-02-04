@@ -4,6 +4,7 @@ import { auth } from "~/server/auth";
 import HomeBoard from "../_components/home-board";
 import CompaniesList from "./companies-list";
 import EventsList from "./events-list";
+import ClosestEventsList from "./closest-events-list";
 
 const handleSearchEvents = async (formData: FormData) => {
   "use server";
@@ -30,6 +31,8 @@ export default async function Home() {
       <div className="my-8 w-full space-y-8 px-10 md:px-20 lg:px-40">
         <HomeBoard handleSearchEvents={handleSearchEvents} />
         <CompaniesList />
+
+        <ClosestEventsList />
 
         <EventsList
           userId={session?.user.id}

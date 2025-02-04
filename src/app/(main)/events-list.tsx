@@ -35,6 +35,7 @@ export default function EventsList({ userId, handleApplyToEvent }: Props) {
     api.event.getRandomEvents.useQuery({
       limit: 10,
     });
+
   return (
     <div className="space-y-2">
       <h1 className="text-2xl font-bold text-gray-950">Featured events</h1>
