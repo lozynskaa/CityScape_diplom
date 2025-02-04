@@ -204,20 +204,7 @@ export const eventRouter = createTRPCRouter({
       if (userId) {
         const randomEvents = await ctx.db
           .select({
-            id: events.id,
-            name: events.name,
-            createdAt: events.createdAt,
-            description: events.description,
-            purpose: events.purpose,
-            location: events.location,
-            imageUrl: events.imageUrl,
-            goalAmount: events.goalAmount,
-            date: events.date,
-            companyId: events.companyId,
-            currentAmount: events.currentAmount,
-            currency: events.currency,
-            category: events.category,
-            withoutDonations: events.withoutDonations,
+            event: events,
             isUserApplied: sql<boolean>`CASE WHEN ${userEvents.userId} IS NOT NULL THEN true ELSE false END`,
             paymentEnabled: sql<boolean>`CASE WHEN ${companies.stripeLinked} IS true THEN true ELSE false END`,
           })
@@ -232,26 +219,15 @@ export const eventRouter = createTRPCRouter({
           )
           .limit(limit)
           .orderBy(desc(events.createdAt));
-        return randomEvents;
+        return randomEvents.map((event) => ({
+          ...event,
+          paymentEnabled: !!event.paymentEnabled,
+          isUserApplied: !!event.isUserApplied,
+        }));
       }
 
       const randomEvents = await ctx.db
-        .select({
-          id: events.id,
-          name: events.name,
-          createdAt: events.createdAt,
-          description: events.description,
-          purpose: events.purpose,
-          location: events.location,
-          imageUrl: events.imageUrl,
-          goalAmount: events.goalAmount,
-          date: events.date,
-          companyId: events.companyId,
-          currentAmount: events.currentAmount,
-          currency: events.currency,
-          category: events.category,
-          withoutDonations: events.withoutDonations,
-        })
+        .select()
         .from(events)
         .limit(limit)
         .orderBy(desc(events.createdAt));
@@ -362,23 +338,9 @@ export const eventRouter = createTRPCRouter({
 
       const companyEvents = await ctx.db
         .select({
-          id: events.id,
-          name: events.name,
-          createdAt: events.createdAt,
-          description: events.description,
-          purpose: events.purpose,
-          location: events.location,
-          imageUrl: events.imageUrl,
-          goalAmount: events.goalAmount,
-          date: events.date,
-          companyId: events.companyId,
-          currentAmount: events.currentAmount,
-          currency: events.currency,
-          category: events.category,
-          withoutDonations: events.withoutDonations,
+          event: events,
           isUserApplied: sql<boolean>`CASE WHEN ${userEvents.userId} IS NOT NULL THEN true ELSE false END`,
           paymentEnabled: sql<boolean>`CASE WHEN ${companies.stripeLinked} IS true THEN true ELSE false END`,
-          creatorId: events.creatorId,
         })
         .from(events)
         .leftJoin(companies, eq(events.companyId, companies.id))
@@ -387,7 +349,11 @@ export const eventRouter = createTRPCRouter({
           and(eq(events.id, userEvents.eventId), eq(userEvents.userId, userId)),
         )
         .where(eq(events.companyId, id));
-      return companyEvents;
+      return companyEvents.map((event) => ({
+        ...event,
+        paymentEnabled: !!event.paymentEnabled,
+        isUserApplied: !!event.isUserApplied,
+      }));
     }),
 
   getEventsWithFilters: publicProcedure

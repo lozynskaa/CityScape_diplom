@@ -1,11 +1,17 @@
-import { and, count, eq, like, or } from "drizzle-orm";
+import { and, count, eq, like, or, sum } from "drizzle-orm";
 import { z } from "zod";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { companies, events, users } from "~/server/db/schema";
+import {
+  companies,
+  donations,
+  events,
+  userEvents,
+  users,
+} from "~/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { type Company } from "~/server/db/company.schema";
 import { stripe } from "~/server/stripe";
@@ -353,11 +359,32 @@ export const companyRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { id } = input;
       const userId = ctx.session.user.id;
-      const [company] = await ctx.db
-        .select()
+      const [companyData] = await ctx.db
+        .select({
+          company: companies,
+          totalRaised: sum(events.goalAmount).as("totalRaised"),
+          totalDonations: sum(donations.amount).as("totalDonations"),
+          totalApplicants: count(userEvents.userId).as("totalApplicants"),
+        })
         .from(companies)
-        .where(and(eq(companies.id, id), eq(companies.founderId, userId)));
-      return company;
+        .leftJoin(events, eq(companies.id, events.companyId))
+        .leftJoin(donations, eq(events.id, donations.eventId))
+        .leftJoin(userEvents, eq(events.id, userEvents.eventId))
+        .where(and(eq(companies.id, id), eq(companies.founderId, userId)))
+        .groupBy(companies.id);
+
+      if (!companyData?.company) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Company not found",
+        });
+      }
+      return {
+        ...companyData?.company,
+        totalRaised: companyData?.totalRaised ?? 0,
+        totalDonations: companyData?.totalDonations ?? 0,
+        totalApplicants: companyData?.totalApplicants ?? 0,
+      };
     }),
 
   deleteCompany: protectedProcedure
