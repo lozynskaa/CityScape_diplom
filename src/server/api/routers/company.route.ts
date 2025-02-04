@@ -15,8 +15,6 @@ import {
 import { TRPCError } from "@trpc/server";
 import { type Company } from "~/server/db/company.schema";
 import { createImageURL } from "~/lib/createImageURL";
-import { wayforpay } from "~/server/payment/wayforpay";
-import { parseIban } from "~/lib/iban";
 
 const companyRouterValidationSchema = {
   createCompany: z.object({
@@ -34,6 +32,10 @@ const companyRouterValidationSchema = {
       companyIBAN: z.string().max(34),
       okpo: z.string(),
       phoneNumber: z.string(),
+      firstName: z.string(),
+      lastName: z.string(),
+      dateOfBirth: z.date(),
+      country: z.string(),
     }),
   }),
   updateCompany: z.object({
@@ -67,6 +69,10 @@ const companyRouterValidationSchema = {
       companyIBAN: z.string().max(34),
       okpo: z.string(),
       phoneNumber: z.string(),
+      firstName: z.string(),
+      lastName: z.string(),
+      dateOfBirth: z.date(),
+      country: z.string(),
     }),
     event: z.object({
       eventName: z.string().min(1),
@@ -113,6 +119,10 @@ export const companyRouter = createTRPCRouter({
         companyIBAN: iBan,
         okpo,
         phoneNumber: phone,
+        firstName,
+        lastName,
+        dateOfBirth,
+        country,
       } = input.company;
 
       const userId = ctx.session.user.id;
@@ -139,6 +149,10 @@ export const companyRouter = createTRPCRouter({
           iBan,
           okpo,
           phone,
+          dateOfBirth,
+          firstName,
+          lastName,
+          country,
         })
         .returning();
 
@@ -187,6 +201,10 @@ export const companyRouter = createTRPCRouter({
         companyIBAN: iBan,
         okpo,
         phoneNumber: phone,
+        firstName,
+        lastName,
+        dateOfBirth,
+        country,
       } = input.company;
 
       const {
@@ -202,14 +220,7 @@ export const companyRouter = createTRPCRouter({
         currency,
       } = input.event;
 
-      const [existingUser] = await ctx.db
-        .select({ id: users.id, name: users.name })
-        .from(users)
-        .where(eq(users.id, ctx.session.user.id));
-
-      if (!existingUser) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
+      const userId = ctx.session.user.id;
 
       let companyImageURL: string | undefined = undefined;
       let eventImageURL: string | undefined = undefined;
@@ -240,6 +251,10 @@ export const companyRouter = createTRPCRouter({
           iBan,
           okpo,
           phone,
+          dateOfBirth,
+          firstName,
+          lastName,
+          country,
         })
         .returning();
 

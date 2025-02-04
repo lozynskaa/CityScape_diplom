@@ -26,8 +26,13 @@ export const companies = createTable("company", {
   iBan: varchar("iban", { length: 34 }).notNull(),
   okpo: varchar("okpo", { length: 255 }).notNull(),
   phone: varchar("phone", { length: 255 }).notNull(),
-  merchantAccount: varchar("merchant_account", { length: 255 }).notNull(),
-  secretKey: varchar("merchant_secret", { length: 255 }).notNull(),
+  dateOfBirth: timestamp("date_of_birth", {
+    mode: "date",
+    withTimezone: true,
+  }).notNull(),
+  firstName: varchar("first_name", { length: 255 }).notNull(),
+  lastName: varchar("last_name", { length: 255 }).notNull(),
+  country: varchar("country", { length: 255 }).notNull(),
 });
 
 export type Company = typeof companies.$inferSelect;

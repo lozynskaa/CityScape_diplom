@@ -32,6 +32,10 @@ export type CompanyInfoState = {
     };
     okpo: string;
     phoneNumber: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: Date;
+    country: string;
   };
   //event
   event: {
@@ -103,6 +107,10 @@ const DEFAULT_STATE: CompanyInfoState = {
     companyIBAN: "",
     okpo: "",
     phoneNumber: "",
+    firstName: "",
+    lastName: "",
+    dateOfBirth: new Date(),
+    country: "",
   },
   //event
   event: {

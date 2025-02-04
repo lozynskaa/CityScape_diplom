@@ -4,19 +4,20 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "~/app/_components/ui/button";
 import { Input } from "~/app/_components/ui/input";
+import { LabeledItem } from "~/app/_components/ui/labeled-item";
 import { Spinner } from "~/app/_components/ui/spinner";
+import { Switch } from "~/app/_components/ui/switch";
 import { api } from "~/trpc/react";
 
 export default function QuickDonatePage() {
-  const [step, setStep] = useState(1);
   const [amountValue, setAmountValue] = useState<number>(0);
+  const [anonymous, setAnonymous] = useState(false);
   const { eventId } = useParams<{ eventId: string }>();
-  const [embeddedFormHTML, setEmbeddedFormHTML] = useState<string>("");
 
   const { data: event, isLoading } = api.event.getEvent.useQuery({
     id: eventId,
   });
-  const { mutateAsync: initializePayment } =
+  const { mutateAsync: initializePayment, isPending } =
     api.donation.initializePayment.useMutation();
 
   const handlePaymentCreate = async () => {
@@ -27,51 +28,43 @@ export default function QuickDonatePage() {
       amount: amountValue,
       currency: event.currency,
       eventId,
-      anonymous: false,
+      anonymous,
     });
-    setEmbeddedFormHTML(paymentData);
-    setStep(2);
+    if (!paymentData) return;
+    const urlToRedirect = paymentData._links.redirect.href;
+    window.location.href = urlToRedirect;
   };
 
   if (isLoading) {
-    return (
-      <div className="flex h-full w-full flex-1 items-center justify-center">
-        <Spinner />
-      </div>
-    );
+    return <Spinner />;
   }
 
   return (
     <>
       <div className="w-full space-y-8 px-12 py-8">
-        {step === 1 && (
-          <div className="flex flex-col items-center justify-between gap-y-4">
-            <h3 className="text-2xl font-bold">{event?.name}</h3>
-            <Input
-              type="number"
-              name="amount"
-              placeholder="Amount"
-              label="Amount"
-              onChange={(e) => setAmountValue(Number(e.target.value))}
-              value={amountValue}
-            />
-            <Button
-              className="w-22 rounded-full font-bold"
-              type="submit"
-              onClick={handlePaymentCreate}
-            >
-              Donate
-            </Button>
-          </div>
-        )}
-        {step === 2 && (
-          <div className="flex flex-col items-center justify-center gap-y-4">
-            <h1 className="text-4xl font-bold">{event?.name}</h1>
-            <p className="text-2xl font-bold">Amount: ${amountValue}</p>
-
-            <div dangerouslySetInnerHTML={{ __html: embeddedFormHTML }} />
-          </div>
-        )}
+        <div className="flex flex-col items-center justify-between gap-y-4">
+          <h3 className="text-2xl font-bold">{event?.name}</h3>
+          <Input
+            disabled={isPending}
+            type="number"
+            name="amount"
+            placeholder="Amount"
+            label="Amount"
+            onChange={(e) => setAmountValue(Number(e.target.value))}
+            value={amountValue}
+          />
+          <LabeledItem label="Include Donations">
+            <Switch checked={anonymous} onCheckedChange={setAnonymous} />
+          </LabeledItem>
+          <Button
+            disabled={isPending}
+            className="w-22 rounded-full font-bold"
+            type="submit"
+            onClick={handlePaymentCreate}
+          >
+            Donate
+          </Button>
+        </div>
       </div>
     </>
   );

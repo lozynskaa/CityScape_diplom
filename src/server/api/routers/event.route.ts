@@ -259,7 +259,9 @@ export const eventRouter = createTRPCRouter({
         })
         .from(donations)
         .leftJoin(users, eq(donations.userId, users.id))
-        .where(eq(donations.eventId, id));
+        .where(
+          and(eq(donations.eventId, id), eq(donations.status, "completed")),
+        );
 
       const eventUsers = (await ctx.db
         .select({

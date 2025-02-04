@@ -32,8 +32,19 @@ export default async function CompanyPage({ params }: Props) {
       <div className="space-y-2">
         <div className="flex flex-row items-center justify-between">
           <h3 className="text-2xl font-bold">Active Events</h3>
-          <Link href={`/event?companyId=${companyId}&page=1`}>
-            <Button className="w-22 rounded-full font-bold">See All</Button>
+          <Link
+            href={
+              firstThreeEvents.length
+                ? `/event?companyId=${companyId}&page=1`
+                : ""
+            }
+          >
+            <Button
+              className="w-22 rounded-full font-bold"
+              disabled={!firstThreeEvents.length}
+            >
+              See All
+            </Button>
           </Link>
         </div>
         {firstThreeEvents.length ? (
@@ -50,8 +61,15 @@ export default async function CompanyPage({ params }: Props) {
       <div className="space-y-2">
         <div className="flex flex-row items-center justify-between">
           <h3 className="text-2xl font-bold">Posts</h3>
-          <Link href={`/company/${companyId}/posts`}>
-            <Button className="w-22 rounded-full font-bold">See All</Button>
+          <Link
+            href={firstThreePosts.length ? `/post?companyId=${companyId}/` : ""}
+          >
+            <Button
+              className="w-22 rounded-full font-bold"
+              disabled={!firstThreePosts.length}
+            >
+              See All
+            </Button>
           </Link>
         </div>
         {firstThreePosts.length ? (

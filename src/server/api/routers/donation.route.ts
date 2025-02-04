@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { format } from "date-fns";
 import { eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 
@@ -6,7 +7,7 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { companies } from "~/server/db/company.schema";
 import { donations } from "~/server/db/donations.schema";
 import { events } from "~/server/db/event.schema";
-import { wayforpay } from "~/server/payment/wayforpay";
+import { checkoutService } from "~/server/payment/checkout";
 
 const donationRouterValidationSchema = {
   initializePayment: z.object({
@@ -22,6 +23,7 @@ const donationRouterValidationSchema = {
   }),
   removeDonatedAmount: z.object({
     donationId: z.string(),
+    amount: z.number().optional(),
   }),
   updateDonationStatus: z.object({
     id: z.string(),
@@ -63,56 +65,10 @@ export const donationRouter = createTRPCRouter({
         });
       }
 
-      const response = await wayforpay.initPayment({
-        merchantDomainName: "www.671d-178-212-96-198.ngrok-free.app",
-        amount: amount.toFixed(2),
-        // returnUrl: "http://localhost:3000/donation/success",
-        serviceUrl:
-          "https://671d-178-212-96-198.ngrok-free.app/webhooks/wayforpay",
-        orderReference: donation.id,
-        orderDate: `${Date.now()}`,
-        currency,
-        productName: [event.name],
-        productPrice: [amount.toFixed(2)],
-        productCount: [1],
-      });
-
-      return response;
-    }),
-
-  initializePayoutToCompany: publicProcedure
-    .input(donationRouterValidationSchema.initializePayoutToCompany)
-    .mutation(async ({ input, ctx }) => {
-      const { donationId, amount, currency } = input;
-
-      const [donation] = await ctx.db
-        .select()
-        .from(donations)
-        .where(eq(donations.id, donationId));
-
-      if (!donation) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Donation not found",
-        });
-      }
-
-      const [event] = await ctx.db
-        .select()
-        .from(events)
-        .where(eq(events.id, donation.eventId));
-
-      if (!event) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Event not found",
-        });
-      }
-
       const [company] = await ctx.db
         .select()
         .from(companies)
-        .where(eq(companies.id, event.companyId));
+        .where(eq(companies.id, event?.companyId));
 
       if (!company) {
         throw new TRPCError({
@@ -121,31 +77,28 @@ export const donationRouter = createTRPCRouter({
         });
       }
 
-      await ctx.db
-        .update(donations)
-        .set({
-          amount: amount.toFixed(2),
-          currency,
-        })
-        .where(eq(donations.id, donation.id));
-
-      const payoutResult = await wayforpay.initMerchantPayout({
-        orderReference: donationId,
-        amount,
+      const response = await checkoutService.createPaymentLink({
+        amount: Number(amount),
         currency,
-        iban: company.iBan,
-        okpo: company.okpo,
-        accountName: company.name,
-        description: `Donation to ${company.name}. Event: ${event.name}`,
+        country: company.country,
+        eventTitle: event.name,
+        eventId: event.id,
+        userId,
+        eventCompanyId: event.companyId,
+        dateOfBirth: format(company.dateOfBirth, "yyyy-MM-dd"),
+        iBan: company.iBan,
+        refId: donation.id,
+        firstName: company.firstName,
+        lastName: company.lastName,
       });
 
-      return payoutResult;
+      return response;
     }),
 
   removeDonatedAmount: publicProcedure
     .input(donationRouterValidationSchema.removeDonatedAmount)
     .mutation(async ({ input, ctx }) => {
-      const { donationId } = input;
+      const { donationId, amount } = input;
 
       const [donation] = await ctx.db
         .select()
@@ -162,7 +115,7 @@ export const donationRouter = createTRPCRouter({
       await ctx.db
         .update(events)
         .set({
-          currentAmount: sql`${events.currentAmount} - ${donation.amount}`,
+          currentAmount: sql`${events.currentAmount} - ${amount ?? donation.amount}`,
         })
         .where(eq(events.id, donation.eventId));
     }),
@@ -170,7 +123,7 @@ export const donationRouter = createTRPCRouter({
   addDonatedAmount: publicProcedure
     .input(donationRouterValidationSchema.removeDonatedAmount)
     .mutation(async ({ input, ctx }) => {
-      const { donationId } = input;
+      const { donationId, amount } = input;
 
       const [donation] = await ctx.db
         .select()
@@ -187,7 +140,7 @@ export const donationRouter = createTRPCRouter({
       await ctx.db
         .update(events)
         .set({
-          currentAmount: sql`${events.currentAmount} + ${donation.amount}`,
+          currentAmount: sql`${events.currentAmount} + ${amount ?? donation.amount}`,
         })
         .where(eq(events.id, donation.eventId));
     }),

@@ -71,6 +71,13 @@
       "when": 1734463877342,
       "tag": "0009_equal_psynapse",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1735072410432,
+      "tag": "0010_loose_colleen_wing",
+      "breakpoints": true
     }
   ]
 }

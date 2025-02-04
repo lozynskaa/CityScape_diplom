@@ -3,6 +3,16 @@ import { Input } from "~/app/_components/ui/input";
 import { Textarea } from "~/app/_components/ui/textarea";
 import { type CompanyInfoState } from "./page";
 import Image from "next/image";
+import { LabeledItem } from "~/app/_components/ui/labeled-item";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/app/_components/ui/popover";
+import { Button } from "~/app/_components/ui/button";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "~/app/_components/ui/calendar";
+import { format } from "date-fns/format";
 
 type Props = {
   companyDetails: CompanyInfoState["company"];
@@ -36,6 +46,59 @@ export function FirstStep({
             ...prev,
             companyEmail: e.target.value,
           }))
+        }
+      />
+      <Input
+        placeholder="Enter name"
+        label="Recipient First Name"
+        value={companyDetails.firstName}
+        onChange={(e) =>
+          setCompanyDetails((prev) => ({ ...prev, firstName: e.target.value }))
+        }
+      />
+      <Input
+        placeholder="Enter name"
+        label="Recipient Last Name"
+        value={companyDetails.lastName}
+        onChange={(e) =>
+          setCompanyDetails((prev) => ({ ...prev, lastName: e.target.value }))
+        }
+      />
+      <LabeledItem label="Event Date">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              className="h-9 w-96 items-start justify-start"
+              variant="outline"
+            >
+              <CalendarIcon />
+              {companyDetails.dateOfBirth ? (
+                format(companyDetails.dateOfBirth, "PPP")
+              ) : (
+                <span>Pick a date</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0">
+            <Calendar
+              mode="single"
+              selected={companyDetails.dateOfBirth}
+              onSelect={(date) =>
+                date &&
+                setCompanyDetails((prev) => ({ ...prev, eventDate: date }))
+              }
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+      </LabeledItem>
+      <Input
+        placeholder="Enter country code"
+        label="Recipient Country Code"
+        value={companyDetails.country}
+        onChange={(e) =>
+          e.target.value.length <= 3 &&
+          setCompanyDetails((prev) => ({ ...prev, country: e.target.value }))
         }
       />
       <Input

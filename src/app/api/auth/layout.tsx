@@ -11,7 +11,7 @@ export default async function AuthLayout({
           CityScape
         </Link>
       </header>
-      <div className="flex flex-1 flex-col items-center justify-center">
+      <div className="flex w-full flex-1 flex-col items-center justify-center">
         {children}
       </div>
     </>

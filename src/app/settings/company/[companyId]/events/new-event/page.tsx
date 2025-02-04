@@ -125,7 +125,7 @@ export default function NewEventPage() {
         <ItemSelectBlock
           items={[{ id: "Category 1", name: "Category 1" }]}
           set={(id) => setEventDetails((prev) => ({ ...prev, category: id }))}
-          title="Select Category"
+          title={eventDetails.category ?? "Select Category"}
           label="Event Category"
         />
         <LabeledItem label="Include Donations">
@@ -219,7 +219,7 @@ export default function NewEventPage() {
         <ItemSelectBlock
           items={[{ id: "USD", name: "USD" }]}
           set={(id) => setEventDetails((prev) => ({ ...prev, currency: id }))}
-          title="Select Currency"
+          title={eventDetails.currency ?? "Select Currency"}
           label="Donation Currency"
         />
 

@@ -17,7 +17,11 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    WEBHOOK_BASE_URL: z.string(),
+    CHECKOUT_PRIVATE_KEY: z.string(),
+    CHECKOUT_CHANNEL_ID: z.string(),
+    CHECKOUT_AUTHORIZATION: z.string(),
+    CHECKOUT_SIGNATURE_SECRET: z.string(),
+    NEXTAUTH_URL: z.string(),
   },
 
   /**
@@ -39,7 +43,11 @@ export const env = createEnv({
     OAUTH_CLIENT_SECRET: process.env.OAUTH_CLIENT_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
-    WEBHOOK_BASE_URL: process.env.WEBHOOK_BASE_URL,
+    CHECKOUT_PRIVATE_KEY: process.env.CHECKOUT_PRIVATE_KEY,
+    CHECKOUT_CHANNEL_ID: process.env.CHECKOUT_CHANNEL_ID,
+    CHECKOUT_AUTHORIZATION: process.env.CHECKOUT_AUTHORIZATION,
+    CHECKOUT_SIGNATURE_SECRET: process.env.CHECKOUT_SIGNATURE_SECRET,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

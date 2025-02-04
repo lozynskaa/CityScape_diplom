@@ -71,6 +71,14 @@ export default function PostsListPage() {
     return <FullPageSpinner />;
   }
 
+  if (data?.pages?.length && !data.pages.every((page) => page.posts.length)) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <h1 className="text-2xl font-bold">No posts found</h1>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full space-y-8 px-12 py-8">
       <div className="grid grid-cols-1 gap-y-6">

@@ -15,6 +15,30 @@ import { Textarea } from "~/app/_components/ui/textarea";
 import { type Company } from "~/server/db//company.schema";
 import { Spinner } from "~/app/_components/ui/spinner";
 import { useParams } from "next/navigation";
+import { LabeledItem } from "~/app/_components/ui/labeled-item";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/app/_components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "~/app/_components/ui/calendar";
+import { format } from "date-fns";
+
+const requiredFields = [
+  "name",
+  "companyEmail",
+  "website",
+  "description",
+  "companyImage",
+  "iBan",
+  "okpo",
+  "phone",
+  "dateOfBirth",
+  "country",
+  "firstName",
+  "lastName",
+];
 
 export default function Company() {
   const { companyId } = useParams<{ companyId: string }>();
@@ -37,6 +61,14 @@ export default function Company() {
         description: currentCompany.description,
         website: currentCompany.website,
         imageUrl: currentCompany.imageUrl,
+        imageFile: undefined,
+        iBan: currentCompany.iBan,
+        okpo: currentCompany.okpo,
+        phone: currentCompany.phone,
+        dateOfBirth: currentCompany.dateOfBirth,
+        country: currentCompany.country,
+        firstName: currentCompany.firstName,
+        lastName: currentCompany.lastName,
       });
     }
   }, [currentCompany]);
@@ -60,18 +92,10 @@ export default function Company() {
   };
 
   const handleSave = async () => {
-    const requiredKeys = [
-      "name",
-      "email",
-      "description",
-      "location",
-      "website",
-      "category",
-    ];
     if (
       currentCompany &&
       updatedCompanyData &&
-      requiredKeys.every(
+      requiredFields.every(
         (key) => key in updatedCompanyData || key in currentCompany,
       )
     ) {
@@ -145,7 +169,7 @@ export default function Company() {
         <Input
           placeholder="Enter name"
           label="Company Name"
-          value={updatedCompanyData?.name ?? currentCompany?.name}
+          value={updatedCompanyData.name}
           onChange={(e) =>
             setUpdatedCompanyData((prev) => ({ ...prev, name: e.target.value }))
           }
@@ -153,32 +177,128 @@ export default function Company() {
         <Input
           placeholder="Enter email"
           label="Company Email"
-          value={updatedCompanyData?.email ?? currentCompany?.email}
+          value={updatedCompanyData.email}
           onChange={(e) =>
             setUpdatedCompanyData((prev) => ({
               ...prev,
-              email: e.target.value,
+              companyEmail: e.target.value,
+            }))
+          }
+        />
+        <Input
+          placeholder="Enter name"
+          label="Recipient First Name"
+          value={updatedCompanyData.firstName}
+          onChange={(e) =>
+            setUpdatedCompanyData((prev) => ({
+              ...prev,
+              firstName: e.target.value,
+            }))
+          }
+        />
+        <Input
+          placeholder="Enter name"
+          label="Recipient Last Name"
+          value={updatedCompanyData.lastName}
+          onChange={(e) =>
+            setUpdatedCompanyData((prev) => ({
+              ...prev,
+              lastName: e.target.value,
+            }))
+          }
+        />
+        <LabeledItem label="Recipient Date of Birth">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                className="h-9 w-full items-start justify-start"
+                variant="outline"
+              >
+                <CalendarIcon />
+                {updatedCompanyData.dateOfBirth ? (
+                  format(updatedCompanyData.dateOfBirth, "PPP")
+                ) : (
+                  <span>Pick a date</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={updatedCompanyData.dateOfBirth}
+                onSelect={(date) =>
+                  date &&
+                  setUpdatedCompanyData((prev) => ({
+                    ...prev,
+                    dateOfBirth: date,
+                  }))
+                }
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </LabeledItem>
+
+        <Input
+          placeholder="Enter country code"
+          label="Recipient Country Code"
+          value={updatedCompanyData.country}
+          onChange={(e) =>
+            e.target.value.length <= 3 &&
+            setUpdatedCompanyData((prev) => ({
+              ...prev,
+              country: e.target.value,
+            }))
+          }
+        />
+        <Input
+          placeholder="Enter IBAN"
+          label="Company IBAN"
+          wrapperClassName="col-span-2"
+          value={updatedCompanyData.iBan}
+          onChange={(e) =>
+            setUpdatedCompanyData((prev) => ({
+              ...prev,
+              iBan: e.target.value,
+            }))
+          }
+        />
+        <Input
+          placeholder="Enter OKPO"
+          label="Company OKPO"
+          value={updatedCompanyData.okpo}
+          onChange={(e) =>
+            setUpdatedCompanyData((prev) => ({ ...prev, okpo: e.target.value }))
+          }
+        />
+        <Input
+          placeholder="Enter phone number"
+          label="Company Phone Number"
+          type="number"
+          value={updatedCompanyData.phone}
+          onChange={(e) =>
+            setUpdatedCompanyData((prev) => ({
+              ...prev,
+              phone: e.target.value,
             }))
           }
         />
         <Textarea
           placeholder="Enter description"
           label="Company Description"
-          wrapperClassName="col-span-2"
+          value={updatedCompanyData.description ?? ""}
           onChange={(e) =>
             setUpdatedCompanyData((prev) => ({
               ...prev,
               description: e.target.value,
             }))
           }
-          value={
-            updatedCompanyData?.description ?? currentCompany?.description ?? ""
-          }
+          wrapperClassName="col-span-2"
         />
         <Input
-          placeholder="Enter website"
+          type="text"
           label="Company website"
-          value={updatedCompanyData?.website ?? currentCompany?.website ?? ""}
+          value={updatedCompanyData.website ?? ""}
           onChange={(e) =>
             setUpdatedCompanyData((prev) => ({
               ...prev,

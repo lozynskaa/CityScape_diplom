@@ -7,7 +7,7 @@ export default async function MainLayout({
   return (
     <>
       <Header />
-      <main className="flex flex-1 flex-col items-center justify-center">
+      <main className="flex w-full flex-1 flex-col items-center justify-center">
         {children}
       </main>
     </>

@@ -6,6 +6,15 @@ import { Input } from "~/app/_components/ui/input";
 import { Textarea } from "~/app/_components/ui/textarea";
 import { Button } from "~/app/_components/ui/button";
 import { api } from "~/trpc/react";
+import { LabeledItem } from "~/app/_components/ui/labeled-item";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/app/_components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "~/app/_components/ui/calendar";
+import { format } from "date-fns/format";
 
 const requiredFields = [
   "name",
@@ -13,6 +22,13 @@ const requiredFields = [
   "website",
   "description",
   "companyImage",
+  "companyIBAN",
+  "okpo",
+  "phoneNumber",
+  "dateOfBirth",
+  "country",
+  "firstName",
+  "lastName",
 ];
 
 type CompanyDetails = {
@@ -27,6 +43,10 @@ type CompanyDetails = {
   companyIBAN: string;
   okpo: string;
   phoneNumber: string;
+  dateOfBirth: Date;
+  country: string;
+  firstName: string;
+  lastName: string;
 };
 
 export default function NewCompanyPage() {
@@ -39,6 +59,10 @@ export default function NewCompanyPage() {
     companyIBAN: "",
     okpo: "",
     phoneNumber: "",
+    dateOfBirth: new Date(),
+    country: "",
+    firstName: "",
+    lastName: "",
   });
 
   const { mutate: createCompany } = api.company.createCompany.useMutation();
@@ -71,6 +95,10 @@ export default function NewCompanyPage() {
         companyIBAN: companyDetails.companyIBAN,
         okpo: companyDetails.okpo,
         phoneNumber: companyDetails.phoneNumber,
+        dateOfBirth: companyDetails.dateOfBirth,
+        country: companyDetails.country,
+        firstName: companyDetails.firstName,
+        lastName: companyDetails.lastName,
       },
     });
   };
@@ -107,6 +135,63 @@ export default function NewCompanyPage() {
               ...prev,
               companyEmail: e.target.value,
             }))
+          }
+        />
+        <Input
+          placeholder="Enter name"
+          label="Recipient First Name"
+          value={companyDetails.firstName}
+          onChange={(e) =>
+            setCompanyDetails((prev) => ({
+              ...prev,
+              firstName: e.target.value,
+            }))
+          }
+        />
+        <Input
+          placeholder="Enter name"
+          label="Recipient Last Name"
+          value={companyDetails.lastName}
+          onChange={(e) =>
+            setCompanyDetails((prev) => ({ ...prev, lastName: e.target.value }))
+          }
+        />
+        <LabeledItem label="Recipient Date of Birth">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                className="h-9 w-96 items-start justify-start"
+                variant="outline"
+              >
+                <CalendarIcon />
+                {companyDetails.dateOfBirth ? (
+                  format(companyDetails.dateOfBirth, "PPP")
+                ) : (
+                  <span>Pick a date</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={companyDetails.dateOfBirth}
+                onSelect={(date) =>
+                  date &&
+                  setCompanyDetails((prev) => ({ ...prev, dateOfBirth: date }))
+                }
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </LabeledItem>
+
+        <Input
+          placeholder="Enter country code"
+          label="Recipient Country Code"
+          value={companyDetails.country}
+          onChange={(e) =>
+            e.target.value.length <= 3 &&
+            setCompanyDetails((prev) => ({ ...prev, country: e.target.value }))
           }
         />
         <Input

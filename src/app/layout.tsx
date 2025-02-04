@@ -24,16 +24,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${jakartaSans.variable}`}>
-      <head>
-        <script
-          id="widget-wfp-script"
-          type="text/javascript"
-          src="https://secure.wayforpay.com/server/pay-widget.js"
-        />
-      </head>
       <body>
-        <div className="flex min-h-screen flex-col items-center justify-center overflow-y-auto bg-gray-900 p-8">
-          <div className="w-full flex-1 rounded-2xl bg-gray-50">
+        <div className="min-h-screen overflow-y-auto bg-gray-900 p-8">
+          <div className="flex min-h-[calc(100vh-4rem)] w-full flex-1 flex-col items-center justify-center rounded-2xl bg-gray-50">
             <TRPCReactProvider>{children}</TRPCReactProvider>
           </div>
         </div>
