@@ -1,5 +1,6 @@
-import React from "react";
+import React, { Suspense } from "react";
 import Header from "../_components/header";
+import { Spinner } from "../_components/ui/spinner";
 
 export default async function MainLayout({
   children,
@@ -7,9 +8,11 @@ export default async function MainLayout({
   return (
     <>
       <Header />
-      <main className="flex w-full flex-1 flex-col items-center justify-center">
-        {children}
-      </main>
+      <Suspense fallback={<Spinner />}>
+        <main className="flex w-full flex-1 flex-col items-center justify-center">
+          {children}
+        </main>
+      </Suspense>
     </>
   );
 }

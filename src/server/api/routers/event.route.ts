@@ -110,10 +110,7 @@ export const eventRouter = createTRPCRouter({
       let imageUrl: string | undefined = undefined;
       if (image) {
         const uuid = crypto.randomUUID();
-        imageUrl = await createImageURL(
-          `event-image-${uuid}-${image.fileName}`,
-          image.file,
-        );
+        imageUrl = await createImageURL(`event-image-${uuid}`, image.file);
       }
 
       const [event] = await ctx.db
@@ -163,10 +160,7 @@ export const eventRouter = createTRPCRouter({
       let imageUrl: string | undefined = undefined;
       if (image) {
         const uuid = crypto.randomUUID();
-        imageUrl = await createImageURL(
-          `event-image-${uuid}-${image.fileName}`,
-          image.file,
-        );
+        imageUrl = await createImageURL(`event-image-${uuid}`, image.file);
       }
 
       const [event] = await ctx.db

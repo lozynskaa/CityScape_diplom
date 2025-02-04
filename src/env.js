@@ -23,6 +23,7 @@ export const env = createEnv({
     CHECKOUT_SIGNATURE_SECRET: z.string(),
     NEXTAUTH_URL: z.string(),
     NEXTAUTH_SECRET: z.string(),
+    AUTH_TRUST_HOST: z.string(),
   },
 
   /**
@@ -50,6 +51,7 @@ export const env = createEnv({
     CHECKOUT_SIGNATURE_SECRET: process.env.CHECKOUT_SIGNATURE_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

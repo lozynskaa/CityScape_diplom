@@ -7,7 +7,17 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - DATABASE_URL=postgresql://postgres:postgrseql@db:5432/diplom
+      - AUTH_SECRET=1kmQL7B8Ec5k6UCLGXvQSK5f5fwGJlf/icn/9qAeYXI=
+      - OAUTH_CLIENT_ID=1094050481038-chejip4sppoo51an12l2vun57hfhm5rr.apps.googleusercontent.com
+      - OAUTH_CLIENT_SECRET=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
+      - CHECKOUT_PRIVATE_KEY=sk_sbox_5khfurmbfwspd5gti6z2wodicyk
+      - CHECKOUT_CHANNEL_ID=pc_jdqqmongbnqeljbi54whdzenmi
+      - CHECKOUT_AUTHORIZATION=0de2e922-9d69-4c8d-96d8-281c651361fc
+      - CHECKOUT_SIGNATURE_SECRET=d2b2334d-1738-4a41-96f2-0626da613355
+      - NEXTAUTH_URL=http://localhost:3000
+      - AUTH_TRUST_HOST=http://localhost:3000
+      - NEXTAUTH_SECRET=marichka_secret
     networks:
       - app-network
     depends_on:
@@ -21,7 +31,7 @@ services:
     entrypoint:
       ["/bin/sh", "-c", "bunx drizzle-kit generate && bunx drizzle-kit migrate"]
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - DATABASE_URL=postgresql://postgres:postgrseql@db:5432/diplom
     volumes:
       - .:/app
     networks:
@@ -33,7 +43,7 @@ services:
     image: postgres:15-alpine
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrseql
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: diplom
     ports:
       - "5432:5432"

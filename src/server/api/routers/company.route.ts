@@ -131,10 +131,7 @@ export const companyRouter = createTRPCRouter({
 
       if (image) {
         const uuid = crypto.randomUUID();
-        imageUrl = await createImageURL(
-          `company-image-${uuid}-${image.fileName}`,
-          image.file,
-        );
+        imageUrl = await createImageURL(`company-image-${uuid}`, image.file);
       }
 
       const [company] = await ctx.db
@@ -168,10 +165,7 @@ export const companyRouter = createTRPCRouter({
 
       if (image) {
         const uuid = crypto.randomUUID();
-        imageUrl = await createImageURL(
-          `company-image-${uuid}-${image.fileName}`,
-          image.file,
-        );
+        imageUrl = await createImageURL(`company-image-${uuid}`, image.file);
       }
 
       const [company] = await ctx.db
@@ -227,14 +221,14 @@ export const companyRouter = createTRPCRouter({
       if (companyImage) {
         const uuid = crypto.randomUUID();
         companyImageURL = await createImageURL(
-          `company-image-${uuid}-${companyImage.fileName}`,
+          `company-image-${uuid}`,
           companyImage.file,
         );
       }
       if (eventImage) {
         const uuid = crypto.randomUUID();
         eventImageURL = await createImageURL(
-          `event-image-${uuid}-${eventImage.fileName}`,
+          `event-image-${uuid}`,
           eventImage.file,
         );
       }

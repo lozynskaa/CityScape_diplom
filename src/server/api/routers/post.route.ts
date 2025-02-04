@@ -72,10 +72,7 @@ export const postRouter = createTRPCRouter({
         imageUrls = await Promise.all(
           images?.map((imageFile) => {
             const uuid = crypto.randomUUID();
-            return createImageURL(
-              `post-image-${uuid}-${imageFile.fileName}`,
-              imageFile.file,
-            );
+            return createImageURL(`post-image-${uuid}`, imageFile.file);
           }),
         );
       }
@@ -103,10 +100,7 @@ export const postRouter = createTRPCRouter({
         imageUrls = await Promise.all(
           images?.map((imageFile) => {
             const uuid = crypto.randomUUID();
-            return createImageURL(
-              `post-image-${uuid}-${imageFile.fileName}`,
-              imageFile.file,
-            );
+            return createImageURL(`post-image-${uuid}`, imageFile.file);
           }),
         );
       }

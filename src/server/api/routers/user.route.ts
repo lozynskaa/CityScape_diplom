@@ -62,10 +62,7 @@ export const userRouter = createTRPCRouter({
 
       if (image) {
         const uuid = crypto.randomUUID();
-        imageUrl = await createImageURL(
-          `user-image-${uuid}-${image.fileName}`,
-          image.file,
-        );
+        imageUrl = await createImageURL(`user-image-${uuid}`, image.file);
       }
 
       const passwordHash: string = await Bun.password.hash(password);
@@ -105,10 +102,7 @@ export const userRouter = createTRPCRouter({
 
       if (image) {
         const uuid = crypto.randomUUID();
-        imageUrl = await createImageURL(
-          `user-image-${uuid}-${image.fileName}`,
-          image.file,
-        );
+        imageUrl = await createImageURL(`user-image-${uuid}`, image.file);
       }
       const updatedUser = await ctx.db
         .update(users)

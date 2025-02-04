@@ -5,6 +5,8 @@ WORKDIR /app
 # Copy Drizzle schema if using Drizzle
 COPY drizzle ./
 
+COPY .env ./
+
 # Copy package manager lockfile and install dependencies
 COPY bun.lockb package.json ./
 RUN bun install --frozen-lockfile
@@ -13,7 +15,7 @@ RUN bun install --frozen-lockfile
 COPY . .
 
 # Build the application
-RUN bun --bun build
+RUN bun --bun run build
 
 # Final runtime stage
 FROM oven/bun:latest as runner
@@ -24,4 +26,4 @@ COPY --from=deps /app .
 
 # Expose port
 EXPOSE 3000
-CMD ["bun", "run", "start"]
+CMD ["bun", "--bun", "run", "start"]

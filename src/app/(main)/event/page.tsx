@@ -1,6 +1,5 @@
 "use client";
 
-import { Suspense } from "react";
 import CategoryBadge from "~/app/_components/category-badge";
 import DynamicPagination from "~/app/_components/dynamic-pagination";
 import ExploreCard from "~/app/_components/explore-card";
@@ -69,88 +68,86 @@ export default function EventsListPage() {
   const { events, eventsCount } = data;
 
   return (
-    <Suspense>
-      <div className="w-full flex-1 space-y-8 px-12 py-8">
-        <div className="space-y-4">
-          <h1 className="text-3xl font-bold">Explore events</h1>
-          <div className="flex flex-row items-center gap-x-4">
-            {categories.map(({ label, value }) => (
-              <CategoryBadge
-                selected={value === input.category}
-                key={value}
-                category={label}
-                onClick={() => handleChangeFilter("category", value)}
-              />
-            ))}
-          </div>
-          <LabeledItem label={categoriesData?.length ? "Event Category" : ""}>
-            <div className="flex flex-row items-center gap-x-4">
-              {categoriesData.map((category) => (
-                <CategoryBadge
-                  selected={category === input.eventCategory}
-                  key={category}
-                  category={category}
-                  onClick={() => handleChangeFilter("eventCategory", category)}
-                />
-              ))}
-            </div>
-          </LabeledItem>
-
-          <div className="flex flex-row items-center gap-x-4">
-            <Input
-              label="Event Location"
-              placeholder="Enter location"
-              defaultValue={input.eventLocation}
-              onChange={(e) =>
-                handleChangeFilter("eventLocation", e.target.value)
-              }
+    <div className="w-full flex-1 space-y-8 px-12 py-8">
+      <div className="space-y-4">
+        <h1 className="text-3xl font-bold">Explore events</h1>
+        <div className="flex flex-row items-center gap-x-4">
+          {categories.map(({ label, value }) => (
+            <CategoryBadge
+              selected={value === input.category}
+              key={value}
+              category={label}
+              onClick={() => handleChangeFilter("category", value)}
             />
-            <LabeledItem label="Start Date">
-              <DatePicker
-                placeholder="Pick a start date"
-                selectedDate={input.eventDate.startDate}
-                onSelect={(date) => set("startDate", date.toISOString())}
-              />
-            </LabeledItem>
-            <LabeledItem label="End Date">
-              <DatePicker
-                placeholder="Pick an end date"
-                selectedDate={input.eventDate.endDate}
-                onSelect={(date) => set("endDate", date.toISOString())}
-              />
-            </LabeledItem>
-          </div>
+          ))}
         </div>
-        <Input
-          className="h-12 flex-1 placeholder:text-gray-400"
-          placeholder="Search for events by name"
-          defaultValue={input.search}
-          onChange={(e) => handleChangeFilter("search", e.target.value)}
-        />
-        <If condition={isFetching}>
-          <Spinner />
-        </If>
-        <If condition={!isFetching}>
-          <div className="grid grid-cols-5 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {events.map((event) => (
-              <ExploreCard
-                key={event.id}
-                imageUrl={event.imageUrl ?? ""}
-                link={`/event/${event.id}`}
-                name={event.name}
-                description={event.category ?? "No category"}
+        <LabeledItem label={categoriesData?.length ? "Event Category" : ""}>
+          <div className="flex flex-row items-center gap-x-4">
+            {categoriesData.map((category) => (
+              <CategoryBadge
+                selected={category === input.eventCategory}
+                key={category}
+                category={category}
+                onClick={() => handleChangeFilter("eventCategory", category)}
               />
             ))}
           </div>
-          <DynamicPagination
-            totalElements={eventsCount}
-            currentPage={input.page}
-            onPageChange={(page) => handleChangeFilter("page", page.toString())}
-            elementsPerPage={input.limit}
-            pagesToSeen={5}
+        </LabeledItem>
+
+        <div className="flex flex-row items-center gap-x-4">
+          <Input
+            label="Event Location"
+            placeholder="Enter location"
+            defaultValue={input.eventLocation}
+            onChange={(e) =>
+              handleChangeFilter("eventLocation", e.target.value)
+            }
           />
-        </If>
+          <LabeledItem label="Start Date">
+            <DatePicker
+              placeholder="Pick a start date"
+              selectedDate={input.eventDate.startDate}
+              onSelect={(date) => set("startDate", date.toISOString())}
+            />
+          </LabeledItem>
+          <LabeledItem label="End Date">
+            <DatePicker
+              placeholder="Pick an end date"
+              selectedDate={input.eventDate.endDate}
+              onSelect={(date) => set("endDate", date.toISOString())}
+            />
+          </LabeledItem>
+        </div>
       </div>
-    </Suspense>
+      <Input
+        className="h-12 flex-1 placeholder:text-gray-400"
+        placeholder="Search for events by name"
+        defaultValue={input.search}
+        onChange={(e) => handleChangeFilter("search", e.target.value)}
+      />
+      <If condition={isFetching}>
+        <Spinner />
+      </If>
+      <If condition={!isFetching}>
+        <div className="grid grid-cols-5 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          {events.map((event) => (
+            <ExploreCard
+              key={event.id}
+              imageUrl={event.imageUrl ?? ""}
+              link={`/event/${event.id}`}
+              name={event.name}
+              description={event.category ?? "No category"}
+            />
+          ))}
+        </div>
+        <DynamicPagination
+          totalElements={eventsCount}
+          currentPage={input.page}
+          onPageChange={(page) => handleChangeFilter("page", page.toString())}
+          elementsPerPage={input.limit}
+          pagesToSeen={5}
+        />
+      </If>
+    </div>
   );
 }
