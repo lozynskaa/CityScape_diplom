@@ -13,11 +13,9 @@ import { api } from "~/trpc/react";
 
 export default function PostSelect() {
   const { companyId } = useParams<{ companyId: string }>();
-  const { data: posts = [], isFetching } = api.company.getCompanyPosts.useQuery(
-    {
-      id: companyId,
-    },
-  );
+  const { data: posts = [], isFetching } = api.post.getCompanyPosts.useQuery({
+    id: companyId,
+  });
 
   if (isFetching) {
     return <Spinner />;
@@ -40,7 +38,7 @@ export default function PostSelect() {
                 <Post
                   title={post.title}
                   content={post.content ?? ""}
-                  images={JSON.parse(post.images ?? "[]")}
+                  images={post.imageUrls}
                 />
               </Link>
             </CarouselItem>

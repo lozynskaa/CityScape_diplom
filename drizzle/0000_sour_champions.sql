@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS "work-diplom_company" (
 CREATE TABLE IF NOT EXISTS "work-diplom_donation" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
 	"user_id" varchar(255),
-	"event_id" varchar(255) NOT NULL,
+	"jar_id" varchar(255) NOT NULL,
 	"anonymous" boolean DEFAULT false,
 	"amount" numeric(10, 2) NOT NULL,
 	"donation_date" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
@@ -66,9 +66,9 @@ CREATE TABLE IF NOT EXISTS "work-diplom_post" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "work-diplom_user_event" (
 	"user_id" varchar(255) NOT NULL,
-	"company_id" varchar(255) NOT NULL,
+	"event_id" varchar(255) NOT NULL,
 	"role" varchar(50),
-	CONSTRAINT "work-diplom_user_event_user_id_company_id_pk" PRIMARY KEY("user_id","company_id")
+	CONSTRAINT "work-diplom_user_event_user_id_event_id_pk" PRIMARY KEY("user_id","event_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "work-diplom_user" (
@@ -121,7 +121,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "work-diplom_user_event" ADD CONSTRAINT "work-diplom_user_event_company_id_work-diplom_event_id_fk" FOREIGN KEY ("company_id") REFERENCES "public"."work-diplom_event"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "work-diplom_user_event" ADD CONSTRAINT "work-diplom_user_event_event_id_work-diplom_event_id_fk" FOREIGN KEY ("event_id") REFERENCES "public"."work-diplom_event"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

@@ -5,20 +5,21 @@ import { Input } from "~/app/_components/ui/input";
 import { Textarea } from "~/app/_components/ui/textarea";
 import { Button } from "~/app/_components/ui/button";
 import { api } from "~/trpc/react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Post from "~/app/_components/post-card";
 
 const requiredFields = ["title", "content"];
 
 export default function NewPostPage() {
   const { companyId } = useParams<{ companyId: string }>();
+  const router = useRouter();
   const [postDetails, setPostDetails] = useState({
     title: "",
     content: "",
     images: [] as string[],
   });
 
-  const { mutate: createPost } = api.company.createCompanyPost.useMutation();
+  const { mutateAsync: createPost } = api.post.createPost.useMutation();
 
   const handleLoadFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -33,13 +34,17 @@ export default function NewPostPage() {
     }
   };
 
-  const handleCreatePost = () => {
-    createPost({
+  const handleCreatePost = async () => {
+    const newPost = await createPost({
       title: postDetails.title,
       content: postDetails.content,
-      images: postDetails.images,
+      imageUrls: postDetails.images,
       companyId,
     });
+
+    if (newPost) {
+      router.push(`/settings/company/${companyId}/posts/${newPost.id}`);
+    }
   };
 
   return (
@@ -68,7 +73,7 @@ export default function NewPostPage() {
 
         <Input
           type="file"
-          label="Company Logo"
+          label="Post Images"
           accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*"
           onChange={handleLoadFiles}
           multiple

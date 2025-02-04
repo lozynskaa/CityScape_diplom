@@ -1,6 +1,6 @@
 {
-  "id": "3b731b64-17f7-46a9-b20e-48c429c293de",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "fc11ad6b-a047-4f42-8dc1-3998688ccdef",
+  "prevId": "3b731b64-17f7-46a9-b20e-48c429c293de",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -207,8 +207,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "jar_id": {
-          "name": "jar_id",
+        "event_id": {
+          "name": "event_id",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true

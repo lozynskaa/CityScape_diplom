@@ -5,13 +5,28 @@ import DefaultCompanyImage from "~/assets/default-company-bg.png";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import Link from "next/link";
+import { format } from "date-fns";
+import { useState } from "react";
 
 type Props = {
-  event: Event;
+  event: Event & { isUserApplied?: boolean };
   settingsTab?: boolean;
+  handleApplyToEvent?: (id: string) => void;
 };
 
-export default function EventCard({ event, settingsTab }: Props) {
+export default function EventCard({
+  event,
+  settingsTab,
+  handleApplyToEvent,
+}: Props) {
+  const [localApplied, setLocalApplied] = useState(!!event.isUserApplied);
+
+  const handleApply = () => {
+    if (handleApplyToEvent) {
+      handleApplyToEvent(event.id);
+      setLocalApplied(true);
+    }
+  };
   return (
     <div className="flex h-full w-full flex-row justify-between gap-x-8 rounded-lg bg-white py-4">
       <div className="flex w-full flex-col gap-y-4">
@@ -20,20 +35,28 @@ export default function EventCard({ event, settingsTab }: Props) {
           <p className="line-clamp-1 text-base text-gray-600">
             {event.purpose ?? event.description}
           </p>
-        </div>
-        <div className="space-y-2">
-          <p className="text-sm text-gray-600">
-            {event.currentAmount}/{event.goalAmount} {event.currency}
+          <p className="line-clamp-2 text-base text-gray-950">
+            Location: {event.location}
+            <br />
+            Date:
+            {format(event.date!, "dd/MM/yyyy")}
           </p>
-          <div className="h-3 w-full rounded-full bg-gray-100">
-            <div
-              className="h-3 rounded-full bg-emerald-400"
-              style={{
-                width: `${((event.currentAmount ? +event.currentAmount : 0) / (event.goalAmount ? +event.goalAmount : 0)) * 100}%`,
-              }}
-            />
-          </div>
         </div>
+        {!event.withoutDonations && (
+          <div className="space-y-2">
+            <p className="text-sm text-gray-600">
+              {event.currentAmount}/{event.goalAmount} {event.currency}
+            </p>
+            <div className="h-3 w-full rounded-full bg-gray-100">
+              <div
+                className="h-3 rounded-full bg-emerald-400"
+                style={{
+                  width: `${((event.currentAmount ? +event.currentAmount : 0) / (event.goalAmount ? +event.goalAmount : 0)) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
+        )}
         {settingsTab ? (
           <Link
             href={`/settings/company/${event.companyId}/events/${event.id}`}
@@ -47,17 +70,26 @@ export default function EventCard({ event, settingsTab }: Props) {
             </Button>
           </Link>
         ) : (
-          <Link
-            href={`/company/${event.companyId}/events/${event.id}`}
-            className="w-30 inline-block h-10"
-          >
+          <div className="flex flex-row items-center gap-x-2">
             <Button
+              onClick={handleApply}
               className="w-30 h-10 rounded-full text-sm font-bold"
-              variant="ghost"
+              disabled={localApplied}
             >
-              Quick donate
+              {localApplied ? "Applied" : "Apply to event"}
             </Button>
-          </Link>
+            <Link
+              href={`/company/${event.companyId}/events/${event.id}`}
+              className="w-30 inline-block h-10"
+            >
+              <Button
+                className="w-30 h-10 rounded-full text-sm font-bold"
+                variant="ghost"
+              >
+                Quick donate
+              </Button>
+            </Link>
+          </div>
         )}
       </div>
       <Image

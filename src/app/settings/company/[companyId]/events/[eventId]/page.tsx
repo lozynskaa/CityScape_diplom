@@ -32,6 +32,7 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "~/app/_components/ui/calendar";
 import { format } from "date-fns";
+import ApplicantItem from "~/app/_components/applicant-item";
 
 export default function EventPage() {
   const { eventId } = useParams<{
@@ -142,53 +143,61 @@ export default function EventPage() {
         </p>
       </div>
 
-      <h1 className="text-2xl font-bold text-gray-950">Latest donations</h1>
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold text-gray-950">
+          Latest donations ({currentEvent.donationUsers?.length})
+        </h1>
 
-      {currentEvent?.donationUsers?.length > 0 ? (
-        <Carousel
-          opts={{
-            align: "start",
-            axis: "x",
-          }}
-          orientation="vertical"
-          className="h-[300px] w-full py-4"
-        >
-          <CarouselContent>
-            {currentEvent.donationUsers.map((userDonation, index) => (
-              <CarouselItem key={index} className="basis-1/5">
-                <DonorItem donation={userDonation as DonationItemType} />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
-      ) : (
-        <p className="!mt-2 text-sm text-gray-600">No recent donations yet.</p>
-      )}
+        {currentEvent?.donationUsers?.length > 0 ? (
+          <Carousel
+            opts={{
+              align: "start",
+              axis: "x",
+            }}
+            orientation="vertical"
+            className="max-h-[300px] w-full py-4"
+          >
+            <CarouselContent>
+              {currentEvent.donationUsers.map((userDonation, index) => (
+                <CarouselItem key={index} className="basis-1/5">
+                  <DonorItem donation={userDonation as DonationItemType} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        ) : (
+          <p className="text-sm text-gray-600">No recent donations yet.</p>
+        )}
+      </div>
 
-      <h1 className="text-2xl font-bold text-gray-950">Event applicants</h1>
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold text-gray-950">
+          Event applicants ({currentEvent.eventUsers?.length})
+        </h1>
 
-      {currentEvent?.eventUsers?.length > 0 ? (
-        <Carousel
-          opts={{
-            align: "start",
-            axis: "x",
-          }}
-          orientation="vertical"
-          className="h-[300px] w-full py-4"
-        >
-          <CarouselContent>
-            {currentEvent.donationUsers.map((userDonation, index) => (
-              <CarouselItem key={index} className="basis-1/5">
-                <DonorItem donation={userDonation as DonationItemType} />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
-      ) : (
-        <p className="!mt-2 text-sm text-gray-600">
-          No users applied to event yet.
-        </p>
-      )}
+        {currentEvent?.eventUsers?.length > 0 ? (
+          <Carousel
+            opts={{
+              align: "start",
+              axis: "x",
+            }}
+            orientation="vertical"
+            className="max-h-[300px] w-full py-4"
+          >
+            <CarouselContent>
+              {currentEvent.eventUsers.map((applicant, index) => (
+                <CarouselItem key={index} className="basis-1/5">
+                  <ApplicantItem applicant={applicant} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        ) : (
+          <p className="text-sm text-gray-600">
+            No users applied to event yet.
+          </p>
+        )}
+      </div>
 
       <div className="flex flex-row items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-950">Edit Event</h1>

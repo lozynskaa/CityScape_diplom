@@ -10,7 +10,7 @@ export const userEvents = createTable(
     userId: varchar("user_id", { length: 255 })
       .notNull()
       .references(() => users.id),
-    eventId: varchar("company_id", { length: 255 })
+    eventId: varchar("event_id", { length: 255 })
       .notNull()
       .references(() => events.id),
     role: varchar("role", { length: 50 }),

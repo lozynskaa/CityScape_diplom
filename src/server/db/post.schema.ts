@@ -9,7 +9,7 @@ export const posts = createTable("post", {
   id: varchar("id", { length: 255 })
     .notNull()
     .primaryKey()
-    .$defaultFn(() => crypto.getRandomValues(new Uint32Array()).toString()),
+    .$defaultFn(() => crypto.getRandomValues(new Uint32Array(1)).toString()),
   companyId: varchar("company_id", { length: 255 })
     .notNull()
     .references(() => companies.id),

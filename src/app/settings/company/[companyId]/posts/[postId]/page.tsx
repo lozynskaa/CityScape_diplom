@@ -24,19 +24,18 @@ export default function EditPostPage() {
     images: [] as string[],
   });
 
-  const { data: post, isFetching } = api.company.getPost.useQuery({
+  const { data: post, isFetching } = api.post.getPost.useQuery({
     id: postId,
   });
-  const { mutate: updatePost } = api.company.updateCompanyPost.useMutation();
-  const { mutateAsync: deletePost } =
-    api.company.deleteCompanyPost.useMutation();
+  const { mutate: updatePost } = api.post.updatePost.useMutation();
+  const { mutateAsync: deletePost } = api.post.deletePost.useMutation();
 
   useEffect(() => {
     if (post) {
       setPostDetails({
         title: post.title,
         content: post.content ?? "",
-        images: JSON.parse(post.images ?? "[]"),
+        images: post.imageUrls,
       });
     }
   }, [post]);
@@ -58,7 +57,7 @@ export default function EditPostPage() {
     updatePost({
       title: postDetails.title,
       content: postDetails.content,
-      images: postDetails.images,
+      imageUrls: postDetails.images,
       id: postId,
     });
   };
@@ -109,7 +108,7 @@ export default function EditPostPage() {
 
         <Input
           type="file"
-          label="Company Logo"
+          label="Post Images"
           accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*"
           onChange={handleLoadFiles}
           multiple

@@ -143,7 +143,7 @@ export default function Profile() {
         />
         <Input
           type="file"
-          label="Company Logo"
+          label="Profile Image"
           accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*"
           onChange={handleLoadFile}
         />
@@ -152,7 +152,7 @@ export default function Profile() {
             width={200}
             height={200}
             src={updatedUserData?.image}
-            alt="Company Logo"
+            alt="Profile Image"
             className="col-span-2"
           />
         )}

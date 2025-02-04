@@ -19,6 +19,12 @@ export default async function Home() {
   const quickEvents = await api.event.getRandomEvents({
     limit: 10,
   });
+
+  const handleApplyToEvent = async (id: string) => {
+    "use server";
+    await api.event.applyToEvent({ id });
+  };
+
   return (
     <HydrateClient>
       <div className="my-8 w-full space-y-8 px-10 md:px-20 lg:px-40">
@@ -82,7 +88,10 @@ export default async function Home() {
             <CarouselContent>
               {quickEvents.map((event, index) => (
                 <CarouselItem key={index} className="basis-1/3">
-                  <EventCard event={event} />
+                  <EventCard
+                    event={event}
+                    handleApplyToEvent={handleApplyToEvent}
+                  />
                 </CarouselItem>
               ))}
             </CarouselContent>

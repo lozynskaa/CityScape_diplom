@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import {
@@ -6,7 +6,13 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { donations, events, userEvents, users } from "~/server/db/schema";
+import {
+  donations,
+  events,
+  type User,
+  userEvents,
+  users,
+} from "~/server/db/schema";
 import { TRPCError } from "@trpc/server";
 
 const eventRouterValidationSchema = {
@@ -135,9 +141,31 @@ export const eventRouter = createTRPCRouter({
     .input(eventRouterValidationSchema.getRandomEvents)
     .query(async ({ input, ctx }) => {
       const { limit } = input;
+      const userId = ctx.session!.user.id;
+
       const randomEvents = await ctx.db
-        .select()
+        .select({
+          id: events.id,
+          name: events.name,
+          createdAt: events.createdAt,
+          description: events.description,
+          purpose: events.purpose,
+          location: events.location,
+          imageUrl: events.imageUrl,
+          goalAmount: events.goalAmount,
+          date: events.date,
+          companyId: events.companyId,
+          currentAmount: events.currentAmount,
+          currency: events.currency,
+          category: events.category,
+          withoutDonations: events.withoutDonations,
+          isUserApplied: sql<boolean>`CASE WHEN ${userEvents.userId} IS NOT NULL THEN true ELSE false END`,
+        })
         .from(events)
+        .leftJoin(
+          userEvents,
+          and(eq(events.id, userEvents.eventId), eq(userEvents.userId, userId)),
+        )
         .limit(limit)
         .orderBy(desc(events.createdAt));
       return randomEvents;
@@ -170,11 +198,16 @@ export const eventRouter = createTRPCRouter({
         .leftJoin(users, eq(donations.userId, users.id))
         .where(eq(donations.eventId, id));
 
-      const eventUsers = await ctx.db
-        .select()
+      const eventUsers = (await ctx.db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          image: users.image,
+        })
         .from(userEvents)
         .where(eq(userEvents.eventId, id))
-        .leftJoin(users, eq(userEvents.userId, users.id));
+        .leftJoin(users, eq(userEvents.userId, users.id))) as User[];
 
       // Combine results
       return {
