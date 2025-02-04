@@ -1,27 +1,10 @@
 version: "3.9"
 services:
-  migrations:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    working_dir: /app
-    entrypoint:
-      ["/bin/sh", "-c", "bunx drizzle-kit generate && bunx drizzle-kit migrate"]
-
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgrseql@db:5432/diplom
-    volumes:
-      - .:/app
-    networks:
-      - app-network
-    depends_on:
-      - db
-
   db:
-    image: postgres:15-alpine
+    image: postgis/postgis:15-3.3-alpine
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: postgresql
       POSTGRES_DB: diplom
     ports:
       - "5432:5432"
@@ -32,6 +15,27 @@ services:
     # extra_hosts:
     # - "host.docker.internal:host-gateway"
 
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    entrypoint:
+      [
+        "/bin/sh",
+        "-c",
+        "yarn add @t3-oss/env-nextjs && yarn db:generate && yarn db:migrate",
+      ]
+
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgresql@db:5432/diplom
+    volumes:
+      - .:/app
+    networks:
+      - app-network
+    depends_on:
+      - db
+
   app:
     build:
       context: .
@@ -39,7 +43,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgrseql@db:5432/diplom
+      - DATABASE_URL=postgresql://postgres:postgresql@db:5432/diplom
       - AUTH_SECRET=1kmQL7B8Ec5k6UCLGXvQSK5f5fwGJlf/icn/9qAeYXI=
       - OAUTH_CLIENT_ID=1094050481038-chejip4sppoo51an12l2vun57hfhm5rr.apps.googleusercontent.com
       - OAUTH_CLIENT_SECRET=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
@@ -50,10 +54,15 @@ services:
       - NEXTAUTH_URL=http://localhost:3000
       - AUTH_TRUST_HOST=http://localhost:3000
       - NEXTAUTH_SECRET=marichka_secret
+      - HERE_APP_ID=tnlocw9L5CaZ18rKRDbM
+      - HERE_API_KEY=DPlThiZyJRk3Pe2S2hKmiRqPi45f6LzrMYu6r8C0uyE
+      - SENDGRID_API_KEY=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
+      - SENDGRID_DEFAULT_SENDER=igor.com2003@gmail.com
     networks:
       - app-network
     depends_on:
       - db
+      - migrations
 
 networks:
   app-network:

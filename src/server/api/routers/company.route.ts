@@ -1,5 +1,5 @@
 import { and, count, eq, like, or, sql, sum } from "drizzle-orm";
-import { optional, z } from "zod";
+import { z } from "zod";
 import {
   createTRPCRouter,
   protectedProcedure,

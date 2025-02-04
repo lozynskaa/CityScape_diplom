@@ -11,10 +11,10 @@ export default function Post({ title, content, images }: Props) {
   return (
     <div className="space-y-2 rounded-xl bg-white p-6 shadow-md">
       <h2 className="text-2xl font-bold text-gray-950">
-        {title ? title : "Unknown title"}
+        {title?.length ? title : "Unknown title"}
       </h2>
       <p className="text-sm text-gray-600">
-        {content ? content : "Unknown content"}
+        {content?.length ? content : "Unknown content"}
       </p>
       <If condition={Array.isArray(images)}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

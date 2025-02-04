@@ -10,8 +10,8 @@ COPY drizzle ./
 COPY .env ./
 
 # Copy package manager lockfile and install dependencies
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+COPY package.json ./
+RUN yarn install    
 
 # Copy the rest of the application code
 COPY . .

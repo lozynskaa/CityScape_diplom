@@ -20,6 +20,13 @@ const defaultCenter = {
   lng: DEFAULT_LOCATION.longitude,
 };
 
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    H: any;
+  }
+}
+
 const apiKey = "DPlThiZyJRk3Pe2S2hKmiRqPi45f6LzrMYu6r8C0uyE";
 
 const Map = memo(({ zoom = 14, markers = [] }: HereMapProps) => {
