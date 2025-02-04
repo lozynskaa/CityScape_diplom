@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import NoValues from "~/app/_components/no-values";
 import EventCard from "~/app/_components/quick-event-card";
 import {
   Carousel,
@@ -19,6 +20,17 @@ export default function EventSelect() {
 
   if (isFetching) {
     return <Spinner />;
+  }
+
+  if (events.length === 0) {
+    return (
+      <NoValues
+        title="No events found"
+        message="Seems like you don't have any events. You can create one."
+        buttonText="Create event"
+        redirectUrl={`/settings/company/${companyId}/new-event`}
+      />
+    );
   }
 
   return (

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import NoValues from "~/app/_components/no-values";
 import Post from "~/app/_components/post-card";
 import {
   Carousel,
@@ -19,6 +20,17 @@ export default function PostSelect() {
 
   if (isFetching) {
     return <Spinner />;
+  }
+
+  if (posts.length === 0) {
+    return (
+      <NoValues
+        title="No posts found"
+        message="Seems like you don't have any posts. You can create one."
+        buttonText="Create post"
+        redirectUrl={`/settings/company/${companyId}/new-post`}
+      />
+    );
   }
 
   return (
