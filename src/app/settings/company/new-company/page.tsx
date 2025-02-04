@@ -16,6 +16,9 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "~/app/_components/ui/calendar";
 import { format } from "date-fns/format";
 
+const defaultBirthday = new Date();
+defaultBirthday.setFullYear(defaultBirthday.getFullYear() - 22);
+
 const requiredFields = [
   "name",
   "companyEmail",
@@ -59,7 +62,7 @@ export default function NewCompanyPage() {
     companyIBAN: "",
     okpo: "",
     phoneNumber: "",
-    dateOfBirth: new Date(),
+    dateOfBirth: defaultBirthday,
     country: "",
     firstName: "",
     lastName: "",
@@ -160,7 +163,7 @@ export default function NewCompanyPage() {
           <Popover>
             <PopoverTrigger asChild>
               <Button
-                className="h-9 w-96 items-start justify-start"
+                className="h-9 w-full items-start justify-start"
                 variant="outline"
               >
                 <CalendarIcon />

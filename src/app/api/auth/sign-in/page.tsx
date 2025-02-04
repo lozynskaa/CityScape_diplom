@@ -60,7 +60,7 @@ export default async function SignUp() {
       <div className="px-4 pt-5">
         <h1 className="text-2xl font-bold">Sign in or create an account</h1>
       </div>
-      <div className="flex flex-col items-start gap-16 md:flex-row">
+      <div className="flex flex-col items-start gap-16 lg:flex-row">
         <div className="flex flex-col items-center gap-y-3 px-4 py-3">
           <form action={handleSignIn} className="flex flex-col gap-y-3">
             <Input name="email" label="Email" className="rounded-full" />

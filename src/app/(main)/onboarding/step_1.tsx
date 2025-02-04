@@ -64,11 +64,11 @@ export function FirstStep({
           setCompanyDetails((prev) => ({ ...prev, lastName: e.target.value }))
         }
       />
-      <LabeledItem label="Event Date">
+      <LabeledItem label="Recipient Date of Birth">
         <Popover>
           <PopoverTrigger asChild>
             <Button
-              className="h-9 w-96 items-start justify-start"
+              className="h-9 w-full items-start justify-start"
               variant="outline"
             >
               <CalendarIcon />

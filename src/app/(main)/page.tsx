@@ -104,7 +104,7 @@ export default async function Home() {
             orientation="vertical"
             className="w-full py-4"
           >
-            <CarouselContent className="h-[calc(100vh-4rem)]">
+            <CarouselContent className="h-[250px]">
               {quickEvents.map((event) => (
                 <CarouselItem key={event?.id} className="basis-1/3">
                   <EventCard

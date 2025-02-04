@@ -97,6 +97,9 @@ contentByStep.set(2, {
     !state.event.eventDate,
 });
 
+const defaultBirthday = new Date();
+defaultBirthday.setFullYear(defaultBirthday.getFullYear() - 22);
+
 const DEFAULT_STATE: CompanyInfoState = {
   //company
   company: {
@@ -109,7 +112,7 @@ const DEFAULT_STATE: CompanyInfoState = {
     phoneNumber: "",
     firstName: "",
     lastName: "",
-    dateOfBirth: new Date(),
+    dateOfBirth: defaultBirthday,
     country: "",
   },
   //event

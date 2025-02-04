@@ -41,7 +41,7 @@ export default function QuickDonatePage() {
 
   return (
     <>
-      <div className="w-full space-y-8 px-12 py-8">
+      <div className="w-full flex-1 space-y-8 px-12 py-8">
         <div className="flex flex-col items-center justify-between gap-y-4">
           <h3 className="text-2xl font-bold">{event?.name}</h3>
           <Input
@@ -52,8 +52,9 @@ export default function QuickDonatePage() {
             label="Amount"
             onChange={(e) => setAmountValue(Number(e.target.value))}
             value={amountValue}
+            wrapperClassName="max-w-[200px]"
           />
-          <LabeledItem label="Include Donations">
+          <LabeledItem label="Anonymous" wrapperClassName="max-w-[200px]">
             <Switch checked={anonymous} onCheckedChange={setAnonymous} />
           </LabeledItem>
           <Button

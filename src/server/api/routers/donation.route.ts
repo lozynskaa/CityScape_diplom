@@ -78,7 +78,7 @@ export const donationRouter = createTRPCRouter({
       }
 
       const response = await checkoutService.createPaymentLink({
-        amount: Number(amount),
+        amount: Number(amount) * 100,
         currency,
         country: company.country,
         eventTitle: event.name,

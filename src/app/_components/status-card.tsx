@@ -15,7 +15,7 @@ const icons = {
 export default function StatusCard({ status, title, message }: Props) {
   const iconComponent = icons[status];
   return (
-    <div className="mt-[200px] flex h-full flex-col items-center justify-center rounded-lg bg-white p-4 shadow md:w-2/3">
+    <div className="mb-[200px] flex h-full flex-col items-center justify-center rounded-lg bg-white p-4 shadow md:w-2/3">
       <div
         className={`mb-2 flex h-12 w-12 items-center justify-center rounded-full ${status === "success" ? "bg-green-500" : status === "pending" ? "bg-yellow-500" : "bg-red-500"}`}
       >

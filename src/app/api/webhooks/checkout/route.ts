@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
     });
     await api.donation.addDonatedAmount({
       donationId: parsedBody.data.reference,
-      amount: parsedBody.data.amount,
+      amount: parsedBody.data.amount / 100,
     });
   } else {
     // Handle failed payment
