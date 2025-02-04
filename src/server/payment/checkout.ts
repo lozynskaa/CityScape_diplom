@@ -100,7 +100,7 @@ class CheckoutService {
             userId: userId,
             eventCompanyId: eventCompanyId,
           },
-          return_url: `${process.env.NEXTAUTH_URL}/donation/success`,
+          return_url: `${process.env.VERCEL_URL ?? process.env.NEXTAUTH_URL}/donation/success`,
           locale: "en-GB",
           capture: true,
           capture_on: "2019-08-24T14:15:22Z",
