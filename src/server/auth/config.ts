@@ -134,18 +134,23 @@ export const authConfig = {
     verificationTokensTable: verificationTokens,
   }),
   callbacks: {
+    async jwt({ token, user }) {
+      if (user === null) {
+        return null;
+      }
+      return token;
+    },
     session: async ({ token, session }) => {
       const [dbUser] = await db
         .select()
         .from(users)
         .where(eq(users.id, token.sub!))
         .limit(1);
+
       return {
         ...session,
         token,
-        user: {
-          ...dbUser,
-        },
+        user: dbUser,
       };
     },
     async signIn() {
