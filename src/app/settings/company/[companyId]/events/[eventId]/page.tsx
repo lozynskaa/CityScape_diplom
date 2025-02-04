@@ -21,6 +21,17 @@ import ApplicantItem from "~/app/_components/applicant-item";
 import { ItemSelectBlock } from "~/app/_components/item-select";
 import DatePicker from "~/app/_components/ui/date-picker";
 
+const requiredFields = [
+  "name",
+  "description",
+  "goalAmount",
+  "currency",
+  "purpose",
+  "category",
+  "location",
+  "date",
+];
+
 export default function EventPage() {
   const { eventId } = useParams<{
     companyId: string;
@@ -74,22 +85,10 @@ export default function EventPage() {
   };
 
   const handleSave = async () => {
-    const requiredKeys = [
-      "name",
-      "description",
-      "purpose",
-      "imageUrl",
-      "goalAmount",
-      "currency",
-      "withoutDonations",
-      "location",
-      "date",
-      "category",
-    ];
     if (
       currentEvent &&
       updatedEventData &&
-      requiredKeys.every(
+      requiredFields.every(
         (key) => key in currentEvent || key in updatedEventData,
       )
     ) {

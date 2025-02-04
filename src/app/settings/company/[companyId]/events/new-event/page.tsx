@@ -8,7 +8,7 @@ import { LabeledItem } from "~/app/_components/ui/labeled-item";
 import { Button } from "~/app/_components/ui/button";
 import { api } from "~/trpc/react";
 import { type Event } from "~/server/db/event.schema";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ItemSelectBlock } from "~/app/_components/item-select";
 import DatePicker from "~/app/_components/ui/date-picker";
 import { Switch } from "~/app/_components/ui/switch";
@@ -19,15 +19,15 @@ const requiredFields = [
   "goalAmount",
   "currency",
   "purpose",
-  "imageUrl",
+  "imageFile",
   "category",
-  "withoutDonations",
   "location",
   "date",
 ];
 
 export default function NewEventPage() {
   const { companyId } = useParams<{ companyId: string }>();
+  const router = useRouter();
   const [eventDetails, setEventDetails] = useState<
     Omit<Partial<Event>, "id" | "imageUrl"> & {
       imageFile?: { file: string; fileName: string };
@@ -44,7 +44,7 @@ export default function NewEventPage() {
     date: undefined,
   });
 
-  const { mutate: createEvent } = api.event.createEvent.useMutation();
+  const { mutateAsync: createEvent } = api.event.createEvent.useMutation();
 
   const handleLoadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -64,29 +64,30 @@ export default function NewEventPage() {
     }
   };
 
-  const handleCreateEvent = () => {
+  const handleCreateEvent = async () => {
     if (
       !requiredFields.every(
         (field) => eventDetails[field as keyof typeof eventDetails],
       )
-    )
-      return;
-    createEvent({
-      name: eventDetails.name!,
-      description: eventDetails.description!,
-      goalAmount:
-        eventDetails.goalAmount && +eventDetails.goalAmount
-          ? +eventDetails.goalAmount
-          : 0,
-      currency: eventDetails.currency!,
-      purpose: eventDetails.purpose!,
-      image: eventDetails.imageFile!,
-      companyId,
-      category: eventDetails.category!,
-      includeDonations: !!eventDetails.withoutDonations,
-      location: eventDetails.location!,
-      date: eventDetails.date!,
-    });
+    ) {
+      const newEvent = await createEvent({
+        name: eventDetails.name!,
+        description: eventDetails.description!,
+        goalAmount:
+          eventDetails.goalAmount && +eventDetails.goalAmount
+            ? +eventDetails.goalAmount
+            : 0,
+        currency: eventDetails.currency!,
+        purpose: eventDetails.purpose!,
+        image: eventDetails.imageFile!,
+        companyId,
+        category: eventDetails.category!,
+        includeDonations: !!eventDetails.withoutDonations,
+        location: eventDetails.location!,
+        date: eventDetails.date!,
+      });
+      router.push(`/settings/company/${companyId}/events/${newEvent.id}`);
+    }
   };
 
   return (
@@ -96,9 +97,11 @@ export default function NewEventPage() {
         <Button
           className="w-24 rounded-full"
           onClick={handleCreateEvent}
-          disabled={requiredFields.some(
-            (field) => !eventDetails[field as keyof typeof eventDetails],
-          )}
+          disabled={
+            !requiredFields.every(
+              (field) => eventDetails[field as keyof typeof eventDetails],
+            )
+          }
         >
           Save
         </Button>
