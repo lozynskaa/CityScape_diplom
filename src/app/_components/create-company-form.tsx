@@ -40,7 +40,7 @@ export default function CreateCompanyForm({
 
   useEffect(() => {
     if (predefinedCompany) {
-      setCompanyDetails(companyDetails);
+      setCompanyDetails(predefinedCompany);
     }
   }, [predefinedCompany]);
 
@@ -169,6 +169,7 @@ export default function CreateCompanyForm({
       <Input
         type="text"
         label="Company website"
+        value={companyDetails.website ?? ""}
         onChange={(e) =>
           setCompanyDetails((prev) => ({ ...prev, website: e.target.value }))
         }
@@ -185,7 +186,7 @@ export default function CreateCompanyForm({
           height={200}
           src={companyDetails.imageFile.file}
           alt="Company Logo"
-          className="col-span-2"
+          className="col-span-2 justify-self-center"
         />
       )}
     </form>

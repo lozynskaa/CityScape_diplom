@@ -8,6 +8,7 @@ type Props = {
 };
 
 export default function PhoneInput({ onChange, value, country }: Props) {
+  if (value === undefined || value === null) return null;
   return (
     <PhoneInputBase
       inputClass="!w-full !rounded-md"

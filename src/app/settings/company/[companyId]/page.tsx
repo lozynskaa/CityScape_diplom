@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Avatar,
   AvatarFallback,
@@ -37,7 +37,7 @@ const disabledCallback = (state: CreateCompanyDetails) => {
 
 export default function Company() {
   const { companyId } = useParams<{ companyId: string }>();
-
+  const [disabled, setDisabled] = useState(true);
   const companyDetailsRef = useRef<CreateCompanyDetails>({});
 
   const { data: currentCompany = null, isFetching } =
@@ -121,14 +121,16 @@ export default function Company() {
           Edit company details
         </h1>
 
-        <Button onClick={handleSave}>Save changes</Button>
+        <Button onClick={handleSave} disabled={disabled}>
+          Save changes
+        </Button>
       </div>
 
       <CreateCompanyForm
         predefinedCompany={currentCompany}
         companyDetailsRef={companyDetailsRef}
         disabledCallback={disabledCallback}
-        setDisabled={() => null}
+        setDisabled={setDisabled}
       />
     </div>
   );

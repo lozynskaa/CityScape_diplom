@@ -93,7 +93,7 @@ export default function CreateEventForm({
 
   useEffect(() => {
     if (predefinedEvent) {
-      setEventDetails(eventDetails);
+      setEventDetails(predefinedEvent);
     }
   }, [predefinedEvent]);
 

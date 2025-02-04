@@ -2,7 +2,7 @@ import Image from "next/image";
 import If from "./ui/if";
 
 type Props = {
-  title: string;
+  title?: string | null;
   content?: string | null;
   images?: Array<{ fileName: string; file: string } | string>;
 };
@@ -11,7 +11,7 @@ export default function Post({ title, content, images }: Props) {
   return (
     <div className="space-y-2 rounded-xl bg-white p-6 shadow-md">
       <h2 className="text-2xl font-bold text-gray-950">
-        {title || "Unknown title"}
+        {title ? title : "Unknown title"}
       </h2>
       <p className="text-sm text-gray-600">
         {content ? content : "Unknown content"}

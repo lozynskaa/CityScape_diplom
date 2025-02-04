@@ -1,61 +1,41 @@
 "use client";
 
-import { useState } from "react";
-import { Input } from "~/app/_components/ui/input";
-import { Textarea } from "~/app/_components/ui/textarea";
+import { useRef, useState } from "react";
 import { Button } from "~/app/_components/ui/button";
 import { api } from "~/trpc/react";
 import { useParams, useRouter } from "next/navigation";
-import Post from "~/app/_components/post-card";
+import CreatePostForm, {
+  type CreatePostDetails,
+} from "~/app/_components/create-post-form";
 
-const requiredFields = ["title", "content"];
+const requiredFields = ["title", "content"] as const;
+
+const disabledCallback = (state: CreatePostDetails) => {
+  return !requiredFields.every((field) => state[field]);
+};
 
 export default function NewPostPage() {
   const { companyId } = useParams<{ companyId: string }>();
+  const [disabled, setDisabled] = useState(true);
   const router = useRouter();
-  const [postDetails, setPostDetails] = useState({
-    title: "",
-    content: "",
-    images: [] as { fileName: string; file: string }[],
-  });
+  const postDetailsRef = useRef<CreatePostDetails>({});
 
   const { mutateAsync: createPost } = api.post.createPost.useMutation();
 
-  const handleLoadFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const fileList = Array.from(files);
-
-      fileList.forEach((file) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-
-        reader.onload = () => {
-          const base64Data = reader.result as string; // e.g., "data:image/png;base64,..."
-
-          const parsedFile = {
-            file: base64Data,
-            fileName: file.name,
-          };
-          setPostDetails((prev) => ({
-            ...prev,
-            imageFiles: [...prev.images, parsedFile],
-          }));
-        };
-      });
-    }
-  };
-
   const handleCreatePost = async () => {
-    const newPost = await createPost({
-      title: postDetails.title,
-      content: postDetails.content,
-      images: postDetails.images,
-      companyId,
-    });
+    if (!disabledCallback(postDetailsRef.current)) {
+      const filledPostDetails =
+        postDetailsRef.current as Required<CreatePostDetails>;
+      const newPost = await createPost({
+        title: filledPostDetails.title,
+        content: filledPostDetails.content ?? "",
+        images: filledPostDetails.imageFiles ?? [],
+        companyId,
+      });
 
-    if (newPost) {
-      router.push(`/settings/company/${companyId}/posts/${newPost.id}`);
+      if (newPost) {
+        router.push(`/settings/company/${companyId}/posts/${newPost.id}`);
+      }
     }
   };
 
@@ -66,47 +46,17 @@ export default function NewPostPage() {
         <Button
           className="w-24 rounded-full"
           onClick={handleCreatePost}
-          disabled={requiredFields.some(
-            (field) => !postDetails[field as keyof typeof postDetails],
-          )}
+          disabled={disabled}
         >
           Save
         </Button>
       </div>
-      <form className="grid w-full grid-cols-2 gap-4">
-        <Input
-          placeholder="Enter title"
-          label="Post Title"
-          value={postDetails.title}
-          onChange={(e) =>
-            setPostDetails((prev) => ({ ...prev, title: e.target.value }))
-          }
-        />
-
-        <Input
-          type="file"
-          label="Post Images"
-          accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*"
-          onChange={handleLoadFiles}
-          multiple
-        />
-        <Textarea
-          placeholder="Enter content"
-          label="Post Content"
-          value={postDetails.content}
-          onChange={(e) =>
-            setPostDetails((prev) => ({
-              ...prev,
-              content: e.target.value,
-            }))
-          }
-          className="h-40"
-          wrapperClassName="col-span-2"
-        />
-      </form>
-
-      <h1 className="text-2xl font-bold">Post Preview</h1>
-      <Post {...postDetails} />
+      <CreatePostForm
+        disabledCallback={disabledCallback}
+        postDetailsRef={postDetailsRef}
+        setDisabled={setDisabled}
+        previewPost
+      />
     </div>
   );
 }

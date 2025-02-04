@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Input } from "~/app/_components/ui/input";
-import { Textarea } from "~/app/_components/ui/textarea";
+import { useRef, useState } from "react";
 import { Button } from "~/app/_components/ui/button";
 import { api } from "~/trpc/react";
 import { useParams, useRouter } from "next/navigation";
 import Post from "~/app/_components/post-card";
 import { Spinner } from "~/app/_components/ui/spinner";
+import CreatePostForm, {
+  type CreatePostDetails,
+} from "~/app/_components/create-post-form";
+const requiredFields = ["title", "content"] as const;
 
-const requiredFields = ["title", "content"];
+const disabledCallback = (state: CreatePostDetails) => {
+  return !requiredFields.every((field) => state[field]);
+};
 
 export default function EditPostPage() {
   const { companyId, postId } = useParams<{
@@ -17,13 +21,8 @@ export default function EditPostPage() {
     postId: string;
   }>();
   const router = useRouter();
-
-  const [postDetails, setPostDetails] = useState({
-    title: "",
-    content: "",
-    images: [] as string[],
-    imageFiles: [] as { fileName: string; file: string }[],
-  });
+  const [disabled, setDisabled] = useState(true);
+  const postDetailsRef = useRef<CreatePostDetails>({});
 
   const { data: post, isFetching } = api.post.getPrivatePost.useQuery({
     id: postId,
@@ -31,49 +30,17 @@ export default function EditPostPage() {
   const { mutate: updatePost } = api.post.updatePost.useMutation();
   const { mutateAsync: deletePost } = api.post.deletePost.useMutation();
 
-  useEffect(() => {
-    if (post) {
-      setPostDetails({
-        title: post.title,
-        content: post.content ?? "",
-        images: post.imageUrls,
-        imageFiles: [],
-      });
-    }
-  }, [post]);
-
-  const handleLoadFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const fileList = Array.from(files);
-
-      fileList.forEach((file) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-
-        reader.onload = () => {
-          const base64Data = reader.result as string; // e.g., "data:image/png;base64,..."
-
-          const parsedFile = {
-            file: base64Data,
-            fileName: file.name,
-          };
-          setPostDetails((prev) => ({
-            ...prev,
-            imageFiles: [...prev.imageFiles, parsedFile],
-          }));
-        };
-      });
-    }
-  };
-
   const handleCreatePost = () => {
-    updatePost({
-      title: postDetails.title,
-      content: postDetails.content,
-      images: postDetails.imageFiles,
-      id: postId,
-    });
+    if (!disabledCallback(postDetailsRef.current)) {
+      const filledPostDetails =
+        postDetailsRef.current as Required<CreatePostDetails>;
+      updatePost({
+        id: postId,
+        title: filledPostDetails.title,
+        content: filledPostDetails.content ?? "",
+        images: filledPostDetails.imageFiles ?? [],
+      });
+    }
   };
 
   const handleDeletePost = async () => {
@@ -90,7 +57,11 @@ export default function EditPostPage() {
   return (
     <div className="h-full space-y-8 px-12 py-8">
       <h1 className="text-2xl font-bold">Post Preview</h1>
-      <Post {...postDetails} images={postDetails.imageFiles} />
+      <Post
+        title={post?.title}
+        content={post?.content}
+        images={post?.imageUrls}
+      />
       <div className="flex w-full flex-row items-center justify-between gap-x-4">
         <h1 className="flex-1 text-2xl font-bold">Edit Post</h1>
         <Button
@@ -103,44 +74,17 @@ export default function EditPostPage() {
         <Button
           className="w-24 rounded-full"
           onClick={handleCreatePost}
-          disabled={requiredFields.some(
-            (field) => !postDetails[field as keyof typeof postDetails],
-          )}
+          disabled={disabled}
         >
           Save
         </Button>
       </div>
-      <form className="grid w-full grid-cols-2 gap-4">
-        <Input
-          placeholder="Enter title"
-          label="Post Title"
-          value={postDetails.title}
-          onChange={(e) =>
-            setPostDetails((prev) => ({ ...prev, title: e.target.value }))
-          }
-        />
-
-        <Input
-          type="file"
-          label="Post Images"
-          accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*"
-          onChange={handleLoadFiles}
-          multiple
-        />
-        <Textarea
-          placeholder="Enter content"
-          label="Post Content"
-          value={postDetails.content}
-          onChange={(e) =>
-            setPostDetails((prev) => ({
-              ...prev,
-              content: e.target.value,
-            }))
-          }
-          className="h-40"
-          wrapperClassName="col-span-2"
-        />
-      </form>
+      <CreatePostForm
+        disabledCallback={disabledCallback}
+        predefinedPost={post}
+        postDetailsRef={postDetailsRef}
+        setDisabled={setDisabled}
+      />
     </div>
   );
 }
