@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { Suspense, useCallback, useEffect, useRef } from "react";
 import Post from "~/app/_components/post-card";
 import { FullPageSpinner } from "~/app/_components/ui/spinner";
 import { useDebounce } from "~/hooks/use-debounce";
@@ -80,20 +80,22 @@ export default function PostsListPage() {
   }
 
   return (
-    <div className="w-full space-y-8 px-12 py-8">
-      <div className="grid grid-cols-1 gap-y-6">
-        {data?.pages.map((page) =>
-          page.posts.map((post) => (
-            <Post
-              key={post.id}
-              images={post.imageUrls}
-              title={post.title}
-              content={post.content}
-            />
-          )),
-        )}
+    <Suspense>
+      <div className="w-full space-y-8 px-12 py-8">
+        <div className="grid grid-cols-1 gap-y-6">
+          {data?.pages.map((page) =>
+            page.posts.map((post) => (
+              <Post
+                key={post.id}
+                images={post.imageUrls}
+                title={post.title}
+                content={post.content}
+              />
+            )),
+          )}
+        </div>
+        {hasNextPage && <div ref={observerRef} className="h-10 w-full"></div>}
       </div>
-      {hasNextPage && <div ref={observerRef} className="h-10 w-full"></div>}
-    </div>
+    </Suspense>
   );
 }
