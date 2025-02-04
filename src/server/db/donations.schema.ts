@@ -18,7 +18,7 @@ export const donations = createTable("donation", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   userId: varchar("user_id", { length: 255 }),
-  eventId: varchar("jar_id", { length: 255 }).notNull(),
+  eventId: varchar("event_id", { length: 255 }).notNull(),
   anonymous: boolean("anonymous").default(false),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
   donationDate: timestamp("donation_date", {

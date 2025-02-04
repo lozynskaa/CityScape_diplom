@@ -1,6 +1,14 @@
 "use client";
 
-import { Building, Building2, Milk, StickyNote, User } from "lucide-react";
+import {
+  Building,
+  Building2,
+  CalendarFold,
+  CalendarPlus,
+  NotebookPen,
+  NotebookText,
+  User,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -30,24 +38,24 @@ const sidebarItems = [
         icon: Building,
       },
       {
-        title: "Jars",
-        icon: Milk,
-        href: (companyId: string) => `/settings/company/${companyId}/jars`,
+        title: "Events",
+        icon: CalendarFold,
+        href: (companyId: string) => `/settings/company/${companyId}/events`,
       },
       {
-        title: "New Jar",
-        icon: Milk,
+        title: "New Event",
+        icon: CalendarPlus,
         href: (companyId: string) =>
-          `/settings/company/${companyId}/jars/new-jar`,
+          `/settings/company/${companyId}/events/new-event`,
       },
       {
         title: "Posts",
-        icon: StickyNote,
+        icon: NotebookText,
         href: (companyId: string) => `/settings/company/${companyId}/posts`,
       },
       {
         title: "New Post",
-        icon: StickyNote,
+        icon: NotebookPen,
         href: (companyId: string) =>
           `/settings/company/${companyId}/posts/new-post`,
       },

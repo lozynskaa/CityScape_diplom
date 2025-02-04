@@ -6,7 +6,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { events, userEvents } from "~/server/db/schema";
+import { donations, events, userEvents, users } from "~/server/db/schema";
 import { TRPCError } from "@trpc/server";
 
 const eventRouterValidationSchema = {
@@ -151,7 +151,37 @@ export const eventRouter = createTRPCRouter({
         .select()
         .from(events)
         .where(eq(events.id, id));
-      return event;
+
+      if (!event) {
+        throw new Error("Event not found");
+      }
+
+      // Get the list of users who donated
+      const donationUsers = await ctx.db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          image: users.image,
+          donationAmount: donations.amount,
+          currency: donations.currency,
+        })
+        .from(donations)
+        .leftJoin(users, eq(donations.userId, users.id))
+        .where(eq(donations.eventId, id));
+
+      const eventUsers = await ctx.db
+        .select()
+        .from(userEvents)
+        .where(eq(userEvents.eventId, id))
+        .leftJoin(users, eq(userEvents.userId, users.id));
+
+      // Combine results
+      return {
+        ...event,
+        donationUsers: donationUsers || [],
+        eventUsers: eventUsers || [],
+      };
     }),
 
   getEventsByCompany: publicProcedure

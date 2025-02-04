@@ -1,16 +1,7 @@
 "use client";
-import { Button } from "~/app/_components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuTrigger,
-} from "~/app/_components/ui/dropdown-menu";
 import { Input } from "~/app/_components/ui/input";
 import { Textarea } from "~/app/_components/ui/textarea";
 import { type CompanyInfoState } from "./page";
-import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
-import { LabeledItem } from "~/app/_components/ui/labeled-item";
 import Image from "next/image";
 
 type Props = {
@@ -25,7 +16,7 @@ export function FirstStep({
   handleLoadFile,
 }: Props) {
   return (
-    <div className="flex w-96 flex-col items-center gap-y-4">
+    <div className="grid grid-cols-1 flex-col items-center gap-4 md:grid-cols-2">
       <Input
         placeholder="Enter name"
         label="Company Name"
@@ -45,22 +36,23 @@ export function FirstStep({
           }))
         }
       />
-      <Input
-        type="text"
-        label="Company website"
-        onChange={(e) =>
-          setCompanyDetails((prev) => ({ ...prev, website: e.target.value }))
-        }
-      />
       <Textarea
         placeholder="Enter description"
         label="Company Description"
+        wrapperClassName="col-span-2"
         value={companyDetails.description}
         onChange={(e) =>
           setCompanyDetails((prev) => ({
             ...prev,
             description: e.target.value,
           }))
+        }
+      />
+      <Input
+        type="text"
+        label="Company website"
+        onChange={(e) =>
+          setCompanyDetails((prev) => ({ ...prev, website: e.target.value }))
         }
       />
       <Input
@@ -73,35 +65,11 @@ export function FirstStep({
         <Image
           width={200}
           height={200}
+          className="col-span-2 justify-self-center"
           src={companyDetails.companyImage}
           alt="Company Logo"
         />
       )}
-
-      <DropdownMenu>
-        <LabeledItem label="Main Category">
-          <DropdownMenuTrigger asChild>
-            <Button className="w-96 items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
-              {companyDetails.category || "Select Category"}
-            </Button>
-          </DropdownMenuTrigger>
-        </LabeledItem>
-        <DropdownMenuContent>
-          <DropdownMenuGroup>
-            <DropdownMenuItem
-              className="w-96"
-              onClick={() =>
-                setCompanyDetails((prev) => ({
-                  ...prev,
-                  category: "Category 1",
-                }))
-              }
-            >
-              Category 1
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
     </div>
   );
 }

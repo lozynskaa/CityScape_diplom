@@ -24,7 +24,11 @@ export default function CompanySelect() {
       <p className="mb-4 text-center text-sm text-gray-600">
         Company not selected, please select it to continue.
       </p>
-      <ItemSelectBlock set={handleSelectCompany} items={companies} />
+      <ItemSelectBlock
+        set={handleSelectCompany}
+        items={companies}
+        title="Select company"
+      />
     </div>
   );
 }

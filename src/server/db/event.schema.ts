@@ -15,7 +15,7 @@ export const events = createTable("event", {
   id: varchar("id", { length: 255 })
     .notNull()
     .primaryKey()
-    .$defaultFn(() => crypto.getRandomValues(new Uint32Array()).toString()),
+    .$defaultFn(() => crypto.getRandomValues(new Uint32Array(8)).toString()),
   companyId: varchar("company_id", { length: 255 })
     .notNull()
     .references(() => companies.id),

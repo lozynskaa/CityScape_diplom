@@ -13,7 +13,6 @@ const companyRouterValidationSchema = {
   createCompany: z.object({
     name: z.string().min(1),
     companyEmail: z.string().email(),
-    category: z.string(),
     description: z.string(),
     website: z.string().url().optional(),
     image: z.string().url().optional(),
@@ -21,7 +20,6 @@ const companyRouterValidationSchema = {
   updateCompany: z.object({
     name: z.string().min(1),
     companyEmail: z.string().email(),
-    category: z.string(),
     description: z.string(),
     website: z.string().url().optional(),
     image: z.string().url().optional(),
@@ -168,7 +166,7 @@ export const companyRouter = createTRPCRouter({
       if (!event) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Jar not found",
+          message: "Event not found",
         });
       }
 

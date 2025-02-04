@@ -4,12 +4,13 @@ import { cn } from "~/lib/utils";
 
 type Props = React.ComponentProps<"input"> & {
   label?: string;
+  wrapperClassName?: string;
 };
 
 const Input = React.forwardRef<HTMLInputElement, Props>(
-  ({ className, type, label, ...props }, ref) => {
+  ({ className, wrapperClassName, type, label, ...props }, ref) => {
     return (
-      <div className="w-full space-y-2">
+      <div className={cn("w-full space-y-2", wrapperClassName)}>
         {label && (
           <p className="text-base font-medium text-gray-950">{label}</p>
         )}

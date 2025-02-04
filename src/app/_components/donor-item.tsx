@@ -1,4 +1,5 @@
-import { type Donation, type User } from "~/server/db/schema";
+import { type Donation } from "~/server/db/donations.schema";
+import { type User } from "~/server/db/user.schema";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 export type DonationItemType = Pick<User, "name" | "email" | "image"> & {
@@ -23,9 +24,11 @@ export default function DonorItem({ donation }: Props) {
       </Avatar>
       <div>
         <h3 className="text-lg font-bold">{donation.name ?? "Anonymous"}</h3>
-        <p className="text-sm text-gray-600">
-          {donation.donationAmount} {donation.currency}
-        </p>
+        {+donation.donationAmount && (
+          <p className="text-sm text-gray-600">
+            {donation.donationAmount} {donation.currency}
+          </p>
+        )}
       </div>
     </div>
   );

@@ -8,19 +8,11 @@ import {
   AvatarImage,
 } from "~/app/_components/ui/avatar";
 import { Button } from "~/app/_components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/app/_components/ui/dropdown-menu";
-import { LabeledItem } from "~/app/_components/ui/labeled-item";
 import { api } from "~/trpc/react";
 import DefaultCompanyImage from "~/assets/default-company-bg.png";
 import { Input } from "~/app/_components/ui/input";
 import { Textarea } from "~/app/_components/ui/textarea";
-import { type Company } from "~/server/db/schema";
+import { type Company } from "~/server/db//company.schema";
 import { Spinner } from "~/app/_components/ui/spinner";
 import { useParams } from "next/navigation";
 
@@ -43,9 +35,7 @@ export default function Company() {
         name: currentCompany.name,
         email: currentCompany.email,
         description: currentCompany.description,
-        location: currentCompany.location,
         website: currentCompany.website,
-        category: currentCompany.category,
       });
     }
   }, [currentCompany]);
@@ -82,11 +72,7 @@ export default function Company() {
         description:
           updatedCompanyData?.description ?? currentCompany?.description ?? "",
         image: updatedCompanyData?.imageUrl ?? currentCompany?.imageUrl ?? "",
-        location:
-          updatedCompanyData?.location ?? currentCompany?.location ?? "",
         website: updatedCompanyData?.website ?? currentCompany?.website ?? "",
-        category:
-          updatedCompanyData?.category ?? currentCompany?.category ?? "",
       });
 
       if (result) {
@@ -117,9 +103,7 @@ export default function Company() {
         </Avatar>
         <div>
           <h3 className="text-2xl font-bold">{currentCompany?.name}</h3>
-          <p className="text-gray-600">
-            {currentCompany?.category}, {currentCompany?.location}
-          </p>
+          <p className="text-gray-600">{currentCompany?.description}</p>
         </div>
       </div>
       <div className="flex w-full flex-col items-center gap-5 md:flex-row">
@@ -169,6 +153,20 @@ export default function Company() {
             }))
           }
         />
+        <Textarea
+          placeholder="Enter description"
+          label="Company Description"
+          wrapperClassName="col-span-2"
+          onChange={(e) =>
+            setUpdatedCompanyData((prev) => ({
+              ...prev,
+              description: e.target.value,
+            }))
+          }
+          value={
+            updatedCompanyData?.description ?? currentCompany?.description ?? ""
+          }
+        />
         <Input
           placeholder="Enter website"
           label="Company website"
@@ -180,42 +178,6 @@ export default function Company() {
             }))
           }
         />
-        <Input
-          placeholder="Enter location"
-          label="Company location"
-          value={updatedCompanyData?.location ?? currentCompany?.location ?? ""}
-          onChange={(e) =>
-            setUpdatedCompanyData((prev) => ({
-              ...prev,
-              location: e.target.value,
-            }))
-          }
-        />
-        <DropdownMenu>
-          <LabeledItem label="Main Category">
-            <DropdownMenuTrigger asChild>
-              <Button className="w-full items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
-                {updatedCompanyData?.category ??
-                  currentCompany?.category ??
-                  "Select Category"}
-              </Button>
-            </DropdownMenuTrigger>
-          </LabeledItem>
-          <DropdownMenuContent>
-            <DropdownMenuGroup>
-              <DropdownMenuItem
-                onClick={() =>
-                  setUpdatedCompanyData((prev) => ({
-                    ...prev,
-                    category: "Category 1",
-                  }))
-                }
-              >
-                Category 1
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
         <Input
           type="file"
           label="Company Logo"
@@ -231,20 +193,6 @@ export default function Company() {
             className="col-span-2"
           />
         )}
-        <Textarea
-          placeholder="Enter description"
-          label="Company Description"
-          wrapperClassName="col-span-2"
-          onChange={(e) =>
-            setUpdatedCompanyData((prev) => ({
-              ...prev,
-              description: e.target.value,
-            }))
-          }
-          value={
-            updatedCompanyData?.description ?? currentCompany?.description ?? ""
-          }
-        />
       </div>
     </div>
   );

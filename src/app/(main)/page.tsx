@@ -8,7 +8,7 @@ import {
   CarouselItem,
 } from "../_components/ui/carousel";
 import CompanyCard from "../_components/company-card";
-import JarCard from "../_components/quick-jar-card";
+import EventCard from "../_components/quick-event-card";
 import { api, HydrateClient } from "~/trpc/server";
 
 export default async function Home() {
@@ -80,9 +80,9 @@ export default async function Home() {
             className="h-[516px] w-full py-4"
           >
             <CarouselContent>
-              {quickEvents.map((jar, index) => (
+              {quickEvents.map((event, index) => (
                 <CarouselItem key={index} className="basis-1/3">
-                  <JarCard jar={jar} />
+                  <EventCard event={event} />
                 </CarouselItem>
               ))}
             </CarouselContent>

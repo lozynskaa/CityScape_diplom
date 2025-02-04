@@ -18,23 +18,28 @@ import {
 } from "~/app/_components/ui/alert-dialog";
 
 export type CompanyInfoState = {
+  //company
   name: string;
   description?: string;
   companyEmail: string;
   category: string;
-  companyImage?: string;
   website?: string;
-  jarName: string;
-  jarPurpose: string;
-  jarImage?: string;
-  currency: string;
-  jarDescription?: string;
+  companyImage?: string;
+  //event
+  eventName: string;
+  eventDescription?: string;
+  eventDate: Date;
+  eventPurpose: string;
+  eventLocation: string;
+  eventImage?: string;
   goalAmount: number;
+  includeDonations: boolean;
+  currency: string;
 };
 
 type ContentData = {
   component: typeof FirstStep | typeof SecondStep;
-  loadFileKey: "companyImage" | "jarImage";
+  loadFileKey: "companyImage" | "eventImage";
   description: string;
   title: string;
   disabled: (state: CompanyInfoState) => boolean;
@@ -46,32 +51,43 @@ contentByStep.set(1, {
   component: FirstStep,
   loadFileKey: "companyImage",
   description:
-    "Let's get started by setting up your company profile and creating a fundraising jar. Once you've completed these steps, you'll be able to take part in city-wide charity events.",
+    "Let's get started by setting up your company profile and creating a fundraising event. Once you've completed these steps, you'll be able to take part in city-wide charity events.",
   title: "Welcome to CityScape!",
-  disabled: (state: CompanyInfoState) => !state.category || !state.name,
+  disabled: (state: CompanyInfoState) =>
+    !state.category || !state.name || !state.companyEmail,
 });
 contentByStep.set(2, {
   component: SecondStep,
-  loadFileKey: "jarImage",
+  loadFileKey: "eventImage",
   description:
-    "Let's get started by setting up your company profile and creating a fundraising jar. Once you've completed these steps, you'll be able to take part in city-wide charity events.",
-  title: "Create you first fundraising jar!",
+    "Let's get started by setting up your company profile and creating a fundraising event. Once you've completed these steps, you'll be able to take part in city-wide charity events.",
+  title: "Create you first fundraising event!",
   disabled: (state: CompanyInfoState) =>
-    !state.jarPurpose || !state.jarName || !state.currency || !state.goalAmount,
+    !state.eventPurpose ||
+    !state.eventName ||
+    !state.currency ||
+    !state.eventLocation ||
+    !state.eventDate,
 });
 
 const DEFAULT_STATE: CompanyInfoState = {
+  //company
   name: "",
   description: "",
   companyEmail: "",
   category: "",
-  jarName: "",
-  jarPurpose: "",
-  currency: "USD",
-  goalAmount: 0,
   website: "",
   companyImage: "",
-  jarImage: "",
+  //event
+  eventName: "",
+  eventDescription: "",
+  eventLocation: "",
+  eventDate: new Date(),
+  eventPurpose: "",
+  goalAmount: 0,
+  includeDonations: false,
+  currency: "USD",
+  eventImage: "",
 };
 
 export default function Onboarding() {
@@ -93,18 +109,23 @@ export default function Onboarding() {
   const handleNextStep = async () => {
     if (step === 2) {
       completeOnboarding({
+        //company
         category: companyInfo.category,
         companyEmail: companyInfo.companyEmail,
         currency: companyInfo.currency,
         description: companyInfo.description,
-        goalAmount: companyInfo.goalAmount,
-        jarDescription: companyInfo.jarDescription,
-        jarName: companyInfo.jarName,
-        jarPurpose: companyInfo.jarPurpose,
         name: companyInfo.name,
         website: companyInfo.website,
-        jarImage: companyInfo.jarImage,
         companyImage: companyInfo.companyImage,
+        //event
+        eventDate: companyInfo.eventDate,
+        eventDescription: companyInfo.eventDescription,
+        eventLocation: companyInfo.eventLocation,
+        eventPurpose: companyInfo.eventPurpose,
+        eventName: companyInfo.eventName,
+        eventImage: companyInfo.eventImage,
+        goalAmount: companyInfo.goalAmount,
+        includeDonations: companyInfo.includeDonations,
       });
       return setStep(1);
     }
@@ -112,7 +133,7 @@ export default function Onboarding() {
   };
 
   const handleLoadFile =
-    (key: "jarImage" | "companyImage") =>
+    (key: "eventImage" | "companyImage") =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       const fileUrl = URL.createObjectURL(file!);

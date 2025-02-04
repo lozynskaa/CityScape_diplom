@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import JarCard from "~/app/_components/quick-jar-card";
+import EventCard from "~/app/_components/quick-event-card";
 import {
   Carousel,
   CarouselContent,
@@ -10,11 +10,12 @@ import {
 import { Spinner } from "~/app/_components/ui/spinner";
 import { api } from "~/trpc/react";
 
-export default function JarSelect() {
+export default function EventSelect() {
   const { companyId } = useParams<{ companyId: string }>();
-  const { data: jars = [], isFetching } = api.company.getCompanyJars.useQuery({
-    id: companyId,
-  });
+  const { data: events = [], isFetching } =
+    api.event.getEventsByCompany.useQuery({
+      id: companyId,
+    });
 
   if (isFetching) {
     return <Spinner />;
@@ -31,9 +32,9 @@ export default function JarSelect() {
         className="h-[516px] w-full py-4"
       >
         <CarouselContent>
-          {jars.map((jar, index) => (
+          {events.map((event, index) => (
             <CarouselItem key={index} className="basis-1/5">
-              <JarCard jar={jar} settingsTab />
+              <EventCard event={event} settingsTab />
             </CarouselItem>
           ))}
         </CarouselContent>

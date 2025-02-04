@@ -1,6 +1,6 @@
 "use client";
 
-import { type Company } from "~/server/db/schema";
+import { type Company } from "~/server/db/company.schema";
 import DefaultCompanyImage from "~/assets/default-company-bg.png";
 import Image from "next/image";
 import { Button } from "./ui/button";
@@ -17,14 +17,14 @@ export default function CompanyCard({ company }: Props) {
         src={company.imageUrl ?? DefaultCompanyImage}
         alt={company.name}
         onError={(e) => (e.currentTarget.src = DefaultCompanyImage.src)}
-        width={223}
-        height={126}
-        className="max-w-auto h-auto w-full rounded-lg object-cover"
+        width={250}
+        height={140}
+        className="h-[140px] w-[250px] rounded-lg object-contain"
       />
       <div className="space-y-3 p-4">
         <p className="text-lg font-medium text-gray-950">{company.name}</p>
         <p className="line-clamp-1 text-base text-gray-600">
-          {company.category ?? company.description}
+          {company.description}
         </p>
         <Link
           href={`/company/${company.id}`}

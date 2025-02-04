@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS "work-diplom_company" (
 CREATE TABLE IF NOT EXISTS "work-diplom_donation" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
 	"user_id" varchar(255),
-	"jar_id" varchar(255) NOT NULL,
+	"event_id" varchar(255) NOT NULL,
 	"anonymous" boolean DEFAULT false,
 	"amount" numeric(10, 2) NOT NULL,
 	"donation_date" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
