@@ -28,7 +28,7 @@ import {
 import { type Event } from "~/server/db/event.schema";
 import { TRPCError } from "@trpc/server";
 import { type Company } from "~/server/db/company.schema";
-import { createImageURL } from "~/lib/createImageURL";
+import { createImageURL } from "~/lib/image";
 
 const eventRouterValidationSchema = {
   createEvent: z.object({

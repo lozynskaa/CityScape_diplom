@@ -58,9 +58,7 @@ export default function CompanyListPage() {
         onChange={(e) => handleChangeFilter("search", e.target.value)}
       />
       {isFetching ? (
-        <div className="flex w-full flex-1 items-center justify-center">
-          <Spinner />
-        </div>
+        <Spinner />
       ) : (
         <>
           <div className="grid grid-cols-5 gap-4 md:grid-cols-3 lg:grid-cols-4">

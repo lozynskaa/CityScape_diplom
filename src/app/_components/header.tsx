@@ -12,6 +12,7 @@ import {
 } from "./ui/dropdown-menu";
 import { LogOut, SquareChartGantt, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import If from "./ui/if";
 
 const headerLinks = [
   {
@@ -57,16 +58,21 @@ export default async function Header() {
             </li>
           ))}
         </ul>
-        {session?.user ? (
+        <If condition={!session?.user}>
+          <Link href="/api/auth/sign-in">
+            <Button className="w-22 h-8 rounded-full">Sign in</Button>
+          </Link>
+        </If>
+        <If condition={!!session?.user}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="h-8 w-8 cursor-pointer">
-                <AvatarImage src={session.user.image ?? ""} alt="@shadcn" />
+                <AvatarImage src={session!.user.image ?? ""} alt="@shadcn" />
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="mr-10 w-[calc(100vw_-_64px)] md:w-40">
-              <DropdownMenuLabel>{session.user.name}</DropdownMenuLabel>
+              <DropdownMenuLabel>{session!.user.name}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <Link href="/settings/profile">
@@ -99,11 +105,7 @@ export default async function Header() {
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-        ) : (
-          <Link href="/api/auth/sign-in">
-            <Button className="w-22 h-8 rounded-full">Sign in</Button>
-          </Link>
-        )}
+        </If>
       </nav>
     </header>
   );

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import If from "./ui/if";
 
 type Props = {
   title: string;
@@ -15,9 +16,9 @@ export default function Post({ title, content, images }: Props) {
       <p className="text-sm text-gray-600">
         {content ? content : "Unknown content"}
       </p>
-      {images && images.length > 0 && (
+      <If condition={Array.isArray(images)}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {images.map((image, index) => (
+          {images!.map((image, index) => (
             <Image
               key={index}
               src={typeof image === "string" ? image : image.file}
@@ -28,7 +29,7 @@ export default function Post({ title, content, images }: Props) {
             />
           ))}
         </div>
-      )}
+      </If>
     </div>
   );
 }

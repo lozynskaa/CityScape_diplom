@@ -4,7 +4,7 @@ import { type AdapterAccount } from "next-auth/adapters";
 import { accounts, users } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { createImageURL } from "~/lib/createImageURL";
+import { createImageURL } from "~/lib/image";
 
 const userRouterValidationSchema = {
   createUser: z.object({

@@ -10,7 +10,7 @@ import {
   type SQLWrapper,
 } from "drizzle-orm";
 import { z } from "zod";
-import { createImageURL } from "~/lib/createImageURL";
+import { createImageURL } from "~/lib/image";
 
 import {
   createTRPCRouter,

@@ -1,6 +1,7 @@
 import { type Donation } from "~/server/db/donations.schema";
 import { type User } from "~/server/db/user.schema";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import If from "./ui/if";
 
 export type DonationItemType = Pick<User, "name" | "email" | "image"> & {
   donationAmount: Donation["amount"];
@@ -24,11 +25,11 @@ export default function DonorItem({ donation }: Props) {
       </Avatar>
       <div>
         <h3 className="text-lg font-bold">{donation.name ?? "Anonymous"}</h3>
-        {+donation.donationAmount && (
+        <If condition={!Number.isNaN(+donation.donationAmount)}>
           <p className="text-sm text-gray-600">
             {donation.donationAmount} {donation.currency}
           </p>
-        )}
+        </If>
       </div>
     </div>
   );

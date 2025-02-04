@@ -24,6 +24,7 @@ import {
 } from "./ui/sidebar";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import If from "./ui/if";
 
 const sidebarItems = [
   {
@@ -90,8 +91,8 @@ export default function AppSidebar() {
                     </Link>
                   </SidebarMenuButton>
                   <SidebarMenuSub>
-                    {item.subItems?.length &&
-                      item.subItems.map((subItem) => (
+                    <If condition={Array.isArray(item.subItems)}>
+                      {item.subItems!.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton
                             href={subItem.href(params.companyId)}
@@ -101,6 +102,7 @@ export default function AppSidebar() {
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       ))}
+                    </If>
                   </SidebarMenuSub>
                 </SidebarMenuItem>
               ))}

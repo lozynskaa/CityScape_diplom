@@ -19,7 +19,7 @@ export default function CompanyCard({ company }: Props) {
         onError={(e) => (e.currentTarget.src = DefaultCompanyImage.src)}
         width={250}
         height={140}
-        className="h-[140px] min-w-[100%] rounded-lg object-contain"
+        className="h-[140px] min-w-[100%] rounded-lg object-cover"
       />
       <div className="space-y-3 p-4">
         <p className="text-lg font-medium text-gray-950">{company.name}</p>

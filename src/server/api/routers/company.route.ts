@@ -14,7 +14,7 @@ import {
 } from "~/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { type Company } from "~/server/db/company.schema";
-import { createImageURL } from "~/lib/createImageURL";
+import { createImageURL } from "~/lib/image";
 
 const companyRouterValidationSchema = {
   createCompany: z.object({

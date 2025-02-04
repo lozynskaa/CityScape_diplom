@@ -1,3 +1,4 @@
+import If from "./ui/if";
 import {
   Pagination,
   PaginationContent,
@@ -39,11 +40,11 @@ export default function DynamicPagination({
             onClick={() => onPageChange(currentPage - 1)}
           />
         </PaginationItem>
-        {startPage > 1 && (
+        <If condition={startPage >= 1}>
           <PaginationItem>
             <PaginationEllipsis />
           </PaginationItem>
-        )}
+        </If>
         {Array.from(
           { length: endPage - startPage + 1 },
           (_, index) => startPage + index,
@@ -58,11 +59,11 @@ export default function DynamicPagination({
             </PaginationLink>
           </PaginationItem>
         ))}
-        {endPage < totalPages && (
+        <If condition={endPage < totalPages}>
           <PaginationItem>
             <PaginationEllipsis />
           </PaginationItem>
-        )}
+        </If>
         <PaginationItem>
           <PaginationNext
             className={

@@ -17,8 +17,5 @@ export async function createImageURL(fileName: string, fileBase64: string) {
   // Construct the URL
   const url = `/uploads/${fileName}`;
 
-  // Save the URL in the database (pseudo-code)
-  // await db.insert({ url }).into('images');
-
   return url;
 }

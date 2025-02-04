@@ -7,6 +7,7 @@ import { Button } from "./ui/button";
 import Link from "next/link";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
+import { Progress } from "./ui/progress";
 
 type Props = {
   event: Event & { isUserApplied?: boolean; paymentEnabled?: boolean | null };
@@ -36,6 +37,7 @@ export default function EventCard({
     if (settingsTab) {
       baseList.push(
         <Link
+          key={"details"}
           href={`/settings/company/${event.companyId}/events/${event.id}`}
           className="w-30 inline-block h-10"
         >
@@ -52,6 +54,7 @@ export default function EventCard({
     if (userId) {
       baseList.push(
         <Button
+          key={"apply"}
           onClick={handleApply}
           className="w-30 h-10 rounded-full text-sm font-bold"
           disabled={localApplied}
@@ -63,6 +66,7 @@ export default function EventCard({
     if (event?.paymentEnabled) {
       baseList.push(
         <Link
+          key={"donate"}
           href={`/event/${event.id}/quick-donate`}
           className="w-30 inline-block h-10"
         >
@@ -77,7 +81,11 @@ export default function EventCard({
       );
     }
     baseList.push(
-      <Link href={`/event/${event.id}`} className="w-30 inline-block h-10">
+      <Link
+        href={`/event/${event.id}`}
+        className="w-30 inline-block h-10"
+        key={"learn"}
+      >
         <Button
           className="w-30 h-10 rounded-full text-sm font-bold"
           variant="ghost"
@@ -90,7 +98,7 @@ export default function EventCard({
   }, [userId, event, localApplied, settingsTab]);
 
   return (
-    <div className="flex h-full w-full flex-row justify-between gap-x-8 rounded-lg bg-white p-4">
+    <div className="flex h-full w-full flex-col gap-8 rounded-lg bg-white p-4 shadow-md md:flex-row md:justify-between">
       <div className="flex w-full flex-col gap-y-4">
         <div className="grid grid-cols-2 gap-x-2 gap-y-1">
           <p className="col-span-2 text-lg font-bold text-gray-950">
@@ -115,14 +123,13 @@ export default function EventCard({
             <p className="text-sm text-gray-600">
               {event.currentAmount}/{event.goalAmount} {event.currency}
             </p>
-            <div className="h-3 w-full rounded-full bg-gray-100">
-              <div
-                className="h-3 rounded-full bg-primary"
-                style={{
-                  width: `${((event.currentAmount ? +event.currentAmount : 0) / (event.goalAmount ? +event.goalAmount : 0)) * 100}%`,
-                }}
-              />
-            </div>
+            <Progress
+              value={
+                ((event.currentAmount ? +event.currentAmount : 0) /
+                  (event.goalAmount ? +event.goalAmount : 0)) *
+                100
+              }
+            />
           </div>
         )}
 

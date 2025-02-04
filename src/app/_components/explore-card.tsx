@@ -26,7 +26,7 @@ export default function ExploreCard({
         onError={(e) => (e.currentTarget.src = DefaultCompanyImage.src)}
         width={250}
         height={140}
-        className="h-[140px] min-w-[100%] rounded-lg object-contain"
+        className="h-[140px] min-w-[100%] rounded-lg object-cover"
       />
       <div className="p-4">
         <p className="text-lg font-semibold text-gray-950">{name}</p>
