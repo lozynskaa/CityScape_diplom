@@ -43,6 +43,8 @@ export const users = createTable("user", {
   }),
 });
 
+export type User = typeof users.$inferSelect;
+
 export const accounts = createTable(
   "account",
   {
@@ -110,14 +112,16 @@ export const companies = createTable("company", {
   description: text("description"),
   location: varchar("location", { length: 255 }),
   website: varchar("website", { length: 255 }),
-  email: varchar("email", { length: 255 }),
+  email: varchar("email", { length: 255 }).notNull(),
   imageUrl: varchar("image_url", { length: 255 }),
-  category: varchar("main_category", { length: 255 }),
+  category: varchar("category", { length: 255 }),
   createdAt: timestamp("created_at", {
     mode: "date",
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
 });
+
+export type Company = typeof companies.$inferSelect;
 
 export const companyRelations = relations(companies, ({ many, one }) => ({
   posts: many(posts),
@@ -167,9 +171,9 @@ export const posts = createTable("post", {
     .notNull()
     .references(() => companies.id),
   userId: varchar("user_id", { length: 255 }).notNull(),
-  title: varchar("title", { length: 255 }),
+  title: varchar("title", { length: 255 }).notNull(),
   content: text("content"),
-  imageUrl: varchar("image_url", { length: 255 }),
+  images: text("images"),
   createdAt: timestamp("created_at", {
     mode: "date",
     withTimezone: true,
@@ -198,18 +202,21 @@ export const jars = createTable("jar", {
     .references(() => companies.id),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  goalAmount: numeric("goal_amount", { precision: 10, scale: 2 }),
-  currentAmount: numeric("current_amount", { precision: 10, scale: 2 }).default(
-    "0",
-  ),
+  goalAmount: numeric("goal_amount", { precision: 10, scale: 2 }).notNull(),
+  currentAmount: numeric("current_amount", { precision: 10, scale: 2 })
+    .default("0")
+    .notNull(),
   currency: varchar("currency", { length: 255 }),
   purpose: varchar("purpose", { length: 255 }),
   imageUrl: varchar("image_url", { length: 255 }),
+  // iBan: varchar("iban", { length: 34 }).notNull(),
   createdAt: timestamp("created_at", {
     mode: "date",
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
 });
+
+export type Jar = typeof jars.$inferSelect;
 
 export const jarRelations = relations(jars, ({ many, one }) => ({
   donations: many(donations),
@@ -247,6 +254,8 @@ export const donations = createTable("donation", {
   transactionId: varchar("transaction_id", { length: 255 }),
   currency: varchar("currency", { length: 10 }).default("USD"),
 });
+
+export type Donation = typeof donations.$inferSelect;
 
 export const donationRelations = relations(donations, ({ one }) => ({
   user: one(users, {

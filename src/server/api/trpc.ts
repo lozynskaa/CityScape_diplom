@@ -13,8 +13,16 @@ import { z, ZodError } from "zod";
 
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
-import { accounts, companies, jars, users } from "../db/schema";
-import { eq } from "drizzle-orm";
+import {
+  accounts,
+  companies,
+  Company,
+  donations,
+  jars,
+  posts,
+  users,
+} from "../db/schema";
+import { and, count, eq, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import { cache } from "react";
 import { type AdapterAccount } from "next-auth/adapters";
@@ -152,6 +160,16 @@ const companyRouterValidationSchema = {
     website: z.string().url().optional(),
     image: z.string().url().optional(),
   }),
+  updateCompany: z.object({
+    name: z.string().min(1),
+    companyEmail: z.string().email(),
+    category: z.string(),
+    description: z.string(),
+    location: z.string().optional(),
+    website: z.string().url().optional(),
+    image: z.string().url().optional(),
+    id: z.string(),
+  }),
   createCompanyJar: z.object({
     name: z.string().min(1),
     description: z.string(),
@@ -160,6 +178,15 @@ const companyRouterValidationSchema = {
     goalAmount: z.number().min(0),
     companyId: z.string(),
     currency: z.string(),
+  }),
+  updateCompanyJar: z.object({
+    name: z.string().min(1),
+    description: z.string(),
+    purpose: z.string(),
+    image: z.string().url().optional(),
+    goalAmount: z.number().min(0),
+    currency: z.string(),
+    id: z.string(),
   }),
   completeOnboarding: z.object({
     name: z.string().min(1),
@@ -175,6 +202,24 @@ const companyRouterValidationSchema = {
     jarImage: z.string().url().optional(),
     goalAmount: z.number().min(0),
     currency: z.string(),
+  }),
+  getRandomCompanies: z.object({
+    limit: z.number().min(1).max(100).default(10),
+  }),
+  getCompany: z.object({
+    id: z.string(),
+  }),
+  createCompanyPost: z.object({
+    title: z.string().min(1),
+    content: z.string().min(1),
+    images: z.array(z.string().url()).optional().default([]),
+    companyId: z.string(),
+  }),
+  updateCompanyPost: z.object({
+    id: z.string(),
+    title: z.string().min(1),
+    content: z.string().min(1),
+    images: z.array(z.string().url()).optional().default([]),
   }),
 };
 
@@ -214,6 +259,28 @@ export const companyRouter = createTRPCRouter({
       return company;
     }),
 
+  updateCompany: protectedProcedure
+    .input(companyRouterValidationSchema.updateCompany)
+    .mutation(async ({ input, ctx }) => {
+      const { name, description, location, website, image, id, companyEmail } =
+        input;
+
+      const [company] = await ctx.db
+        .update(companies)
+        .set({
+          name,
+          description,
+          location,
+          website,
+          imageUrl: image ?? null,
+          email: companyEmail,
+        })
+        .where(eq(companies.id, id))
+        .returning();
+
+      return company;
+    }),
+
   createCompanyJar: protectedProcedure
     .input(companyRouterValidationSchema.createCompanyJar)
     .mutation(async ({ input, ctx }) => {
@@ -238,6 +305,28 @@ export const companyRouter = createTRPCRouter({
           goalAmount: `${goalAmount}`,
           currency,
         })
+        .returning();
+
+      return jar;
+    }),
+
+  updateCompanyJar: protectedProcedure
+    .input(companyRouterValidationSchema.updateCompanyJar)
+    .mutation(async ({ input, ctx }) => {
+      const { name, description, purpose, image, goalAmount, currency, id } =
+        input;
+
+      const [jar] = await ctx.db
+        .update(jars)
+        .set({
+          name,
+          description,
+          purpose,
+          imageUrl: image ?? null,
+          goalAmount: `${goalAmount}`,
+          currency,
+        })
+        .where(eq(jars.id, id))
         .returning();
 
       return jar;
@@ -321,6 +410,160 @@ export const companyRouter = createTRPCRouter({
 
       return { company, jar };
     }),
+
+  getRandomCompanies: publicProcedure
+    .input(companyRouterValidationSchema.getRandomCompanies)
+    .query(async ({ ctx, input }) => {
+      const companyList = await ctx.db
+        .select()
+        .from(companies)
+        .orderBy(sql`RANDOM()`)
+        .limit(input.limit);
+
+      return companyList;
+    }),
+
+  getRandomJars: publicProcedure
+    .input(companyRouterValidationSchema.getRandomCompanies)
+    .query(async ({ ctx, input }) => {
+      const jarList = await ctx.db
+        .select()
+        .from(jars)
+        .orderBy(sql`RANDOM()`)
+        .limit(input.limit);
+
+      return jarList;
+    }),
+
+  getUserCompanies: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.session?.user?.id) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    const userCompanies = await ctx.db
+      .select()
+      .from(companies)
+      .where(eq(companies.founderId, ctx.session.user.id));
+    return userCompanies;
+  }),
+
+  getCompany: publicProcedure
+    .input(companyRouterValidationSchema.getCompany)
+    .query(async ({ input, ctx }) => {
+      const { id } = input;
+      const [company] = await ctx.db
+        .select()
+        .from(companies)
+        .where(eq(companies.id, id));
+      return company;
+    }),
+
+  getCompanyJars: publicProcedure
+    .input(companyRouterValidationSchema.getCompany)
+    .query(async ({ input, ctx }) => {
+      const { id } = input;
+      const companyJars = await ctx.db
+        .select()
+        .from(jars)
+        .where(eq(jars.companyId, id));
+      return companyJars;
+    }),
+
+  getJar: publicProcedure
+    .input(companyRouterValidationSchema.getCompany)
+    .query(async ({ input, ctx }) => {
+      const { id } = input;
+      const [jar] = await ctx.db.select().from(jars).where(eq(jars.id, id));
+
+      if (!jar) {
+        throw new Error("Jar not found");
+      }
+
+      // Get the list of users who donated
+      const jarUsers = await ctx.db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          image: users.image,
+          donationAmount: donations.amount,
+          currency: donations.currency,
+        })
+        .from(donations)
+        .leftJoin(users, eq(donations.userId, users.id))
+        .where(eq(donations.jarId, id));
+
+      // Combine results
+      return {
+        ...jar,
+        users: jarUsers || [], // Return an empty array if no users
+      };
+    }),
+
+  createCompanyPost: protectedProcedure
+    .input(companyRouterValidationSchema.createCompanyPost)
+    .mutation(async ({ input, ctx }) => {
+      const { content, title, companyId, images } = input;
+      const { id: userId } = ctx.session.user;
+
+      const [post] = await ctx.db
+        .insert(posts)
+        .values({
+          title,
+          content,
+          userId,
+          companyId,
+          images: JSON.stringify(images),
+        })
+        .returning();
+
+      return post;
+    }),
+
+  updateCompanyPost: protectedProcedure
+    .input(companyRouterValidationSchema.updateCompanyPost)
+    .mutation(async ({ input, ctx }) => {
+      const { id, content, title, images } = input;
+      const { id: userId } = ctx.session.user;
+
+      const [post] = await ctx.db
+        .update(posts)
+        .set({
+          title,
+          content,
+          userId,
+          images: JSON.stringify(images),
+        })
+        .where(eq(posts.id, id))
+        .returning();
+
+      return post;
+    }),
+
+  getCompanyPosts: publicProcedure
+    .input(companyRouterValidationSchema.getCompany)
+    .query(async ({ input, ctx }) => {
+      const { id } = input;
+      const companyPosts = await ctx.db
+        .select()
+        .from(posts)
+        .where(eq(posts.companyId, id));
+      return companyPosts;
+    }),
+
+  getPost: publicProcedure
+    .input(companyRouterValidationSchema.getCompany)
+    .query(async ({ input, ctx }) => {
+      const { id } = input;
+      const [post] = await ctx.db.select().from(posts).where(eq(posts.id, id));
+      return post;
+    }),
+
+  deleteCompanyPost: protectedProcedure
+    .input(companyRouterValidationSchema.getCompany)
+    .mutation(async ({ input, ctx }) => {
+      const { id } = input;
+      await ctx.db.delete(posts).where(eq(posts.id, id));
+    }),
 });
 
 const userRouterValidationSchema = {
@@ -402,7 +645,7 @@ export const userRouter = createTRPCRouter({
       return updatedUser[0];
     }),
 
-  getUser: protectedProcedure
+  getUser: publicProcedure
     .input(userRouterValidationSchema.getUser)
     .query(async ({ ctx, input }) => {
       const user = await ctx.db

@@ -5,11 +5,17 @@ import { cn } from "~/lib/utils";
 type Props = React.PropsWithChildren<{
   label?: string;
   className?: string;
+  wrapperClassName?: string;
 }>;
 
-const LabeledItem = ({ children, label, className }: Props) => {
+const LabeledItem = ({
+  children,
+  label,
+  className,
+  wrapperClassName,
+}: Props) => {
   return (
-    <div className="w-full space-y-2">
+    <div className={cn("w-full space-y-2", wrapperClassName)}>
       {label && (
         <p className={cn("text-base font-medium text-gray-950", className)}>
           {label}

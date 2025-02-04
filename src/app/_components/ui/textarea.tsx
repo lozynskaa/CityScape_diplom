@@ -4,12 +4,13 @@ import { cn } from "~/lib/utils";
 
 type Props = React.ComponentProps<"textarea"> & {
   label?: string;
+  wrapperClassName?: string;
 };
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, Props>(
-  ({ className, label, ...props }, ref) => {
+  ({ className, wrapperClassName, label, ...props }, ref) => {
     return (
-      <div className="w-full space-y-2">
+      <div className={cn("w-full space-y-2", wrapperClassName)}>
         {label && (
           <p className="text-base font-medium text-gray-950">{label}</p>
         )}

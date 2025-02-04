@@ -1,1 +1,0 @@
-DROP TABLE "work-diplom_session";
