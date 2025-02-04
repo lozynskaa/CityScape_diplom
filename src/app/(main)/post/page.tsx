@@ -78,7 +78,7 @@ export default function PostsListPage() {
 
   if (data?.pages?.length && !data.pages.every((page) => page.posts.length)) {
     return (
-      <div className="flex h-full w-full items-center justify-center">
+      <div className="flex h-full w-full flex-col items-center justify-center">
         <If condition={session.status === "authenticated"}>
           <h1 className="text-2xl font-bold">No posts found</h1>
           <p className="mt-2 text-sm text-gray-600">
