@@ -410,10 +410,6 @@ export const eventRouter = createTRPCRouter({
         whereStatement.push(lte(events.date, new Date(eventDate.endDate)));
       }
 
-      let countQuery: {
-        count: number;
-      }[] = [];
-
       switch (category) {
         case "new":
           filterEvents = await ctx.db
@@ -424,8 +420,12 @@ export const eventRouter = createTRPCRouter({
             .limit(limit)
             .offset((page - 1) * limit)
             .orderBy(desc(events.createdAt));
-          countQuery = await ctx.db.select({ count: count() }).from(events);
-          eventsCount = countQuery?.[0]?.count ?? 0;
+          const [eventsCountData] = await ctx.db
+            .select({ count: count() })
+            .from(events)
+            .where(and(...whereStatement));
+
+          eventsCount = eventsCountData?.count ?? 0;
           break;
         case "my_applies":
           if (userId) {
@@ -438,6 +438,7 @@ export const eventRouter = createTRPCRouter({
               event: events,
               userEventCount: count(userEvents.eventId),
               company: companies,
+              count: count(),
             })
             .from(events)
             .where(and(...whereStatement))
@@ -453,6 +454,7 @@ export const eventRouter = createTRPCRouter({
             event,
             company,
           }));
+          eventsCount = eventsQueryList?.[0]?.count ?? 0;
       }
       const mappedEvents = filterEvents.map(({ event }) => {
         return {

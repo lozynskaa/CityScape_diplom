@@ -3,6 +3,7 @@ import CompanyBlock from "~/app/_components/company-block";
 import Post from "~/app/_components/post-card";
 import EventCard from "~/app/_components/quick-event-card";
 import { Button } from "~/app/_components/ui/button";
+import If from "~/app/_components/ui/if";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -24,10 +25,8 @@ export default async function CompanyPage({ params }: Props) {
   const firstThreeEvents = companyEvents.slice(0, 3);
   const firstThreePosts = companyPosts.slice(0, 3);
 
-  // void api.company.getCompany.prefetch({ id: companyId });
-
   return (
-    <div className="w-full space-y-8 px-12 py-8">
+    <div className="w-full flex-1 space-y-8 px-12 py-8">
       {companyData && <CompanyBlock company={companyData} />}
       <div className="space-y-2">
         <div className="flex flex-row items-center justify-between">
@@ -47,15 +46,16 @@ export default async function CompanyPage({ params }: Props) {
             </Button>
           </Link>
         </div>
-        {firstThreeEvents.length ? (
-          firstThreeEvents.map((event) => (
+        <If condition={firstThreeEvents.length > 0}>
+          {firstThreeEvents.map((event) => (
             <div key={event.id}>
               <EventCard event={event} userId={session?.user?.id} />
             </div>
-          ))
-        ) : (
+          ))}
+        </If>
+        <If condition={!firstThreeEvents.length}>
           <p className="text-sm text-gray-600">No events yet.</p>
-        )}
+        </If>
       </div>
 
       <div className="space-y-2">
@@ -72,8 +72,9 @@ export default async function CompanyPage({ params }: Props) {
             </Button>
           </Link>
         </div>
-        {firstThreePosts.length ? (
-          firstThreePosts.map((post) => (
+
+        <If condition={firstThreePosts.length > 0}>
+          {firstThreePosts.map((post) => (
             <div key={post.id}>
               <Post
                 title={post.title}
@@ -81,10 +82,11 @@ export default async function CompanyPage({ params }: Props) {
                 images={post.imageUrls}
               />
             </div>
-          ))
-        ) : (
-          <p className="text-sm text-gray-600">No posts yet.</p>
-        )}
+          ))}
+        </If>
+        <If condition={!firstThreePosts.length}>
+          <p className="text-sm text-gray-600">No posts yet.</p>{" "}
+        </If>
       </div>
     </div>
   );

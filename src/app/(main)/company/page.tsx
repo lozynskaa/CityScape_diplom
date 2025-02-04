@@ -3,6 +3,7 @@
 import CategoryBadge from "~/app/_components/category-badge";
 import DynamicPagination from "~/app/_components/dynamic-pagination";
 import ExploreCard from "~/app/_components/explore-card";
+import If from "~/app/_components/ui/if";
 import { Input } from "~/app/_components/ui/input";
 import { Spinner } from "~/app/_components/ui/spinner";
 import { useDebounce } from "~/hooks/use-debounce";
@@ -37,7 +38,7 @@ export default function CompanyListPage() {
   const { companies, companiesCount } = data;
 
   return (
-    <div className="w-full space-y-8 px-12 py-8">
+    <div className="w-full flex-1 space-y-8 px-12 py-8">
       <div className="space-y-4">
         <h1 className="text-3xl font-bold">Explore companies</h1>
         <div className="flex flex-row items-center gap-x-4">
@@ -57,30 +58,29 @@ export default function CompanyListPage() {
         defaultValue={input.search}
         onChange={(e) => handleChangeFilter("search", e.target.value)}
       />
-      {isFetching ? (
+      <If condition={isFetching}>
         <Spinner />
-      ) : (
-        <>
-          <div className="grid grid-cols-5 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {companies.map((company) => (
-              <ExploreCard
-                key={company.id}
-                imageUrl={company.imageUrl ?? ""}
-                link={`/company/${company.id}`}
-                name={company.name}
-                description={company.description ?? "No description"}
-              />
-            ))}
-          </div>
-          <DynamicPagination
-            totalElements={companiesCount}
-            currentPage={input.page}
-            onPageChange={(page) => handleChangeFilter("page", page.toString())}
-            elementsPerPage={input.limit}
-            pagesToSeen={5}
-          />
-        </>
-      )}
+      </If>
+      <If condition={!isFetching}>
+        <div className="grid grid-cols-5 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          {companies.map((company) => (
+            <ExploreCard
+              key={company.id}
+              imageUrl={company.imageUrl ?? ""}
+              link={`/company/${company.id}`}
+              name={company.name}
+              description={company.description ?? "No description"}
+            />
+          ))}
+        </div>
+        <DynamicPagination
+          totalElements={companiesCount}
+          currentPage={input.page}
+          onPageChange={(page) => handleChangeFilter("page", page.toString())}
+          elementsPerPage={input.limit}
+          pagesToSeen={5}
+        />
+      </If>
     </div>
   );
 }

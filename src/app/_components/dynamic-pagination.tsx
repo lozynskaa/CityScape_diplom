@@ -20,13 +20,12 @@ type Props = {
 //TODO: Fix later generation of pages
 export default function DynamicPagination({
   totalElements,
-  currentPage,
+  currentPage = 1,
   onPageChange,
   pagesToSeen,
   elementsPerPage = 10,
 }: Props) {
   const totalPages = Math.ceil(totalElements / elementsPerPage);
-
   const startPage = Math.max(1, currentPage - pagesToSeen + 1);
   const endPage = Math.min(totalPages, currentPage + pagesToSeen);
 
@@ -40,7 +39,7 @@ export default function DynamicPagination({
             onClick={() => onPageChange(currentPage - 1)}
           />
         </PaginationItem>
-        <If condition={startPage >= 1}>
+        <If condition={startPage > 1}>
           <PaginationItem>
             <PaginationEllipsis />
           </PaginationItem>

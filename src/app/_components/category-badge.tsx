@@ -7,6 +7,7 @@ type Props = {
 };
 
 export default function CategoryBadge({ selected, category, onClick }: Props) {
+  console.log("🚀 ~ CategoryBadge ~ selected:", selected, category);
   return (
     <span
       className={cn(

@@ -4,6 +4,7 @@ import CategoryBadge from "~/app/_components/category-badge";
 import DynamicPagination from "~/app/_components/dynamic-pagination";
 import ExploreCard from "~/app/_components/explore-card";
 import DatePicker from "~/app/_components/ui/date-picker";
+import If from "~/app/_components/ui/if";
 import { Input } from "~/app/_components/ui/input";
 import { LabeledItem } from "~/app/_components/ui/labeled-item";
 import { Spinner } from "~/app/_components/ui/spinner";
@@ -67,7 +68,7 @@ export default function EventsListPage() {
   const { events, eventsCount } = data;
 
   return (
-    <div className="w-full space-y-8 px-12 py-8">
+    <div className="w-full flex-1 space-y-8 px-12 py-8">
       <div className="space-y-4">
         <h1 className="text-3xl font-bold">Explore events</h1>
         <div className="flex flex-row items-center gap-x-4">
@@ -84,7 +85,7 @@ export default function EventsListPage() {
           <div className="flex flex-row items-center gap-x-4">
             {categoriesData.map((category) => (
               <CategoryBadge
-                selected={category === input.category}
+                selected={category === input.eventCategory}
                 key={category}
                 category={category}
                 onClick={() => handleChangeFilter("eventCategory", category)}
@@ -124,30 +125,29 @@ export default function EventsListPage() {
         defaultValue={input.search}
         onChange={(e) => handleChangeFilter("search", e.target.value)}
       />
-      {isFetching ? (
+      <If condition={isFetching}>
         <Spinner />
-      ) : (
-        <>
-          <div className="grid grid-cols-5 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {events.map((event) => (
-              <ExploreCard
-                key={event.id}
-                imageUrl={event.imageUrl ?? ""}
-                link={`/event/${event.id}`}
-                name={event.name}
-                description={event.category ?? "No category"}
-              />
-            ))}
-          </div>
-          <DynamicPagination
-            totalElements={eventsCount}
-            currentPage={input.page}
-            onPageChange={(page) => handleChangeFilter("page", page.toString())}
-            elementsPerPage={input.limit}
-            pagesToSeen={5}
-          />
-        </>
-      )}
+      </If>
+      <If condition={!isFetching}>
+        <div className="grid grid-cols-5 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          {events.map((event) => (
+            <ExploreCard
+              key={event.id}
+              imageUrl={event.imageUrl ?? ""}
+              link={`/event/${event.id}`}
+              name={event.name}
+              description={event.category ?? "No category"}
+            />
+          ))}
+        </div>
+        <DynamicPagination
+          totalElements={eventsCount}
+          currentPage={input.page}
+          onPageChange={(page) => handleChangeFilter("page", page.toString())}
+          elementsPerPage={input.limit}
+          pagesToSeen={5}
+        />
+      </If>
     </div>
   );
 }

@@ -40,33 +40,31 @@ export default function QuickDonatePage() {
   }
 
   return (
-    <>
-      <div className="w-full flex-1 space-y-8 px-12 py-8">
-        <div className="flex flex-col items-center justify-between gap-y-4">
-          <h3 className="text-2xl font-bold">{event?.name}</h3>
-          <Input
-            disabled={isPending}
-            type="number"
-            name="amount"
-            placeholder="Amount"
-            label="Amount"
-            onChange={(e) => setAmountValue(Number(e.target.value))}
-            value={amountValue}
-            wrapperClassName="max-w-[200px]"
-          />
-          <LabeledItem label="Anonymous" wrapperClassName="max-w-[200px]">
-            <Switch checked={anonymous} onCheckedChange={setAnonymous} />
-          </LabeledItem>
-          <Button
-            disabled={isPending}
-            className="w-22 rounded-full font-bold"
-            type="submit"
-            onClick={handlePaymentCreate}
-          >
-            Donate
-          </Button>
-        </div>
+    <div className="w-full flex-1 space-y-8 px-12 py-8">
+      <div className="flex flex-col items-center justify-between gap-y-4">
+        <h3 className="text-2xl font-bold">{event?.name}</h3>
+        <Input
+          disabled={isPending}
+          type="number"
+          name="amount"
+          placeholder="Amount"
+          label="Amount"
+          onChange={(e) => setAmountValue(Number(e.target.value))}
+          value={amountValue}
+          wrapperClassName="max-w-[200px]"
+        />
+        <LabeledItem label="Anonymous" wrapperClassName="max-w-[200px]">
+          <Switch checked={anonymous} onCheckedChange={setAnonymous} />
+        </LabeledItem>
+        <Button
+          disabled={isPending}
+          className="w-22 rounded-full font-bold"
+          type="submit"
+          onClick={handlePaymentCreate}
+        >
+          Donate
+        </Button>
       </div>
-    </>
+    </div>
   );
 }

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ApplicantItem from "~/app/_components/applicant-item";
 import DonorItem, { type DonationItemType } from "~/app/_components/donor-item";
 import EventBlock from "~/app/_components/event-block";
@@ -7,6 +8,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "~/app/_components/ui/carousel";
+import If from "~/app/_components/ui/if";
 import { Progress } from "~/app/_components/ui/progress";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
@@ -30,10 +32,15 @@ export default async function EventPage({ params }: Props) {
     (user) => user.id === session?.user.id,
   );
 
+  const handleApplyToEvent = async () => {
+    "use server";
+    await api.event.applyToEvent({ id: eventId });
+  };
+
   return (
-    <div className="w-full space-y-8 px-12 py-8">
+    <div className="w-full flex-1 space-y-8 px-12 py-8">
       <EventBlock event={event} />
-      {!event.withoutDonations && (
+      <If condition={!event.withoutDonations}>
         <div className="space-y-2">
           <p className="text-base font-medium text-gray-950">
             Raised {Math.round(+event.currentAmount)} {event.currency} of{" "}
@@ -46,20 +53,21 @@ export default async function EventPage({ params }: Props) {
             By {event?.donationUsers?.length} peoples
           </p>
         </div>
-      )}
+      </If>
 
-      {!event.withoutDonations && (
+      <If condition={!event.withoutDonations}>
         <div className="space-y-2">
           <div className="flex flex-row items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-950">
               Latest donations ({event.donationUsers?.length})
             </h1>
-            <Button className="w-22 rounded-full font-bold">
-              Donate to this event
-            </Button>
+            <Link href={`/event/${eventId}/quick-donate`}>
+              <Button className="w-22 rounded-full font-bold">
+                Donate to this event
+              </Button>
+            </Link>
           </div>
-
-          {event?.donationUsers?.length > 0 ? (
+          <If condition={event?.donationUsers?.length > 0}>
             <Carousel
               opts={{
                 align: "start",
@@ -76,28 +84,30 @@ export default async function EventPage({ params }: Props) {
                 ))}
               </CarouselContent>
             </Carousel>
-          ) : (
+          </If>
+          <If condition={!event.donationUsers?.length}>
             <p className="text-sm text-gray-600">No recent donations yet.</p>
-          )}
+          </If>
         </div>
-      )}
+      </If>
 
       <div className="space-y-2">
         <div className="flex flex-row items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-950">
             Event applicants ({event.eventUsers?.length})
           </h1>
-          {!!session?.user?.id && (
+          <If condition={!!session?.user?.id}>
             <Button
               className="w-22 rounded-full font-bold"
               disabled={isCurrentUserApplied}
+              formAction={handleApplyToEvent}
             >
               {isCurrentUserApplied ? "Applied" : "Apply to this event"}
             </Button>
-          )}
+          </If>
         </div>
 
-        {event?.eventUsers?.length > 0 ? (
+        <If condition={event.eventUsers?.length > 0}>
           <Carousel
             opts={{
               align: "start",
@@ -114,11 +124,13 @@ export default async function EventPage({ params }: Props) {
               ))}
             </CarouselContent>
           </Carousel>
-        ) : (
+        </If>
+
+        <If condition={!event.eventUsers?.length}>
           <p className="text-sm text-gray-600">
             No users applied to event yet.
           </p>
-        )}
+        </If>
       </div>
     </div>
   );
