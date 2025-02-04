@@ -63,7 +63,7 @@ export default function CreateCompanyForm({
   };
 
   return (
-    <form className="my-auto grid w-full grid-cols-2 gap-4">
+    <form className="my-auto grid w-full grid-cols-1 gap-4 md:grid-cols-2">
       <Input
         placeholder="Enter name"
         label="Company Name"
@@ -147,7 +147,7 @@ export default function CreateCompanyForm({
       />
       <LabeledItem label="Company Phone Number">
         <PhoneInput
-          value={companyDetails.phone}
+          value={companyDetails.phone ?? ""}
           onChange={(value) =>
             setCompanyDetails((prev) => ({ ...prev, phone: value }))
           }

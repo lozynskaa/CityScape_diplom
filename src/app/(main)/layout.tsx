@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import Header from "../_components/header";
 import { Spinner } from "../_components/ui/spinner";
+import { SessionProvider } from "next-auth/react";
 
 export default async function MainLayout({
   children,
@@ -9,9 +10,11 @@ export default async function MainLayout({
     <>
       <Header />
       <Suspense fallback={<Spinner />}>
-        <main className="flex w-full flex-1 flex-col items-center justify-center">
-          {children}
-        </main>
+        <SessionProvider>
+          <main className="flex w-full flex-1 flex-col items-center justify-center">
+            {children}
+          </main>
+        </SessionProvider>
       </Suspense>
     </>
   );

@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 
 type Props = {
@@ -14,9 +14,9 @@ export default function NoValues({
   buttonText,
   redirectUrl,
 }: Props) {
+  const router = useRouter();
   const handleRedirect = () => {
-    "use server";
-    redirect(redirectUrl);
+    router.push(redirectUrl);
   };
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-y-4">

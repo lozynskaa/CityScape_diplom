@@ -1,4 +1,7 @@
+"use client";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import ApplicantItem from "~/app/_components/applicant-item";
 import DonorItem, { type DonationItemType } from "~/app/_components/donor-item";
 import EventBlock from "~/app/_components/event-block";
@@ -10,31 +13,36 @@ import {
 } from "~/app/_components/ui/carousel";
 import If from "~/app/_components/ui/if";
 import { Progress } from "~/app/_components/ui/progress";
-import { auth } from "~/server/auth";
-import { api } from "~/trpc/server";
+import { FullPageSpinner } from "~/app/_components/ui/spinner";
+import { api } from "~/trpc/react";
 
-type Props = {
-  params: Promise<{ eventId: string }>;
-};
+export default function EventPage() {
+  const { eventId } = useParams<{ eventId: string }>();
+  const session = useSession();
 
-export const revalidate = 60;
-
-export default async function EventPage({ params }: Props) {
-  const { eventId } = await params;
-
-  const session = await auth();
-
-  const event = await api.event.getEvent({
+  const {
+    data: event,
+    isLoading: isLoadingEvent,
+    refetch,
+  } = api.event.getEvent.useQuery({
     id: eventId,
   });
+  const { mutate } = api.event.applyToEvent.useMutation({
+    onSuccess: () => {
+      void refetch();
+    },
+  });
+
+  if (isLoadingEvent || !event) {
+    return <FullPageSpinner />;
+  }
 
   const isCurrentUserApplied = event.eventUsers.some(
-    (user) => user.id === session?.user.id,
+    (user) => user.id === session?.data?.user?.id,
   );
 
-  const handleApplyToEvent = async () => {
-    "use server";
-    await api.event.applyToEvent({ id: eventId });
+  const handleApplyToEvent = () => {
+    mutate({ id: event.id });
   };
 
   return (
@@ -96,11 +104,12 @@ export default async function EventPage({ params }: Props) {
           <h1 className="text-2xl font-bold text-gray-950">
             Event applicants ({event.eventUsers?.length})
           </h1>
-          <If condition={!!session?.user?.id}>
+          <If condition={!!session?.data?.user?.id}>
             <Button
+              type="submit"
               className="w-22 rounded-full font-bold"
               disabled={isCurrentUserApplied}
-              formAction={handleApplyToEvent}
+              onClick={handleApplyToEvent}
             >
               {isCurrentUserApplied ? "Applied" : "Apply to this event"}
             </Button>
