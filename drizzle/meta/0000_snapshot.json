@@ -1,5 +1,5 @@
 {
-  "id": "cd6a68c7-7568-493b-b385-35c2a37be8c6",
+  "id": "e30da8b4-e043-4934-a7d1-bd8556945927",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -146,12 +146,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "location": {
-          "name": "location",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
         "website": {
           "name": "website",
           "type": "varchar(255)",
@@ -166,12 +160,6 @@
         },
         "image_url": {
           "name": "image_url",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "category": {
-          "name": "category",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
@@ -203,69 +191,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.work-diplom_company_user": {
-      "name": "work-diplom_company_user",
-      "schema": "",
-      "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "company_id": {
-          "name": "company_id",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "role": {
-          "name": "role",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "work-diplom_company_user_user_id_work-diplom_user_id_fk": {
-          "name": "work-diplom_company_user_user_id_work-diplom_user_id_fk",
-          "tableFrom": "work-diplom_company_user",
-          "tableTo": "work-diplom_user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "work-diplom_company_user_company_id_work-diplom_company_id_fk": {
-          "name": "work-diplom_company_user_company_id_work-diplom_company_id_fk",
-          "tableFrom": "work-diplom_company_user",
-          "tableTo": "work-diplom_company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "work-diplom_company_user_user_id_company_id_pk": {
-          "name": "work-diplom_company_user_user_id_company_id_pk",
-          "columns": [
-            "user_id",
-            "company_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {}
-    },
     "public.work-diplom_donation": {
       "name": "work-diplom_donation",
       "schema": "",
@@ -280,13 +205,20 @@
           "name": "user_id",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "jar_id": {
           "name": "jar_id",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
+        },
+        "anonymous": {
+          "name": "anonymous",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         },
         "amount": {
           "name": "amount",
@@ -324,44 +256,17 @@
           "name": "currency",
           "type": "varchar(10)",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "'USD'"
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "work-diplom_donation_user_id_work-diplom_user_id_fk": {
-          "name": "work-diplom_donation_user_id_work-diplom_user_id_fk",
-          "tableFrom": "work-diplom_donation",
-          "tableTo": "work-diplom_user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "work-diplom_donation_jar_id_work-diplom_jar_id_fk": {
-          "name": "work-diplom_donation_jar_id_work-diplom_jar_id_fk",
-          "tableFrom": "work-diplom_donation",
-          "tableTo": "work-diplom_jar",
-          "columnsFrom": [
-            "jar_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.work-diplom_jar": {
-      "name": "work-diplom_jar",
+    "public.work-diplom_event": {
+      "name": "work-diplom_event",
       "schema": "",
       "columns": {
         "id": {
@@ -392,7 +297,8 @@
           "name": "goal_amount",
           "type": "numeric(10, 2)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'0'"
         },
         "current_amount": {
           "name": "current_amount",
@@ -400,6 +306,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"
+        },
+        "category": {
+          "name": "category",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
         },
         "currency": {
           "name": "currency",
@@ -419,6 +331,19 @@
           "primaryKey": false,
           "notNull": false
         },
+        "location": {
+          "name": "location",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "without_donations": {
+          "name": "without_donations",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -429,9 +354,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "work-diplom_jar_company_id_work-diplom_company_id_fk": {
-          "name": "work-diplom_jar_company_id_work-diplom_company_id_fk",
-          "tableFrom": "work-diplom_jar",
+        "work-diplom_event_company_id_work-diplom_company_id_fk": {
+          "name": "work-diplom_event_company_id_work-diplom_company_id_fk",
+          "tableFrom": "work-diplom_event",
           "tableTo": "work-diplom_company",
           "columnsFrom": [
             "company_id"
@@ -480,11 +405,12 @@
           "primaryKey": false,
           "notNull": false
         },
-        "images": {
-          "name": "images",
-          "type": "text",
+        "image_urls": {
+          "name": "image_urls",
+          "type": "text[]",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "ARRAY[]::TEXT[]"
         },
         "created_at": {
           "name": "created_at",
@@ -513,6 +439,69 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "public.work-diplom_user_event": {
+      "name": "work-diplom_user_event",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "company_id": {
+          "name": "company_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "work-diplom_user_event_user_id_work-diplom_user_id_fk": {
+          "name": "work-diplom_user_event_user_id_work-diplom_user_id_fk",
+          "tableFrom": "work-diplom_user_event",
+          "tableTo": "work-diplom_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "work-diplom_user_event_company_id_work-diplom_event_id_fk": {
+          "name": "work-diplom_user_event_company_id_work-diplom_event_id_fk",
+          "tableFrom": "work-diplom_user_event",
+          "tableTo": "work-diplom_event",
+          "columnsFrom": [
+            "company_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "work-diplom_user_event_user_id_company_id_pk": {
+          "name": "work-diplom_user_event_user_id_company_id_pk",
+          "columns": [
+            "user_id",
+            "company_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
     "public.work-diplom_user": {
       "name": "work-diplom_user",
       "schema": "",
@@ -527,7 +516,7 @@
           "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "email": {
           "name": "email",
@@ -540,12 +529,6 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
-        },
-        "profile_photo": {
-          "name": "profile_photo",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
         },
         "bio": {
           "name": "bio",
@@ -622,17 +605,7 @@
       "uniqueConstraints": {}
     }
   },
-  "enums": {
-    "public.donation_type": {
-      "name": "donation_type",
-      "schema": "public",
-      "values": [
-        "cash",
-        "card",
-        "crypto"
-      ]
-    }
-  },
+  "enums": {},
   "schemas": {},
   "sequences": {},
   "_meta": {
