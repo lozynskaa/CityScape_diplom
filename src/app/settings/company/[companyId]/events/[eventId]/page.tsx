@@ -17,16 +17,9 @@ import { Input } from "~/app/_components/ui/input";
 import { LabeledItem } from "~/app/_components/ui/labeled-item";
 import { Textarea } from "~/app/_components/ui/textarea";
 import { Switch } from "~/app/_components/ui/switch";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/app/_components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "~/app/_components/ui/calendar";
-import { format } from "date-fns";
 import ApplicantItem from "~/app/_components/applicant-item";
 import { ItemSelectBlock } from "~/app/_components/item-select";
+import DatePicker from "~/app/_components/ui/date-picker";
 
 export default function EventPage() {
   const { eventId } = useParams<{
@@ -258,32 +251,12 @@ export default function EventPage() {
           }
         />
         <LabeledItem label="Event Date">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                className="h-9 w-full items-start justify-start"
-                variant="outline"
-              >
-                <CalendarIcon />
-                {updatedEventData.date ? (
-                  format(updatedEventData.date, "PPP")
-                ) : (
-                  <span>Pick a date</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={updatedEventData.date ?? undefined}
-                onSelect={(date) =>
-                  date &&
-                  setUpdatedEventData((prev) => ({ ...prev, date: date }))
-                }
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <DatePicker
+            selectedDate={updatedEventData.date}
+            onSelect={(date) =>
+              setUpdatedEventData((prev) => ({ ...prev, date: date }))
+            }
+          />
         </LabeledItem>
 
         <Input

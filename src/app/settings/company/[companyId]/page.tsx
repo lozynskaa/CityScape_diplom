@@ -16,14 +16,7 @@ import { type Company } from "~/server/db//company.schema";
 import { Spinner } from "~/app/_components/ui/spinner";
 import { useParams } from "next/navigation";
 import { LabeledItem } from "~/app/_components/ui/labeled-item";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/app/_components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "~/app/_components/ui/calendar";
-import { format } from "date-fns";
+import DatePicker from "~/app/_components/ui/date-picker";
 
 const requiredFields = [
   "name",
@@ -208,35 +201,15 @@ export default function Company() {
           }
         />
         <LabeledItem label="Recipient Date of Birth">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                className="h-9 w-full items-start justify-start"
-                variant="outline"
-              >
-                <CalendarIcon />
-                {updatedCompanyData.dateOfBirth ? (
-                  format(updatedCompanyData.dateOfBirth, "PPP")
-                ) : (
-                  <span>Pick a date</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={updatedCompanyData.dateOfBirth}
-                onSelect={(date) =>
-                  date &&
-                  setUpdatedCompanyData((prev) => ({
-                    ...prev,
-                    dateOfBirth: date,
-                  }))
-                }
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <DatePicker
+            onSelect={(date) =>
+              setUpdatedCompanyData((prev) => ({
+                ...prev,
+                dateOfBirth: date,
+              }))
+            }
+            selectedDate={updatedCompanyData.dateOfBirth}
+          />
         </LabeledItem>
 
         <Input

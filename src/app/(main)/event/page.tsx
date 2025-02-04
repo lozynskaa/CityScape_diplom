@@ -1,19 +1,11 @@
 "use client";
 
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 import CategoryBadge from "~/app/_components/category-badge";
 import DynamicPagination from "~/app/_components/dynamic-pagination";
 import ExploreCard from "~/app/_components/explore-card";
-import { Button } from "~/app/_components/ui/button";
-import { Calendar } from "~/app/_components/ui/calendar";
+import DatePicker from "~/app/_components/ui/date-picker";
 import { Input } from "~/app/_components/ui/input";
 import { LabeledItem } from "~/app/_components/ui/labeled-item";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/app/_components/ui/popover";
 import { Spinner } from "~/app/_components/ui/spinner";
 import { useDebounce } from "~/hooks/use-debounce";
 import { useWritableSearchParams } from "~/hooks/use-writable-search-params";
@@ -111,58 +103,18 @@ export default function EventsListPage() {
             }
           />
           <LabeledItem label="Start Date">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  className="h-9 w-full items-center justify-start"
-                  variant="outline"
-                >
-                  <CalendarIcon />
-                  {input.eventDate.startDate ? (
-                    format(input.eventDate.startDate, "PPP")
-                  ) : (
-                    <span>Pick a start date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={input.eventDate.startDate ?? undefined}
-                  onSelect={(date) =>
-                    date && set("startDate", date.toISOString())
-                  }
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <DatePicker
+              placeholder="Pick a start date"
+              selectedDate={input.eventDate.startDate}
+              onSelect={(date) => set("startDate", date.toISOString())}
+            />
           </LabeledItem>
           <LabeledItem label="End Date">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  className="h-9 w-full items-center justify-start"
-                  variant="outline"
-                >
-                  <CalendarIcon />
-                  {input.eventDate.endDate ? (
-                    format(input.eventDate.endDate, "PPP")
-                  ) : (
-                    <span>Pick a end date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={input.eventDate.endDate ?? undefined}
-                  onSelect={(date) =>
-                    date && set("endDate", date.toISOString())
-                  }
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <DatePicker
+              placeholder="Pick an end date"
+              selectedDate={input.eventDate.endDate}
+              onSelect={(date) => set("endDate", date.toISOString())}
+            />
           </LabeledItem>
         </div>
       </div>

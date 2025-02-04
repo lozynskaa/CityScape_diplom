@@ -4,15 +4,7 @@ import { Textarea } from "~/app/_components/ui/textarea";
 import { type CompanyInfoState } from "./page";
 import Image from "next/image";
 import { LabeledItem } from "~/app/_components/ui/labeled-item";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/app/_components/ui/popover";
-import { Button } from "~/app/_components/ui/button";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "~/app/_components/ui/calendar";
-import { format } from "date-fns/format";
+import DatePicker from "~/app/_components/ui/date-picker";
 
 type Props = {
   companyDetails: CompanyInfoState["company"];
@@ -65,32 +57,12 @@ export function FirstStep({
         }
       />
       <LabeledItem label="Recipient Date of Birth">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              className="h-9 w-full items-start justify-start"
-              variant="outline"
-            >
-              <CalendarIcon />
-              {companyDetails.dateOfBirth ? (
-                format(companyDetails.dateOfBirth, "PPP")
-              ) : (
-                <span>Pick a date</span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={companyDetails.dateOfBirth}
-              onSelect={(date) =>
-                date &&
-                setCompanyDetails((prev) => ({ ...prev, eventDate: date }))
-              }
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
+        <DatePicker
+          selectedDate={companyDetails.dateOfBirth}
+          onSelect={(date) =>
+            setCompanyDetails((prev) => ({ ...prev, dateOfBirth: date }))
+          }
+        />
       </LabeledItem>
       <Input
         placeholder="Enter country code"
