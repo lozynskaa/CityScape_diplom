@@ -29,6 +29,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
+    # extra_hosts:
+    # - "host.docker.internal:host-gateway"
 
   app:
     build:

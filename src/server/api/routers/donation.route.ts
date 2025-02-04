@@ -3,7 +3,11 @@ import { format } from "date-fns";
 import { eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { companies } from "~/server/db/company.schema";
 import { donations } from "~/server/db/donations.schema";
 import { events } from "~/server/db/event.schema";
@@ -163,4 +167,16 @@ export const donationRouter = createTRPCRouter({
         .where(eq(donations.id, id));
       return true;
     }),
+
+  getUserDonations: protectedProcedure.query(async ({ ctx }) => {
+    const userDonations = await ctx.db
+      .select({
+        donation: donations,
+        event: events,
+      })
+      .from(donations)
+      .where(eq(donations.userId, ctx.session.user.id))
+      .leftJoin(events, eq(donations.eventId, events.id));
+    return userDonations;
+  }),
 });

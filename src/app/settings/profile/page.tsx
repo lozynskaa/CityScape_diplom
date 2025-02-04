@@ -14,6 +14,12 @@ import { Textarea } from "~/app/_components/ui/textarea";
 import { type User } from "~/server/db/schema";
 import { api } from "~/trpc/react";
 import { Button } from "~/app/_components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "~/app/_components/ui/carousel";
+import DonorItem from "~/app/_components/donor-item";
 
 const requiredFields = ["name", "email"];
 
@@ -31,9 +37,11 @@ export default function Profile() {
 
   const {
     data: user,
-    isFetching,
+    isPending: isLoadingUser,
     isFetched,
   } = api.user.getUser.useQuery(userId ? { id: userId } : skipToken);
+  const { data: userDonations = [], isPending: isLoadingDonations } =
+    api.donation.getUserDonations.useQuery();
   const { mutateAsync: updateUser } = api.user.updateUser.useMutation();
 
   useEffect(() => {
@@ -42,7 +50,7 @@ export default function Profile() {
     }
   }, [isFetched]);
 
-  if (isFetching || !user) {
+  if (isLoadingUser || isLoadingDonations || !user) {
     return <Spinner />;
   }
 
@@ -105,6 +113,43 @@ export default function Profile() {
           {user.bio}
         </p>
       )}
+
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold text-gray-950">
+          Latest donations ({userDonations.length})
+        </h1>
+
+        {userDonations?.length > 0 ? (
+          <Carousel
+            opts={{
+              align: "start",
+              axis: "x",
+            }}
+            orientation="vertical"
+            className="w-full py-4"
+          >
+            <CarouselContent className="max-h-[300px]">
+              {userDonations.map(({ donation, event }, index) => (
+                <CarouselItem key={index} className="basis-1/5">
+                  <DonorItem
+                    donation={{
+                      ...donation,
+                      donationAmount: donation?.amount,
+                      name: `${user.name} (You)`,
+                      image: user.image,
+                      email: user.email,
+                      eventName: event?.name ?? "",
+                    }}
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        ) : (
+          <p className="text-sm text-gray-600">No recent donations yet.</p>
+        )}
+      </div>
+
       <div className="flex flex-row items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-950">
           Edit profile details

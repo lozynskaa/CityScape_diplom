@@ -1,29 +1,32 @@
-# Use Bun's official Docker image
-FROM oven/bun:latest as deps
+# Use Node.js official Docker image
+FROM node:20-alpine as deps
 WORKDIR /app
 
+# No need to install Yarn as it's pre-installed
 # Copy Drizzle schema if using Drizzle
 COPY drizzle ./
 
+# Copy environment variables
 COPY .env ./
 
 # Copy package manager lockfile and install dependencies
-COPY bun.lockb package.json ./
-RUN bun install --frozen-lockfile
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
 # Copy the rest of the application code
 COPY . .
 
 # Build the application
-RUN bun --bun run build
+RUN yarn build
 
 # Final runtime stage
-FROM oven/bun:latest as runner
+FROM node:20-alpine as runner
 WORKDIR /app
 
+# No need to install Yarn here either
 # Copy built files from the builder stage
 COPY --from=deps /app .
 
 # Expose port
 EXPOSE 3000
-CMD ["bun", "--bun", "run", "start"]
+CMD ["yarn", "start"]

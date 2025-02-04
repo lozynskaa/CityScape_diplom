@@ -16,7 +16,7 @@ export default async function Home() {
   void api.company.getRandomCompanies.prefetch({
     limit: 10,
   });
-  void api.event.getRandomEvents({
+  void api.event.getRandomEvents.prefetch({
     limit: 10,
   });
 

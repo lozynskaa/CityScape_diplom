@@ -250,9 +250,13 @@ export const eventRouter = createTRPCRouter({
           image: users.image,
           donationAmount: donations.amount,
           currency: donations.currency,
+          status: donations.status,
+          donationDate: donations.donationDate,
+          eventName: events.name,
         })
         .from(donations)
         .leftJoin(users, eq(donations.userId, users.id))
+        .leftJoin(events, eq(donations.eventId, events.id))
         .where(
           and(eq(donations.eventId, id), eq(donations.status, "completed")),
         );
@@ -299,9 +303,13 @@ export const eventRouter = createTRPCRouter({
           image: users.image,
           donationAmount: donations.amount,
           currency: donations.currency,
+          status: donations.status,
+          donationDate: donations.donationDate,
+          eventName: events.name,
         })
         .from(donations)
         .leftJoin(users, eq(donations.userId, users.id))
+        .leftJoin(events, eq(donations.eventId, events.id))
         .where(eq(donations.eventId, id));
 
       const eventUsers = (await ctx.db
