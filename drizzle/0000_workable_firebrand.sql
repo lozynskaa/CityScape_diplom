@@ -81,7 +81,9 @@ CREATE TABLE IF NOT EXISTS "work-diplom_user" (
 	"password_hash" varchar(255) NOT NULL,
 	"profile_photo" varchar(255),
 	"bio" text,
-	"created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+	"created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+	"image" varchar(255),
+	"email_verified" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "work-diplom_verification_token" (

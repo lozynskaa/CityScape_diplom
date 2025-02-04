@@ -1,6 +1,6 @@
 {
-  "id": "7d7b0a66-384b-485d-8992-68c4c827f620",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "27f04261-774a-4897-8e7d-6715193e22de",
+  "prevId": "7d7b0a66-384b-485d-8992-68c4c827f620",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -466,64 +466,6 @@
           "tableTo": "work-diplom_company",
           "columnsFrom": [
             "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.work-diplom_session": {
-      "name": "work-diplom_session",
-      "schema": "",
-      "columns": {
-        "session_token": {
-          "name": "session_token",
-          "type": "varchar(255)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "expires": {
-          "name": "expires",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "session_user_id_idx": {
-          "name": "session_user_id_idx",
-          "columns": [
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "work-diplom_session_user_id_work-diplom_user_id_fk": {
-          "name": "work-diplom_session_user_id_work-diplom_user_id_fk",
-          "tableFrom": "work-diplom_session",
-          "tableTo": "work-diplom_user",
-          "columnsFrom": [
-            "user_id"
           ],
           "columnsTo": [
             "id"

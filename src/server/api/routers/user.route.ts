@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { type AdapterAccount } from "next-auth/adapters";
 
@@ -9,6 +9,7 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { accounts, users } from "~/server/db/schema";
+import { TRPCError } from "@trpc/server";
 
 const userRouterValidationSchema = {
   createUser: z.object({
@@ -37,6 +38,11 @@ const userRouterValidationSchema = {
     id_token: z.string(),
     session_state: z.string(),
   }),
+  signIn: z.object({
+    email: z.string().email(),
+    password: z.string().optional(),
+    provider: z.enum(["credentials", "google"]).optional(),
+  }),
 };
 
 export const userRouter = createTRPCRouter({
@@ -45,12 +51,10 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { name, email, password, bio } = input;
 
-      const passwordHash: string = (await Bun.password.hash(
-        password,
-      )) as string;
+      const passwordHash: string = await Bun.password.hash(password);
 
       // Create a new user
-      const user = await ctx.db
+      const [user] = await ctx.db
         .insert(users)
         .values({
           id: randomUUID(),
@@ -61,16 +65,14 @@ export const userRouter = createTRPCRouter({
         })
         .returning();
 
-      const newUser = user[0];
-
-      if (!newUser) return;
+      if (!user) return;
 
       // Optional: create an account entry if using OAuth provider
       await ctx.db.insert(accounts).values({
-        userId: newUser.id,
+        userId: user.id,
         type: "email", // or "oauth" if it’s an OAuth account like Google
         provider: "credentials", // could be "google" for Google-authenticated users
-        providerAccountId: newUser.id,
+        providerAccountId: user.id,
         token_type: null, // Only used if handling tokens manually
       });
 
@@ -125,5 +127,79 @@ export const userRouter = createTRPCRouter({
       };
 
       await ctx.db.insert(accounts).values(googleAccount).onConflictDoNothing();
+    }),
+
+  signIn: publicProcedure
+    .input(userRouterValidationSchema.signIn)
+    .mutation(async ({ input, ctx }) => {
+      const { email, password, provider = "credentials" } = input;
+
+      // Check if the user exists
+      const [user] = await ctx.db
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+
+      if (!user) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      }
+
+      // Handle credential-based sign-in
+      if (provider === "credentials") {
+        if (!password) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Password is required for credential-based sign-in",
+          });
+        }
+
+        const isPasswordValid = await Bun.password.verify(
+          password,
+          user.passwordHash,
+        );
+
+        if (!isPasswordValid) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Invalid credentials",
+          });
+        }
+
+        // Generate tokens or session as needed
+        return user;
+      }
+
+      // Handle OAuth sign-in (e.g., Google)
+      //   if (provider === "google") {
+      //     const googleUser = await OAuthProvider.getGoogleUser(email); // Custom Google OAuth logic
+
+      //     if (!googleUser) {
+      //       throw new TRPCError({ code: "UNAUTHORIZED", message: "Google sign-in failed" });
+      //     }
+
+      //     // Check for linked account
+      //     const account = await ctx.db
+      //       .select()
+      //       .from(accounts)
+      //       .where(and(
+      //         eq(accounts.provider, "google"),
+      //         eq(accounts.userId, user.id)
+      //       ))
+
+      //     if (!account) {
+      //       // Link Google account if not linked
+      //       await ctx.db.insert(accounts).values({
+      //         userId: user.id,
+      //         type: "oauth",
+      //         provider: "google",
+      //         providerAccountId: googleUser.id,
+      //         token_type: "Bearer",
+      //       });
+      //     }
+
+      //     // Return user and session tokens if needed
+      //     return user;
+      //   }
     }),
 });
