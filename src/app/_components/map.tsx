@@ -27,7 +27,7 @@ declare global {
   }
 }
 
-const apiKey = "DPlThiZyJRk3Pe2S2hKmiRqPi45f6LzrMYu6r8C0uyE";
+const apiKey = "01kwiBkfBE52HAkRv1UQ0yZr976MyJ15c2WR0FA19ac";
 
 const Map = memo(({ zoom = 14, markers = [] }: HereMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
