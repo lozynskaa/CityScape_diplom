@@ -3,7 +3,7 @@ import Image from "next/image";
 type Props = {
   title: string;
   content?: string | null;
-  images?: string[];
+  images?: Array<{ fileName: string; file: string } | string>;
 };
 
 export default function Post({ title, content, images }: Props) {
@@ -20,7 +20,7 @@ export default function Post({ title, content, images }: Props) {
           {images.map((image, index) => (
             <Image
               key={index}
-              src={image}
+              src={typeof image === "string" ? image : image.file}
               alt={`Post image ${index + 1}`}
               width={0}
               height={0}

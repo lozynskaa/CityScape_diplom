@@ -10,26 +10,39 @@ import {
   type SQLWrapper,
 } from "drizzle-orm";
 import { z } from "zod";
+import { createImageURL } from "~/lib/createImageURL";
 
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { posts, type Post } from "~/server/db/post.schema";
+import { posts } from "~/server/db/post.schema";
 
 const postRouterValidationSchema = {
   createPost: z.object({
     companyId: z.string(),
     title: z.string().min(1),
     content: z.string().min(1),
-    imageUrls: z.string().array().optional(),
+    images: z
+      .object({
+        file: z.string(), // Bun's File object
+        fileName: z.string(),
+      })
+      .array()
+      .optional(),
   }),
   updatePost: z.object({
     id: z.string(),
     title: z.string().min(1).optional(),
     content: z.string().min(1).optional(),
-    imageUrls: z.string().array().optional(),
+    images: z
+      .object({
+        file: z.string(), // Bun's File object
+        fileName: z.string(),
+      })
+      .array()
+      .optional(),
   }),
   getCompanyPosts: z.object({
     id: z.string(),
@@ -50,8 +63,22 @@ export const postRouter = createTRPCRouter({
   createPost: protectedProcedure
     .input(postRouterValidationSchema.createPost)
     .mutation(async ({ input, ctx }) => {
-      const { companyId, title, content, imageUrls } = input;
+      const { companyId, title, content, images } = input;
       const userId = ctx.session.user.id;
+
+      let imageUrls: string[] = [];
+
+      if (images) {
+        imageUrls = await Promise.all(
+          images?.map((imageFile) => {
+            const uuid = crypto.randomUUID();
+            return createImageURL(
+              `post-image-${uuid}-${imageFile.fileName}`,
+              imageFile.file,
+            );
+          }),
+        );
+      }
       const [post] = await ctx.db
         .insert(posts)
         .values({
@@ -68,7 +95,22 @@ export const postRouter = createTRPCRouter({
   updatePost: protectedProcedure
     .input(postRouterValidationSchema.updatePost)
     .mutation(async ({ input, ctx }) => {
-      const { id, title, content, imageUrls } = input;
+      const { id, title, content, images } = input;
+
+      let imageUrls: string[] = [];
+
+      if (images) {
+        imageUrls = await Promise.all(
+          images?.map((imageFile) => {
+            const uuid = crypto.randomUUID();
+            return createImageURL(
+              `post-image-${uuid}-${imageFile.fileName}`,
+              imageFile.file,
+            );
+          }),
+        );
+      }
+
       const [post] = await ctx.db
         .update(posts)
         .set({

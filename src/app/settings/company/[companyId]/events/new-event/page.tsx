@@ -41,13 +41,16 @@ const requiredFields = [
 
 export default function NewEventPage() {
   const { companyId } = useParams<{ companyId: string }>();
-  const [eventDetails, setEventDetails] = useState<Partial<Event>>({
+  const [eventDetails, setEventDetails] = useState<
+    Omit<Partial<Event>, "id" | "imageUrl"> & {
+      imageFile?: { file: string; fileName: string };
+    }
+  >({
     name: "",
     description: "",
     goalAmount: "",
     currency: "",
     purpose: "",
-    imageUrl: "",
     category: "",
     withoutDonations: true,
     location: "",
@@ -58,9 +61,19 @@ export default function NewEventPage() {
 
   const handleLoadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    const fileUrl = URL.createObjectURL(file!);
-    if (file && fileUrl) {
-      setEventDetails((prev) => ({ ...prev, eventImage: fileUrl }));
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onload = () => {
+        const base64Data = reader.result as string; // e.g., "data:image/png;base64,..."
+
+        const parsedFile = {
+          file: base64Data,
+          fileName: file.name,
+        };
+        setEventDetails((prev) => ({ ...prev, imageFile: parsedFile }));
+      };
     }
   };
 
@@ -80,7 +93,7 @@ export default function NewEventPage() {
           : 0,
       currency: eventDetails.currency!,
       purpose: eventDetails.purpose!,
-      imageUrl: eventDetails.imageUrl!,
+      image: eventDetails.imageFile!,
       companyId,
       category: eventDetails.category!,
       includeDonations: !!eventDetails.withoutDonations,
@@ -255,12 +268,12 @@ export default function NewEventPage() {
           accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*"
           onChange={handleLoadFile}
         />
-        {eventDetails.imageUrl && (
+        {eventDetails.imageFile && (
           <Image
             width={200}
             height={200}
             className="col-span-2 justify-self-center"
-            src={eventDetails.imageUrl}
+            src={eventDetails.imageFile.file}
             alt="Event Logo"
           />
         )}

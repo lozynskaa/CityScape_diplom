@@ -4,14 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import { Input } from "~/app/_components/ui/input";
 import { Textarea } from "~/app/_components/ui/textarea";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/app/_components/ui/dropdown-menu";
-import { LabeledItem } from "~/app/_components/ui/labeled-item";
 import { Button } from "~/app/_components/ui/button";
 import { api } from "~/trpc/react";
 
@@ -20,38 +12,61 @@ const requiredFields = [
   "companyEmail",
   "website",
   "description",
-  "category",
   "companyImage",
 ];
 
+type CompanyDetails = {
+  name: string;
+  companyEmail: string;
+  website: string;
+  description: string;
+  companyImage?: {
+    file: string;
+    fileName: string;
+  };
+};
+
 export default function NewCompanyPage() {
-  const [companyDetails, setCompanyDetails] = useState({
+  const [companyDetails, setCompanyDetails] = useState<CompanyDetails>({
     name: "",
     companyEmail: "",
     website: "",
     description: "",
-    category: "",
-    companyImage: "",
+    companyImage: undefined,
   });
 
   const { mutate: createCompany } = api.company.createCompany.useMutation();
+  const { mutateAsync: createStripeCompany } =
+    api.company.createStripeCompany.useMutation();
 
   const handleLoadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    const fileUrl = URL.createObjectURL(file!);
-    if (file && fileUrl) {
-      setCompanyDetails((prev) => ({ ...prev, companyImage: fileUrl }));
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onload = () => {
+        const base64Data = reader.result as string; // e.g., "data:image/png;base64,..."
+
+        const parsedFile = {
+          file: base64Data,
+          fileName: file.name,
+        };
+        setCompanyDetails((prev) => ({ ...prev, companyImage: parsedFile }));
+      };
     }
   };
-
-  const handleCreateCompany = () => {
+  const handleCreateCompany = async () => {
+    const { companyAccount } = await createStripeCompany({
+      email: companyDetails.companyEmail,
+    });
     createCompany({
       name: companyDetails.name,
       companyEmail: companyDetails.companyEmail,
       website: companyDetails.website,
       description: companyDetails.description,
-      category: companyDetails.category,
       image: companyDetails.companyImage,
+      stripeAccountId: companyAccount.id,
     });
   };
 
@@ -89,38 +104,6 @@ export default function NewCompanyPage() {
             }))
           }
         />
-        <Input
-          type="text"
-          label="Company website"
-          onChange={(e) =>
-            setCompanyDetails((prev) => ({ ...prev, website: e.target.value }))
-          }
-        />
-
-        <DropdownMenu>
-          <LabeledItem label="Main Category">
-            <DropdownMenuTrigger asChild>
-              <Button className="w-full items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
-                {companyDetails.category || "Select Category"}
-              </Button>
-            </DropdownMenuTrigger>
-          </LabeledItem>
-          <DropdownMenuContent>
-            <DropdownMenuGroup>
-              <DropdownMenuItem
-                className="w-full"
-                onClick={() =>
-                  setCompanyDetails((prev) => ({
-                    ...prev,
-                    category: "Category 1",
-                  }))
-                }
-              >
-                Category 1
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
         <Textarea
           placeholder="Enter description"
           label="Company Description"
@@ -133,7 +116,13 @@ export default function NewCompanyPage() {
           }
           wrapperClassName="col-span-2"
         />
-
+        <Input
+          type="text"
+          label="Company website"
+          onChange={(e) =>
+            setCompanyDetails((prev) => ({ ...prev, website: e.target.value }))
+          }
+        />
         <Input
           type="file"
           label="Company Logo"
@@ -144,8 +133,9 @@ export default function NewCompanyPage() {
           <Image
             width={200}
             height={200}
-            src={companyDetails.companyImage}
+            src={companyDetails.companyImage.file}
             alt="Company Logo"
+            className="col-span-2"
           />
         )}
       </form>

@@ -185,7 +185,7 @@ export function SecondStep({
           width={200}
           height={200}
           className="col-span-2 justify-self-center"
-          src={companyDetails.eventImage}
+          src={companyDetails.eventImage.file}
           alt="Event Logo"
         />
       )}

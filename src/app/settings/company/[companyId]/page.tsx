@@ -21,7 +21,7 @@ export default function Company() {
   const router = useRouter();
 
   const [updatedCompanyData, setUpdatedCompanyData] = useState<
-    Partial<Company>
+    Partial<Company> & { imageFile?: { fileName: string; file: string } }
   >({});
   const { data: currentCompany = null, isFetching } =
     api.company.getCompany.useQuery({
@@ -39,15 +39,26 @@ export default function Company() {
         email: currentCompany.email,
         description: currentCompany.description,
         website: currentCompany.website,
+        imageUrl: currentCompany.imageUrl,
       });
     }
   }, [currentCompany]);
 
   const handleLoadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    const fileUrl = URL.createObjectURL(file!);
-    if (file && fileUrl) {
-      setUpdatedCompanyData((prev) => ({ ...prev, imageUrl: fileUrl }));
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onload = () => {
+        const base64Data = reader.result as string; // e.g., "data:image/png;base64,..."
+
+        const parsedFile = {
+          file: base64Data,
+          fileName: file.name,
+        };
+        setUpdatedCompanyData((prev) => ({ ...prev, imageFile: parsedFile }));
+      };
     }
   };
 
@@ -56,7 +67,6 @@ export default function Company() {
       "name",
       "email",
       "description",
-      "imageUrl",
       "location",
       "website",
       "category",
@@ -74,7 +84,7 @@ export default function Company() {
         companyEmail: updatedCompanyData?.email ?? currentCompany?.email,
         description:
           updatedCompanyData?.description ?? currentCompany?.description ?? "",
-        image: updatedCompanyData?.imageUrl ?? currentCompany?.imageUrl ?? "",
+        image: updatedCompanyData?.imageFile,
         website: updatedCompanyData?.website ?? currentCompany?.website ?? "",
       });
 
@@ -206,11 +216,20 @@ export default function Company() {
           accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*"
           onChange={handleLoadFile}
         />
-        {updatedCompanyData?.imageUrl && (
+        {updatedCompanyData?.imageUrl && !updatedCompanyData?.imageFile && (
           <Image
             width={200}
             height={200}
-            src={updatedCompanyData?.imageUrl ?? currentCompany?.imageUrl}
+            src={updatedCompanyData?.imageUrl}
+            alt="Company Logo"
+            className="col-span-2"
+          />
+        )}
+        {updatedCompanyData?.imageFile && (
+          <Image
+            width={200}
+            height={200}
+            src={updatedCompanyData?.imageFile.file}
             alt="Company Logo"
             className="col-span-2"
           />

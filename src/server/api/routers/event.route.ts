@@ -27,7 +27,8 @@ import {
 } from "~/server/db/schema";
 import { type Event } from "~/server/db/event.schema";
 import { TRPCError } from "@trpc/server";
-import { Company } from "~/server/db/company.schema";
+import { type Company } from "~/server/db/company.schema";
+import { createImageURL } from "~/lib/createImageURL";
 
 const eventRouterValidationSchema = {
   createEvent: z.object({
@@ -37,7 +38,12 @@ const eventRouterValidationSchema = {
     date: z.date(),
     location: z.string(),
     includeDonations: z.boolean().default(false),
-    imageUrl: z.string().optional(),
+    image: z
+      .object({
+        file: z.string(), // Bun's File object
+        fileName: z.string(),
+      })
+      .optional(),
     goalAmount: z.number().min(0).default(0).optional(),
     currency: z.string().default("USD").optional(),
     companyId: z.string(),
@@ -51,7 +57,12 @@ const eventRouterValidationSchema = {
     date: z.date(),
     location: z.string(),
     includeDonations: z.boolean().default(false),
-    imageUrl: z.string().optional(),
+    image: z
+      .object({
+        file: z.string(), // Bun's File object
+        fileName: z.string(),
+      })
+      .optional(),
     goalAmount: z.number().min(0).default(0).optional(),
     currency: z.string().default("USD").optional(),
     category: z.string(),
@@ -88,12 +99,21 @@ export const eventRouter = createTRPCRouter({
         date,
         location,
         includeDonations,
-        imageUrl,
+        image,
         goalAmount,
         currency,
         companyId,
         category,
       } = input;
+
+      let imageUrl: string | undefined = undefined;
+      if (image) {
+        const uuid = crypto.randomUUID();
+        imageUrl = await createImageURL(
+          `event-image-${uuid}-${image.fileName}`,
+          image.file,
+        );
+      }
 
       const [event] = await ctx.db
         .insert(events)
@@ -132,11 +152,20 @@ export const eventRouter = createTRPCRouter({
         date,
         location,
         includeDonations,
-        imageUrl,
+        image,
         goalAmount,
         currency,
         category,
       } = input;
+
+      let imageUrl: string | undefined = undefined;
+      if (image) {
+        const uuid = crypto.randomUUID();
+        imageUrl = await createImageURL(
+          `event-image-${uuid}-${image.fileName}`,
+          image.file,
+        );
+      }
 
       const [event] = await ctx.db
         .update(events)

@@ -1,6 +1,5 @@
 import { and, count, eq, like, or } from "drizzle-orm";
 import { z } from "zod";
-
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -10,6 +9,7 @@ import { companies, events, users } from "~/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { type Company } from "~/server/db/company.schema";
 import { stripe } from "~/server/stripe";
+import { createImageURL } from "~/lib/createImageURL";
 
 const companyRouterValidationSchema = {
   createCompany: z.object({
@@ -17,7 +17,12 @@ const companyRouterValidationSchema = {
     companyEmail: z.string().email(),
     description: z.string(),
     website: z.string().url().optional(),
-    image: z.string().url().optional(),
+    image: z
+      .object({
+        file: z.string(), // Bun's File object
+        fileName: z.string(),
+      })
+      .optional(),
     stripeAccountId: z.string(),
   }),
   updateCompany: z.object({
@@ -25,7 +30,12 @@ const companyRouterValidationSchema = {
     companyEmail: z.string().email(),
     description: z.string(),
     website: z.string().url().optional(),
-    image: z.string().url().optional(),
+    image: z
+      .object({
+        file: z.string(), // Bun's File object
+        fileName: z.string(),
+      })
+      .optional(),
     id: z.string(),
   }),
   createStripeCompany: z.object({
@@ -43,7 +53,12 @@ const companyRouterValidationSchema = {
     companyEmail: z.string().email(),
     category: z.string(),
     description: z.string().optional(),
-    companyImage: z.string().url().optional(),
+    companyImage: z
+      .object({
+        file: z.string(), // Bun's File object
+        fileName: z.string(),
+      })
+      .optional(),
     website: z.string().url().optional(),
     eventName: z.string().min(1),
     eventDescription: z.string().optional(),
@@ -51,7 +66,12 @@ const companyRouterValidationSchema = {
     eventDate: z.date(),
     eventLocation: z.string(),
     includeDonations: z.boolean().default(false),
-    eventImage: z.string().url().optional(),
+    eventImage: z
+      .object({
+        file: z.string(), // Bun's File object
+        fileName: z.string(),
+      })
+      .optional(),
     goalAmount: z.number().min(0).default(0).optional(),
     currency: z.string().default("USD").optional(),
     stripeAccountId: z.string(),
@@ -96,6 +116,16 @@ export const companyRouter = createTRPCRouter({
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
+      let imageUrl: string | undefined = undefined;
+
+      if (image) {
+        const uuid = crypto.randomUUID();
+        imageUrl = await createImageURL(
+          `company-image-${uuid}-${image.fileName}`,
+          image.file,
+        );
+      }
+
       const [company] = await ctx.db
         .insert(companies)
         .values({
@@ -104,7 +134,7 @@ export const companyRouter = createTRPCRouter({
           description,
           website,
           email: companyEmail,
-          imageUrl: image,
+          imageUrl,
           stripeAccountId,
         })
         .returning();
@@ -117,13 +147,23 @@ export const companyRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { name, description, website, image, id, companyEmail } = input;
 
+      let imageUrl: string | undefined = undefined;
+
+      if (image) {
+        const uuid = crypto.randomUUID();
+        imageUrl = await createImageURL(
+          `company-image-${uuid}-${image.fileName}`,
+          image.file,
+        );
+      }
+
       const [company] = await ctx.db
         .update(companies)
         .set({
           name,
           description,
           website,
-          imageUrl: image,
+          imageUrl,
           email: companyEmail,
         })
         .where(eq(companies.id, id))
@@ -210,6 +250,23 @@ export const companyRouter = createTRPCRouter({
 
       const userId = ctx.session.user.id;
 
+      let companyImageURL: string | undefined = undefined;
+      let eventImageURL: string | undefined = undefined;
+      if (companyImage) {
+        const uuid = crypto.randomUUID();
+        companyImageURL = await createImageURL(
+          `company-image-${uuid}-${companyImage.fileName}`,
+          companyImage.file,
+        );
+      }
+      if (eventImage) {
+        const uuid = crypto.randomUUID();
+        eventImageURL = await createImageURL(
+          `event-image-${uuid}-${eventImage.fileName}`,
+          eventImage.file,
+        );
+      }
+
       const [company] = await ctx.db
         .insert(companies)
         .values({
@@ -218,7 +275,7 @@ export const companyRouter = createTRPCRouter({
           description,
           website,
           email: companyEmail,
-          imageUrl: companyImage,
+          imageUrl: companyImageURL,
           stripeAccountId: stripeAccountId,
         })
         .returning();
@@ -238,7 +295,7 @@ export const companyRouter = createTRPCRouter({
           name: eventName,
           description: eventDescription,
           purpose: eventPurpose,
-          imageUrl: eventImage,
+          imageUrl: eventImageURL,
           date: eventDate,
           location: eventLocation,
           withoutDonations: !includeDonations,

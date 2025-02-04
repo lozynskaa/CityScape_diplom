@@ -22,6 +22,7 @@ export default function EditPostPage() {
     title: "",
     content: "",
     images: [] as string[],
+    imageFiles: [] as { fileName: string; file: string }[],
   });
 
   const { data: post, isFetching } = api.post.getPost.useQuery({
@@ -36,6 +37,7 @@ export default function EditPostPage() {
         title: post.title,
         content: post.content ?? "",
         images: post.imageUrls,
+        imageFiles: [],
       });
     }
   }, [post]);
@@ -43,13 +45,25 @@ export default function EditPostPage() {
   const handleLoadFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      const fileUrls = Array.from(files).map((file) =>
-        URL.createObjectURL(file),
-      );
-      setPostDetails((prev) => ({
-        ...prev,
-        images: [...prev.images, ...fileUrls],
-      }));
+      const fileList = Array.from(files);
+
+      fileList.forEach((file) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onload = () => {
+          const base64Data = reader.result as string; // e.g., "data:image/png;base64,..."
+
+          const parsedFile = {
+            file: base64Data,
+            fileName: file.name,
+          };
+          setPostDetails((prev) => ({
+            ...prev,
+            imageFiles: [...prev.imageFiles, parsedFile],
+          }));
+        };
+      });
     }
   };
 
@@ -57,7 +71,7 @@ export default function EditPostPage() {
     updatePost({
       title: postDetails.title,
       content: postDetails.content,
-      imageUrls: postDetails.images,
+      images: postDetails.imageFiles,
       id: postId,
     });
   };
@@ -76,7 +90,7 @@ export default function EditPostPage() {
   return (
     <div className="h-full space-y-8 px-12 py-8">
       <h1 className="text-2xl font-bold">Post Preview</h1>
-      <Post {...postDetails} />
+      <Post {...postDetails} images={postDetails.imageFiles} />
       <div className="flex w-full flex-row items-center justify-between gap-x-4">
         <h1 className="flex-1 text-2xl font-bold">Edit Post</h1>
         <Button

@@ -1,10 +1,11 @@
 import { TRPCError } from "@trpc/server";
-import { eq, type SQL } from "drizzle-orm";
+import { eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { companies } from "~/server/db/company.schema";
 import { donations } from "~/server/db/donations.schema";
+import { events } from "~/server/db/event.schema";
 import { stripe } from "~/server/stripe";
 
 const donationRouterValidationSchema = {
@@ -120,6 +121,13 @@ export const donationRouter = createTRPCRouter({
           message: "Company not found",
         });
       }
+
+      await ctx.db
+        .update(events)
+        .set({
+          currentAmount: sql`${events.currentAmount} + ${amount.toFixed(2)}`,
+        })
+        .where(eq(events.id, eventId));
 
       await ctx.db.insert(donations).values({
         amount: amount.toFixed(2),

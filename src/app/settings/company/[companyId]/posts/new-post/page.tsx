@@ -16,7 +16,7 @@ export default function NewPostPage() {
   const [postDetails, setPostDetails] = useState({
     title: "",
     content: "",
-    images: [] as string[],
+    images: [] as { fileName: string; file: string }[],
   });
 
   const { mutateAsync: createPost } = api.post.createPost.useMutation();
@@ -24,13 +24,25 @@ export default function NewPostPage() {
   const handleLoadFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      const fileUrls = Array.from(files).map((file) =>
-        URL.createObjectURL(file),
-      );
-      setPostDetails((prev) => ({
-        ...prev,
-        images: [...prev.images, ...fileUrls],
-      }));
+      const fileList = Array.from(files);
+
+      fileList.forEach((file) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onload = () => {
+          const base64Data = reader.result as string; // e.g., "data:image/png;base64,..."
+
+          const parsedFile = {
+            file: base64Data,
+            fileName: file.name,
+          };
+          setPostDetails((prev) => ({
+            ...prev,
+            imageFiles: [...prev.images, parsedFile],
+          }));
+        };
+      });
     }
   };
 
@@ -38,7 +50,7 @@ export default function NewPostPage() {
     const newPost = await createPost({
       title: postDetails.title,
       content: postDetails.content,
-      imageUrls: postDetails.images,
+      images: postDetails.images,
       companyId,
     });
 

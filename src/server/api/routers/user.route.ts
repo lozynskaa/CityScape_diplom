@@ -4,6 +4,7 @@ import { type AdapterAccount } from "next-auth/adapters";
 import { accounts, users } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { createImageURL } from "~/lib/createImageURL";
 
 const userRouterValidationSchema = {
   createUser: z.object({
@@ -11,13 +12,24 @@ const userRouterValidationSchema = {
     email: z.string().email(),
     password: z.string(),
     bio: z.string(),
-    imageUrl: z.string().optional(),
+    image: z
+      .object({
+        file: z.string(), // Bun's File object
+        fileName: z.string(),
+      })
+      .optional(),
   }),
   updateUser: z.object({
     id: z.string(),
     name: z.string().min(1).optional(),
     email: z.string().email().optional(),
     bio: z.string().optional(),
+    image: z
+      .object({
+        file: z.string(), // Bun's File object
+        fileName: z.string(),
+      })
+      .optional(),
   }),
   getUser: z.object({
     id: z.string(),
@@ -44,7 +56,17 @@ export const userRouter = createTRPCRouter({
   createUser: publicProcedure
     .input(userRouterValidationSchema.createUser)
     .mutation(async ({ ctx, input }) => {
-      const { name, email, password, bio, imageUrl } = input;
+      const { name, email, password, bio, image } = input;
+
+      let imageUrl: string | undefined = undefined;
+
+      if (image) {
+        const uuid = crypto.randomUUID();
+        imageUrl = await createImageURL(
+          `user-image-${uuid}-${image.fileName}`,
+          image.file,
+        );
+      }
 
       const passwordHash: string = await Bun.password.hash(password);
 
@@ -78,9 +100,24 @@ export const userRouter = createTRPCRouter({
   updateUser: protectedProcedure
     .input(userRouterValidationSchema.updateUser)
     .mutation(async ({ ctx, input }) => {
+      const { name, email, bio, image } = input;
+      let imageUrl: string | undefined = undefined;
+
+      if (image) {
+        const uuid = crypto.randomUUID();
+        imageUrl = await createImageURL(
+          `user-image-${uuid}-${image.fileName}`,
+          image.file,
+        );
+      }
       const updatedUser = await ctx.db
         .update(users)
-        .set(input)
+        .set({
+          name,
+          email,
+          bio,
+          image: imageUrl,
+        })
         .where(eq(users.id, input.id))
         .returning();
       return updatedUser[0];

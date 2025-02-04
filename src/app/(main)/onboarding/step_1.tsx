@@ -66,7 +66,7 @@ export function FirstStep({
           width={200}
           height={200}
           className="col-span-2 justify-self-center"
-          src={companyDetails.companyImage}
+          src={companyDetails.companyImage.file}
           alt="Company Logo"
         />
       )}

@@ -22,16 +22,23 @@ export type CompanyInfoState = {
   name: string;
   description?: string;
   companyEmail: string;
-  category: string;
   website?: string;
-  companyImage?: string;
+  companyImage?: {
+    file: string;
+    fileName: string;
+  };
+  stripeAccountId?: string;
   //event
+  category: string;
   eventName: string;
   eventDescription?: string;
   eventDate: Date;
   eventPurpose: string;
   eventLocation: string;
-  eventImage?: string;
+  eventImage?: {
+    file: string;
+    fileName: string;
+  };
   goalAmount: number;
   includeDonations: boolean;
   currency: string;
@@ -74,10 +81,10 @@ const DEFAULT_STATE: CompanyInfoState = {
   name: "",
   description: "",
   companyEmail: "",
-  category: "",
   website: "",
-  companyImage: "",
+  stripeAccountId: "",
   //event
+  category: "",
   eventName: "",
   eventDescription: "",
   eventLocation: "",
@@ -86,7 +93,6 @@ const DEFAULT_STATE: CompanyInfoState = {
   goalAmount: 0,
   includeDonations: false,
   currency: "USD",
-  eventImage: "",
 };
 
 export default function Onboarding() {
@@ -113,24 +119,8 @@ export default function Onboarding() {
         email: companyInfo.companyEmail,
       });
       completeOnboarding({
-        //company
-        category: companyInfo.category,
-        companyEmail: companyInfo.companyEmail,
-        currency: companyInfo.currency,
-        description: companyInfo.description,
-        name: companyInfo.name,
-        website: companyInfo.website,
-        companyImage: companyInfo.companyImage,
+        ...companyInfo,
         stripeAccountId: companyAccount.id,
-        //event
-        eventDate: companyInfo.eventDate,
-        eventDescription: companyInfo.eventDescription,
-        eventLocation: companyInfo.eventLocation,
-        eventPurpose: companyInfo.eventPurpose,
-        eventName: companyInfo.eventName,
-        eventImage: companyInfo.eventImage,
-        goalAmount: companyInfo.goalAmount,
-        includeDonations: companyInfo.includeDonations,
       });
       return setStep(1);
     }
@@ -141,9 +131,19 @@ export default function Onboarding() {
     (key: "eventImage" | "companyImage") =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      const fileUrl = URL.createObjectURL(file!);
-      if (file && fileUrl) {
-        setCompanyInfo((prev) => ({ ...prev, [key]: fileUrl }));
+      if (file) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onload = () => {
+          const base64Data = reader.result as string; // e.g., "data:image/png;base64,..."
+
+          const parsedFile = {
+            file: base64Data,
+            fileName: file.name,
+          };
+          setCompanyInfo((prev) => ({ ...prev, [key]: parsedFile }));
+        };
       }
     };
 

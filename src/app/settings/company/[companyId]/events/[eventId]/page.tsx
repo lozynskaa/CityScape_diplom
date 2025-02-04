@@ -40,7 +40,9 @@ export default function EventPage() {
     eventId: string;
   }>();
 
-  const [updatedEventData, setUpdatedEventData] = useState<Partial<Event>>({});
+  const [updatedEventData, setUpdatedEventData] = useState<
+    Partial<Event> & { imageFile?: { file: string; fileName: string } }
+  >({});
   const {
     data: currentEvent = null,
     isFetching,
@@ -68,9 +70,19 @@ export default function EventPage() {
 
   const handleLoadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    const fileUrl = URL.createObjectURL(file!);
-    if (file && fileUrl) {
-      setUpdatedEventData((prev) => ({ ...prev, imageUrl: fileUrl }));
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onload = () => {
+        const base64Data = reader.result as string; // e.g., "data:image/png;base64,..."
+
+        const parsedFile = {
+          file: base64Data,
+          fileName: file.name,
+        };
+        setUpdatedEventData((prev) => ({ ...prev, imageFile: parsedFile }));
+      };
     }
   };
 
@@ -100,7 +112,7 @@ export default function EventPage() {
         description:
           updatedEventData?.description ?? currentEvent?.description ?? "",
         purpose: updatedEventData?.purpose ?? currentEvent?.purpose ?? "",
-        imageUrl: updatedEventData?.imageUrl ?? currentEvent?.imageUrl ?? "",
+        image: updatedEventData?.imageFile,
         goalAmount: +(
           updatedEventData?.goalAmount ??
           currentEvent?.goalAmount ??
@@ -218,7 +230,7 @@ export default function EventPage() {
           }
         />
         <DropdownMenu>
-          <LabeledItem label="Main Category">
+          <LabeledItem label="Event Category">
             <DropdownMenuTrigger asChild>
               <Button className="w-full items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
                 {updatedEventData.category ?? "Select Category"}
@@ -358,12 +370,12 @@ export default function EventPage() {
           accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*"
           onChange={handleLoadFile}
         />
-        {updatedEventData.imageUrl && (
+        {updatedEventData.imageFile && (
           <Image
             width={200}
             height={200}
             className="col-span-2 justify-self-center"
-            src={updatedEventData.imageUrl}
+            src={updatedEventData.imageFile.file}
             alt="Event Logo"
           />
         )}

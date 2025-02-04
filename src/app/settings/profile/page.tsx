@@ -18,7 +18,9 @@ import { Button } from "~/app/_components/ui/button";
 const requiredFields = ["name", "email"];
 
 export default function Profile() {
-  const [updatedUserData, setUpdatedUserData] = useState<Partial<User>>({
+  const [updatedUserData, setUpdatedUserData] = useState<
+    Partial<User> & { imageFile?: { file: string; fileName: string } }
+  >({
     name: "",
     email: "",
     image: "",
@@ -52,9 +54,19 @@ export default function Profile() {
 
   const handleLoadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    const fileUrl = URL.createObjectURL(file!);
-    if (file && fileUrl) {
-      setUpdatedUserData((prev) => ({ ...prev, image: fileUrl }));
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onload = () => {
+        const base64Data = reader.result as string; // e.g., "data:image/png;base64,..."
+
+        const parsedFile = {
+          file: base64Data,
+          fileName: file.name,
+        };
+        setUpdatedUserData((prev) => ({ ...prev, imageFile: parsedFile }));
+      };
     }
   };
 
@@ -64,6 +76,7 @@ export default function Profile() {
       name: updatedUserData.name ?? "",
       email: updatedUserData.email,
       bio: updatedUserData.bio ?? "",
+      image: updatedUserData.imageFile,
     });
     if (!newUser) return;
     setUpdatedUserData(newUser);
@@ -147,11 +160,11 @@ export default function Profile() {
           accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*"
           onChange={handleLoadFile}
         />
-        {updatedUserData?.image && (
+        {updatedUserData?.imageFile && (
           <Image
             width={200}
             height={200}
-            src={updatedUserData?.image}
+            src={updatedUserData.imageFile.file}
             alt="Profile Image"
             className="col-span-2"
           />
