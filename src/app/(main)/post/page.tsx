@@ -29,14 +29,9 @@ export default function PostsListPage() {
   };
 
   const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-    api.post.getFilteredPosts.useInfiniteQuery(
-      {
-        ...input,
-      },
-      {
-        getNextPageParam: (lastPage) => lastPage.nextCursor,
-      },
-    );
+    api.post.getFilteredPosts.useInfiniteQuery(input, {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    });
 
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
@@ -80,15 +75,15 @@ export default function PostsListPage() {
 
   return (
     <div className="w-full space-y-8 px-12 py-8">
-      <div className="space-y-4">
+      {/* <div className="space-y-4">
         <h1 className="text-3xl font-bold">Explore posts</h1>
-      </div>
-      <Input
+      </div> */}
+      {/* <Input
         className="h-12 flex-1 placeholder:text-gray-400"
         placeholder="Search for posts by name"
         defaultValue={input.search}
         onChange={(e) => handleChangeFilter("search", e.target.value)}
-      />
+      /> */}
       {isFetching && !isFetchingNextPage ? (
         <div className="flex w-full flex-1 items-center justify-center">
           <Spinner />

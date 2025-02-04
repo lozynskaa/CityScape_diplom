@@ -1,12 +1,5 @@
 "use client";
 import { Button } from "~/app/_components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/app/_components/ui/dropdown-menu";
 import { Input } from "~/app/_components/ui/input";
 import { Textarea } from "~/app/_components/ui/textarea";
 import { type CompanyInfoState } from "./page";
@@ -21,6 +14,7 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "~/app/_components/ui/calendar";
 import { format } from "date-fns";
 import { Switch } from "~/app/_components/ui/switch";
+import { ItemSelectBlock } from "~/app/_components/item-select";
 
 type Props = {
   companyDetails: CompanyInfoState;
@@ -43,30 +37,16 @@ export function SecondStep({
           setCompanyDetails((prev) => ({ ...prev, eventName: e.target.value }))
         }
       />
-      <DropdownMenu>
-        <LabeledItem label="Main Category">
-          <DropdownMenuTrigger asChild>
-            <Button className="w-full items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
-              {companyDetails.category || "Select Category"}
-            </Button>
-          </DropdownMenuTrigger>
-        </LabeledItem>
-        <DropdownMenuContent>
-          <DropdownMenuGroup>
-            <DropdownMenuItem
-              className="w-96"
-              onClick={() =>
-                setCompanyDetails((prev) => ({
-                  ...prev,
-                  category: "Category 1",
-                }))
-              }
-            >
-              Category 1
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="w-96">
+        <ItemSelectBlock
+          items={[{ id: "Category 1", name: "Category 1" }]}
+          set={(id) =>
+            setCompanyDetails((prev) => ({ ...prev, eventCategory: id }))
+          }
+          title="Select Category"
+          label="Event Category"
+        />
+      </div>
       <LabeledItem label="Include Donations">
         <Switch
           checked={companyDetails.includeDonations}
@@ -91,7 +71,10 @@ export function SecondStep({
       <LabeledItem label="Event Date">
         <Popover>
           <PopoverTrigger asChild>
-            <Button className="w-96 items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
+            <Button
+              className="h-9 w-96 items-start justify-start"
+              variant="outline"
+            >
               <CalendarIcon />
               {companyDetails.eventDate ? (
                 format(companyDetails.eventDate, "PPP")
@@ -148,31 +131,14 @@ export function SecondStep({
           }))
         }
       />
-
-      <DropdownMenu>
-        <LabeledItem label="Donation Currency">
-          <DropdownMenuTrigger asChild>
-            <Button className="w-96 items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
-              {companyDetails.currency ?? "Select Currency"}
-            </Button>
-          </DropdownMenuTrigger>
-        </LabeledItem>
-        <DropdownMenuContent>
-          <DropdownMenuGroup>
-            <DropdownMenuItem
-              className="w-96"
-              onClick={() =>
-                setCompanyDetails((prev) => ({
-                  ...prev,
-                  currency: "USD",
-                }))
-              }
-            >
-              USD
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="w-96">
+        <ItemSelectBlock
+          items={[{ id: "USD", name: "USD" }]}
+          set={(id) => setCompanyDetails((prev) => ({ ...prev, currency: id }))}
+          title="Select Currency"
+          label="Donation Currency"
+        />
+      </div>
 
       <Input
         type="file"

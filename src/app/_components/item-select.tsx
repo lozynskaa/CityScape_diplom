@@ -8,38 +8,46 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
+import { LabeledItem } from "./ui/labeled-item";
 
 type Props<T> = {
   set: (id: string) => void;
   items: T[];
   title: string;
+  label?: string;
 };
 
 export function ItemSelectBlock<T extends { id: string; name: string }>({
   set,
   items,
   title,
+  label,
 }: Props<T>) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button className="w-96 items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
-          {title}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuGroup>
-          {items.map((company) => (
-            <DropdownMenuItem
-              className="w-96"
-              key={company.id}
-              onClick={() => set(company.id)}
-            >
-              {company.name}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
+      <LabeledItem label={label}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            className="h9 w-full items-start justify-start"
+            variant="outline"
+          >
+            {title}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuGroup>
+            {items.map((company) => (
+              <DropdownMenuItem
+                className="w-full"
+                key={company.id}
+                onClick={() => set(company.id)}
+              >
+                {company.name}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </LabeledItem>
     </DropdownMenu>
   );
 }

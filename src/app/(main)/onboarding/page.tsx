@@ -97,7 +97,7 @@ const DEFAULT_STATE: CompanyInfoState = {
 };
 
 export default function Onboarding() {
-  const router = useRouter()
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [companyInfo, setCompanyInfo] =
     useState<CompanyInfoState>(DEFAULT_STATE);
@@ -162,7 +162,7 @@ export default function Onboarding() {
         <p className="text-base font-medium text-gray-950">Onboarding</p>
         <div className="h-3 w-full rounded-full bg-gray-100">
           <div
-            className="h-3 rounded-full bg-emerald-400"
+            className="bg-primary-400 h-3 rounded-full"
             style={{ width: `${(step / 2) * 100}%` }}
           />
         </div>
@@ -207,7 +207,7 @@ export default function Onboarding() {
         </AlertDialog>
 
         <Button
-          className="flex-1 rounded-full bg-emerald-400 text-sm font-bold text-gray-950 hover:bg-emerald-500 focus:bg-emerald-500 active:bg-emerald-500"
+          className="flex-1 rounded-full text-sm font-bold text-gray-950"
           disabled={disabled(companyInfo)}
           onClick={handleNextStep}
         >

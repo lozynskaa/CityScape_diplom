@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { LogOut, Settings, SquareChartGantt, User } from "lucide-react";
+import { LogOut, SquareChartGantt, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 const headerLinks = [
@@ -24,7 +24,7 @@ const headerLinks = [
   },
   {
     name: "Posts",
-    href: "/posts",
+    href: "/post",
   },
 ];
 
@@ -64,7 +64,7 @@ export default async function Header() {
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="mr-10 w-[calc(100vw_-_64px)] md:w-40">
-              <DropdownMenuLabel>Account</DropdownMenuLabel>
+              <DropdownMenuLabel>{session.user.name}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <Link href="/settings/profile">
@@ -75,19 +75,11 @@ export default async function Header() {
                     </span>
                   </DropdownMenuItem>
                 </Link>
-                <Link href="/my-companies">
+                <Link href="/settings/company">
                   <DropdownMenuItem>
                     <SquareChartGantt />
                     <span className="text-sm font-medium text-gray-950">
                       My Companies
-                    </span>
-                  </DropdownMenuItem>
-                </Link>
-                <Link href="/settings">
-                  <DropdownMenuItem>
-                    <Settings />
-                    <span className="text-sm font-medium text-gray-950">
-                      My Settings
                     </span>
                   </DropdownMenuItem>
                 </Link>
@@ -107,7 +99,7 @@ export default async function Header() {
           </DropdownMenu>
         ) : (
           <Link href="/api/auth/sign-in">
-            <Button className="w-22 h-8 rounded-full bg-emerald-400 text-gray-950 hover:bg-emerald-500 focus:bg-emerald-500 active:bg-emerald-500">
+            <Button className="w-22 h-8 rounded-full text-gray-950">
               Sign in
             </Button>
           </Link>

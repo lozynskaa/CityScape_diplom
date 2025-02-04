@@ -4,13 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import { Input } from "~/app/_components/ui/input";
 import { Textarea } from "~/app/_components/ui/textarea";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/app/_components/ui/dropdown-menu";
 import { LabeledItem } from "~/app/_components/ui/labeled-item";
 import { Button } from "~/app/_components/ui/button";
 import { api } from "~/trpc/react";
@@ -25,6 +18,7 @@ import { Switch } from "~/app/_components/ui/switch";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "~/app/_components/ui/calendar";
+import { ItemSelectBlock } from "~/app/_components/item-select";
 
 const requiredFields = [
   "name",
@@ -128,30 +122,12 @@ export default function NewEventPage() {
             }))
           }
         />
-        <DropdownMenu>
-          <LabeledItem label="Main Category">
-            <DropdownMenuTrigger asChild>
-              <Button className="w-full items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
-                {eventDetails.category ?? "Select Category"}
-              </Button>
-            </DropdownMenuTrigger>
-          </LabeledItem>
-          <DropdownMenuContent>
-            <DropdownMenuGroup>
-              <DropdownMenuItem
-                className="w-96"
-                onClick={() =>
-                  setEventDetails((prev) => ({
-                    ...prev,
-                    category: "Category 1",
-                  }))
-                }
-              >
-                Category 1
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ItemSelectBlock
+          items={[{ id: "Category 1", name: "Category 1" }]}
+          set={(id) => setEventDetails((prev) => ({ ...prev, category: id }))}
+          title="Select Category"
+          label="Event Category"
+        />
         <LabeledItem label="Include Donations">
           <Switch
             checked={!eventDetails.withoutDonations}
@@ -180,7 +156,10 @@ export default function NewEventPage() {
         <LabeledItem label="Event Date">
           <Popover>
             <PopoverTrigger asChild>
-              <Button className="w-full items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
+              <Button
+                className="h-9 w-full items-start justify-start"
+                variant="outline"
+              >
                 <CalendarIcon />
                 {eventDetails.date ? (
                   format(eventDetails.date, "PPP")
@@ -237,30 +216,12 @@ export default function NewEventPage() {
           }
         />
 
-        <DropdownMenu>
-          <LabeledItem label="Donation Currency">
-            <DropdownMenuTrigger asChild>
-              <Button className="w-full items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
-                {eventDetails.currency ?? "Select Currency"}
-              </Button>
-            </DropdownMenuTrigger>
-          </LabeledItem>
-          <DropdownMenuContent>
-            <DropdownMenuGroup>
-              <DropdownMenuItem
-                className="w-96"
-                onClick={() =>
-                  setEventDetails((prev) => ({
-                    ...prev,
-                    currency: "USD",
-                  }))
-                }
-              >
-                USD
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ItemSelectBlock
+          items={[{ id: "USD", name: "USD" }]}
+          set={(id) => setEventDetails((prev) => ({ ...prev, currency: id }))}
+          title="Select Currency"
+          label="Donation Currency"
+        />
 
         <Input
           type="file"

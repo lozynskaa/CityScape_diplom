@@ -12,6 +12,9 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -67,29 +70,37 @@ export default function AppSidebar() {
   const params = useParams<{ companyId: string }>();
 
   return (
-    <Sidebar>
+    <Sidebar childrenClassName="rounded-l-2xl">
       <SidebarContent>
-        {sidebarItems.map((item) => (
-          <SidebarMenuItem key={item.title} title={item.title}>
-            <Link href={item.href}>
-              <SidebarMenuButton>
-                <item.icon className="mr-2 h-4 w-4" />
-                {item.title}
-              </SidebarMenuButton>
-            </Link>
-            {item.subItems?.length &&
-              item.subItems.map((subItem) => (
-                <SidebarMenuSub key={subItem.title}>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton href={subItem.href(params.companyId)}>
-                      <subItem.icon className="mr-2 h-4 w-4" />
-                      {subItem.title}
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                </SidebarMenuSub>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {sidebarItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.href}>
+                      <item.icon className="mr-2 h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                  <SidebarMenuSub>
+                    {item.subItems?.length &&
+                      item.subItems.map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton
+                            href={subItem.href(params.companyId)}
+                          >
+                            <subItem.icon className="mr-2 h-4 w-4" />
+                            <span>{subItem.title}</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                  </SidebarMenuSub>
+                </SidebarMenuItem>
               ))}
-          </SidebarMenuItem>
-        ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   );

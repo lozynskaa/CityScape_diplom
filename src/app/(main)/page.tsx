@@ -12,6 +12,7 @@ import EventCard from "../_components/quick-event-card";
 import { api, HydrateClient } from "~/trpc/server";
 import { redirect } from "next/navigation";
 import { auth } from "~/server/auth";
+import { type Event } from "~/server/db/event.schema";
 
 const handleSearchEvents = async (formData: FormData) => {
   "use server";
@@ -106,7 +107,7 @@ export default async function Home() {
                 <CarouselItem key={index} className="basis-1/3">
                   <EventCard
                     userId={session?.user?.id}
-                    event={event}
+                    event={event as Event}
                     handleApplyToEvent={handleApplyToEvent}
                   />
                 </CarouselItem>

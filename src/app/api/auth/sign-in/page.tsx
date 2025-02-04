@@ -104,7 +104,7 @@ export default async function SignUp() {
           />
           <Textarea name="bio" label="Bio" className="rounded-xl" />
           <Button
-            className="w-96 rounded-full bg-emerald-400 text-sm font-bold text-gray-950 hover:bg-emerald-500 focus:bg-emerald-500 active:bg-emerald-500"
+            className="w-96 rounded-full text-sm font-bold text-gray-950"
             type="submit"
           >
             Create new account

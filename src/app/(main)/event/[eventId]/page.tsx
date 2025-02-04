@@ -12,13 +12,11 @@ import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
 type Props = {
-  params: {
-    eventId: string;
-  };
+  params: Promise<{ eventId: string }>;
 };
 
 export default async function EventPage({ params }: Props) {
-  const { eventId } = params;
+  const { eventId } = await params;
 
   const session = await auth();
 

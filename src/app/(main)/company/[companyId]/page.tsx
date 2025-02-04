@@ -22,7 +22,7 @@ export default async function CompanyPage({ params }: Props) {
   const firstThreeEvents = companyEvents.slice(0, 3);
   const firstThreePosts = companyPosts.slice(0, 3);
 
-  void api.company.getCompany.prefetch({ id: companyId });
+  // void api.company.getCompany.prefetch({ id: companyId });
 
   return (
     <div className="w-full space-y-8 px-12 py-8">

@@ -117,7 +117,7 @@ export default function EventCard({
             </p>
             <div className="h-3 w-full rounded-full bg-gray-100">
               <div
-                className="h-3 rounded-full bg-emerald-400"
+                className="bg-primary-400 h-3 rounded-full"
                 style={{
                   width: `${((event.currentAmount ? +event.currentAmount : 0) / (event.goalAmount ? +event.goalAmount : 0)) * 100}%`,
                 }}

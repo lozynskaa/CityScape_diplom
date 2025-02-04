@@ -14,13 +14,6 @@ import {
 import DonorItem, { type DonationItemType } from "~/app/_components/donor-item";
 import { Button } from "~/app/_components/ui/button";
 import { Input } from "~/app/_components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/app/_components/ui/dropdown-menu";
 import { LabeledItem } from "~/app/_components/ui/labeled-item";
 import { Textarea } from "~/app/_components/ui/textarea";
 import { Switch } from "~/app/_components/ui/switch";
@@ -33,6 +26,7 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "~/app/_components/ui/calendar";
 import { format } from "date-fns";
 import ApplicantItem from "~/app/_components/applicant-item";
+import { ItemSelectBlock } from "~/app/_components/item-select";
 
 export default function EventPage() {
   const { eventId } = useParams<{
@@ -229,30 +223,15 @@ export default function EventPage() {
             }))
           }
         />
-        <DropdownMenu>
-          <LabeledItem label="Event Category">
-            <DropdownMenuTrigger asChild>
-              <Button className="w-full items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
-                {updatedEventData.category ?? "Select Category"}
-              </Button>
-            </DropdownMenuTrigger>
-          </LabeledItem>
-          <DropdownMenuContent>
-            <DropdownMenuGroup>
-              <DropdownMenuItem
-                className="w-96"
-                onClick={() =>
-                  setUpdatedEventData((prev) => ({
-                    ...prev,
-                    category: "Category 1",
-                  }))
-                }
-              >
-                Category 1
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ItemSelectBlock
+          items={[{ id: "Category 1", name: "Category 1" }]}
+          set={(id) =>
+            setUpdatedEventData((prev) => ({ ...prev, eventCategory: id }))
+          }
+          title="Select Category"
+          label="Event Category"
+        />
+
         <LabeledItem label="Include Donations">
           <Switch
             checked={!updatedEventData.withoutDonations}
@@ -281,7 +260,10 @@ export default function EventPage() {
         <LabeledItem label="Event Date">
           <Popover>
             <PopoverTrigger asChild>
-              <Button className="w-full items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
+              <Button
+                className="h-9 w-full items-start justify-start"
+                variant="outline"
+              >
                 <CalendarIcon />
                 {updatedEventData.date ? (
                   format(updatedEventData.date, "PPP")
@@ -339,30 +321,14 @@ export default function EventPage() {
           }
         />
 
-        <DropdownMenu>
-          <LabeledItem label="Donation Currency">
-            <DropdownMenuTrigger asChild>
-              <Button className="w-full items-start justify-start bg-white text-gray-950 hover:bg-gray-100 focus:bg-gray-100 active:bg-gray-100">
-                {updatedEventData.currency ?? "Select Currency"}
-              </Button>
-            </DropdownMenuTrigger>
-          </LabeledItem>
-          <DropdownMenuContent>
-            <DropdownMenuGroup>
-              <DropdownMenuItem
-                className="w-96"
-                onClick={() =>
-                  setUpdatedEventData((prev) => ({
-                    ...prev,
-                    currency: "USD",
-                  }))
-                }
-              >
-                USD
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ItemSelectBlock
+          items={[{ id: "USD", name: "USD" }]}
+          set={(id) =>
+            setUpdatedEventData((prev) => ({ ...prev, currency: id }))
+          }
+          title="Select Currency"
+          label="Donation Currency"
+        />
 
         <Input
           type="file"
