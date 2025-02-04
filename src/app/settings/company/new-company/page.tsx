@@ -6,6 +6,7 @@ import { api } from "~/trpc/react";
 import CreateCompanyForm, {
   type CreateCompanyDetails,
 } from "~/app/_components/create-company-form";
+import { useRouter } from "next/navigation";
 
 const defaultBirthday = new Date();
 defaultBirthday.setFullYear(defaultBirthday.getFullYear() - 22);
@@ -32,14 +33,16 @@ const disabledCallback = (state: CreateCompanyDetails) => {
 export default function NewCompanyPage() {
   const [disabled, setDisabled] = useState(true);
   const companyDetailsRef = useRef<CreateCompanyDetails>({});
-  const { mutate: createCompany } = api.company.createCompany.useMutation();
+  const router = useRouter();
+  const { mutateAsync: createCompany } =
+    api.company.createCompany.useMutation();
 
   const handleCreateCompany = async () => {
     if (!disabledCallback(companyDetailsRef.current)) {
       const filledCompanyDetails =
         companyDetailsRef.current as Required<CreateCompanyDetails>;
 
-      createCompany({
+      const newCompany = await createCompany({
         company: {
           name: filledCompanyDetails.name,
           companyEmail: filledCompanyDetails.email,
@@ -55,6 +58,10 @@ export default function NewCompanyPage() {
           lastName: filledCompanyDetails.lastName,
         },
       });
+      if (newCompany) {
+        setDisabled(true);
+        router.push(`/settings/company/${newCompany.id}`);
+      }
     }
   };
 
