@@ -106,6 +106,7 @@ export const eventRouter = createTRPCRouter({
         category,
       } = input;
 
+      const userId = ctx.session?.user?.id;
       let imageUrl: string | undefined = undefined;
       if (image) {
         const uuid = crypto.randomUUID();
@@ -129,6 +130,7 @@ export const eventRouter = createTRPCRouter({
           imageUrl,
           goalAmount: `${goalAmount ?? 0}`,
           currency,
+          creatorId: userId,
         })
         .returning();
 
@@ -302,6 +304,52 @@ export const eventRouter = createTRPCRouter({
       };
     }),
 
+  getPrivateEvent: protectedProcedure
+    .input(eventRouterValidationSchema.getEvent)
+    .query(async ({ input, ctx }) => {
+      const { id } = input;
+      const userId = ctx.session.user.id;
+      const [event] = await ctx.db
+        .select()
+        .from(events)
+        .where(and(eq(events.id, id), eq(events.creatorId, userId)));
+
+      if (!event) {
+        throw new Error("Event not found");
+      }
+
+      // Get the list of users who donated
+      const donationUsers = await ctx.db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          image: users.image,
+          donationAmount: donations.amount,
+          currency: donations.currency,
+        })
+        .from(donations)
+        .leftJoin(users, eq(donations.userId, users.id))
+        .where(eq(donations.eventId, id));
+
+      const eventUsers = (await ctx.db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          image: users.image,
+        })
+        .from(userEvents)
+        .where(eq(userEvents.eventId, id))
+        .leftJoin(users, eq(userEvents.userId, users.id))) as User[];
+
+      // Combine results
+      return {
+        ...event,
+        donationUsers: donationUsers || [],
+        eventUsers: eventUsers || [],
+      };
+    }),
   getEventsByCompany: publicProcedure
     .input(eventRouterValidationSchema.getEvent)
     .query(async ({ input, ctx }) => {
@@ -330,6 +378,7 @@ export const eventRouter = createTRPCRouter({
           withoutDonations: events.withoutDonations,
           isUserApplied: sql<boolean>`CASE WHEN ${userEvents.userId} IS NOT NULL THEN true ELSE false END`,
           paymentEnabled: sql<boolean>`CASE WHEN ${companies.stripeLinked} IS true THEN true ELSE false END`,
+          creatorId: events.creatorId,
         })
         .from(events)
         .leftJoin(companies, eq(events.companyId, companies.id))

@@ -47,7 +47,7 @@ export default function EventPage() {
     data: currentEvent = null,
     isFetching,
     isFetched,
-  } = api.event.getEvent.useQuery({
+  } = api.event.getPrivateEvent.useQuery({
     id: eventId,
   });
   const { mutateAsync: updateEvent } = api.event.updateEvent.useMutation();

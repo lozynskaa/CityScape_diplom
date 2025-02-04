@@ -35,6 +35,7 @@ export const events = createTable("event", {
     mode: "date",
     withTimezone: true,
   }),
+  creatorId: varchar("creator_id", { length: 255 }).notNull(),
   location: varchar("location", { length: 255 }),
   withoutDonations: boolean("without_donations").default(false),
   // iBan: varchar("iban", { length: 34 }).notNull(),

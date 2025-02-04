@@ -24,7 +24,7 @@ export default function Company() {
     Partial<Company> & { imageFile?: { fileName: string; file: string } }
   >({});
   const { data: currentCompany = null, isFetching } =
-    api.company.getCompany.useQuery({
+    api.company.getPrivateCompany.useQuery({
       id: companyId,
     });
   const { mutateAsync: updateCompany } =

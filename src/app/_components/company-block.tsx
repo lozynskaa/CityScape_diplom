@@ -29,14 +29,15 @@ export default function CompanyBlock({ company }: Props) {
           {name.charAt(0)}
         </AvatarFallback>
       </Avatar>
-      <div className="flex-1 space-y-1">
+      <div className="flex flex-1 flex-col space-y-1">
         <h3 className="text-2xl font-bold">{name}</h3>
         <p className="text-sm text-gray-600">{description}</p>
         <Link
-          className="block text-sm text-gray-600 hover:text-gray-500"
+          className="block break-all text-sm text-gray-600 underline hover:text-gray-500"
           href={website ?? "#"}
+          target="_blank"
         >
-          {website}
+          Company Website
         </Link>
         <span className="text-sm text-gray-600">{email}</span>
       </div>

@@ -302,6 +302,7 @@ export const companyRouter = createTRPCRouter({
           goalAmount: `${goalAmount}`,
           currency,
           category,
+          creatorId: userId,
         })
         .returning();
 
@@ -336,6 +337,18 @@ export const companyRouter = createTRPCRouter({
         .select()
         .from(companies)
         .where(eq(companies.id, id));
+      return company;
+    }),
+
+  getPrivateCompany: protectedProcedure
+    .input(companyRouterValidationSchema.getCompany)
+    .query(async ({ input, ctx }) => {
+      const { id } = input;
+      const userId = ctx.session.user.id;
+      const [company] = await ctx.db
+        .select()
+        .from(companies)
+        .where(and(eq(companies.id, id), eq(companies.founderId, userId)));
       return company;
     }),
 

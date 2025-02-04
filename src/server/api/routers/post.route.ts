@@ -142,6 +142,18 @@ export const postRouter = createTRPCRouter({
       return post;
     }),
 
+  getPrivatePost: protectedProcedure
+    .input(postRouterValidationSchema.getCompanyPosts)
+    .query(async ({ input, ctx }) => {
+      const { id } = input;
+      const userId = ctx.session.user.id;
+      const [post] = await ctx.db
+        .select()
+        .from(posts)
+        .where(and(eq(posts.id, id), eq(posts.userId, userId)));
+      return post;
+    }),
+
   deletePost: protectedProcedure
     .input(postRouterValidationSchema.getCompanyPosts)
     .mutation(async ({ input, ctx }) => {

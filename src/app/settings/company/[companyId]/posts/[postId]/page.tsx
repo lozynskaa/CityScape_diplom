@@ -25,7 +25,7 @@ export default function EditPostPage() {
     imageFiles: [] as { fileName: string; file: string }[],
   });
 
-  const { data: post, isFetching } = api.post.getPost.useQuery({
+  const { data: post, isFetching } = api.post.getPrivatePost.useQuery({
     id: postId,
   });
   const { mutate: updatePost } = api.post.updatePost.useMutation();

@@ -84,7 +84,7 @@ export const donationRouter = createTRPCRouter({
           eventCompanyId,
           eventId,
           userId: userId ?? null,
-          anonymous: anonymous.toString(),
+          anonymous: (!userId || anonymous).toString(),
           amount: amount.toFixed(2),
         },
         ui_mode: "embedded",

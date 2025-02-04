@@ -6,13 +6,13 @@ import { Button } from "~/app/_components/ui/button";
 import { api } from "~/trpc/server";
 
 type Props = {
-  params: {
+  params: Promise<{
     companyId: string;
-  };
+  }>;
 };
 
 export default async function CompanyPage({ params }: Props) {
-  const companyId = params.companyId;
+  const { companyId } = await params;
   const companyData = await api.company.getCompany({ id: companyId });
   const companyEvents = await api.event.getEventsByCompany({ id: companyId });
   const companyPosts = await api.post.getCompanyPosts({ id: companyId });

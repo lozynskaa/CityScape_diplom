@@ -1,9 +1,15 @@
 import React from "react";
 import { SidebarProvider } from "../_components/ui/sidebar";
 import AppSidebar from "../_components/app-sidebar";
+import { auth } from "~/server/auth";
+import { redirect } from "next/navigation";
 export default async function MainLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect("/api/auth/sign-in");
+  }
   return (
     <SidebarProvider
       className="relative"
