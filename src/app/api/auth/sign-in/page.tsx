@@ -2,7 +2,7 @@ import { Button } from "~/app/_components/ui/button";
 import { Input } from "~/app/_components/ui/input";
 import { Textarea } from "~/app/_components/ui/textarea";
 import { signIn } from "~/server/auth";
-import { api } from "~/server/api/trpc";
+import { api } from "~/server/api/root";
 
 async function handleSignIn(formData: FormData) {
   "use server";

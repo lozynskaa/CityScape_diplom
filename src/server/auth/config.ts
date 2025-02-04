@@ -5,7 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "~/server/db";
 import { accounts, users, verificationTokens } from "~/server/db/schema";
 import { type JWT } from "@auth/core/jwt";
-import { api } from "~/server/api/trpc";
+import { api } from "~/server/api/root";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`

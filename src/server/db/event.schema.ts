@@ -31,6 +31,10 @@ export const events = createTable("event", {
   currency: varchar("currency", { length: 255 }),
   purpose: varchar("purpose", { length: 255 }),
   imageUrl: varchar("image_url", { length: 255 }),
+  date: timestamp("date", {
+    mode: "date",
+    withTimezone: true,
+  }),
   location: varchar("location", { length: 255 }),
   withoutDonations: boolean("without_donations").default(false),
   // iBan: varchar("iban", { length: 34 }).notNull(),

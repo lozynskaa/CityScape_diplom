@@ -2,7 +2,7 @@ import HomeBg from "../../assets/home-bg.png";
 import { Search } from "lucide-react";
 import { Input } from "../_components/ui/input";
 import { Button } from "../_components/ui/button";
-import { api, HydrateClient } from "~/server/api/trpc";
+import { api, HydrateClient } from "~/server/api/root";
 import {
   Carousel,
   CarouselContent,

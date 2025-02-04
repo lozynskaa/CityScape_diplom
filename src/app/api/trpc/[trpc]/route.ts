@@ -2,7 +2,7 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { type NextRequest } from "next/server";
 
 import { env } from "~/env";
-import { createTRPCContext, appRouter } from "~/server/api/trpc";
+import { createTRPCContext, appRouter } from "~/server/api/root";
 
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
