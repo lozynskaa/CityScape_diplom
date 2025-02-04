@@ -10,7 +10,7 @@ import { Switch } from "~/app/_components/ui/switch";
 import { api } from "~/trpc/react";
 
 export default function QuickDonatePage() {
-  const [amountValue, setAmountValue] = useState<number>(0);
+  const [amountValue, setAmountValue] = useState<number>();
   const [anonymous, setAnonymous] = useState(false);
   const { eventId } = useParams<{ eventId: string }>();
 
@@ -21,48 +21,70 @@ export default function QuickDonatePage() {
     api.donation.initializePayment.useMutation();
 
   const handlePaymentCreate = async () => {
-    if (!event?.currency) return;
+    if (
+      !event?.currency ||
+      !Number.isFinite(amountValue) ||
+      Number.isNaN(amountValue)
+    )
+      return;
 
-    // Call the backend to create the transaction
-    const paymentData = await initializePayment({
-      amount: amountValue,
-      currency: event.currency,
-      eventId,
-      anonymous,
-    });
-    if (!paymentData) return;
-    const urlToRedirect = paymentData._links.redirect.href;
-    window.location.href = urlToRedirect;
+    try {
+      const paymentData = await initializePayment({
+        amount: amountValue!,
+        currency: event.currency,
+        eventId,
+        anonymous,
+      });
+
+      if (paymentData) {
+        const redirectUrl = paymentData._links.redirect.href;
+        window.location.href = redirectUrl;
+      }
+    } catch (error) {
+      console.error("Error initializing payment:", error);
+    }
   };
 
   if (isLoading) {
-    return <Spinner />;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Spinner />
+      </div>
+    );
   }
 
   return (
-    <div className="w-full flex-1 space-y-8 px-12 py-8">
-      <div className="flex flex-col items-center justify-between gap-y-4">
-        <h3 className="text-2xl font-bold">{event?.name}</h3>
+    <div className="container mx-auto p-8">
+      <div className="mx-auto max-w-lg space-y-6">
+        <h1 className="text-center text-3xl font-bold">{event?.name}</h1>
         <Input
           disabled={isPending}
           type="number"
           name="amount"
-          placeholder="Amount"
-          label="Amount"
-          onChange={(e) => setAmountValue(Number(e.target.value))}
+          placeholder="Enter donation amount"
+          label="Donation Amount"
           value={amountValue}
-          wrapperClassName="max-w-[200px]"
+          onChange={(e) => setAmountValue(Number(e.target.value))}
+          wrapperClassName="w-full"
         />
-        <LabeledItem label="Anonymous" wrapperClassName="max-w-[200px]">
+        <LabeledItem label="Donate Anonymously">
           <Switch checked={anonymous} onCheckedChange={setAnonymous} />
         </LabeledItem>
+        <div>
+          <p>
+            Total Donated:{" "}
+            <span className="font-bold">
+              {event?.currentAmount}/{event?.goalAmount} {event?.currency}
+            </span>
+          </p>
+        </div>
         <Button
-          disabled={isPending}
-          className="w-22 rounded-full font-bold"
-          type="submit"
+          disabled={isPending || !amountValue || amountValue <= 0}
+          className="w-full rounded-lg font-bold"
+          type="button"
           onClick={handlePaymentCreate}
         >
-          Donate
+          {isPending ? "Processing..." : "Donate"}
         </Button>
       </div>
     </div>
