@@ -45,7 +45,7 @@ export default function NewEventPage() {
         image: filledEventDetails.imageFile,
         companyId,
         category: filledEventDetails.category ?? "",
-        includeDonations: !!filledEventDetails.withoutDonations,
+        includeDonations: !filledEventDetails.withoutDonations,
         location: filledEventDetails.location ?? "",
         date: filledEventDetails.date ?? new Date(),
       });
