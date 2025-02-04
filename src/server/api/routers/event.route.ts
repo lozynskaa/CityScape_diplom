@@ -1,4 +1,15 @@
-import { desc, and, eq, sql } from "drizzle-orm";
+import {
+  desc,
+  and,
+  eq,
+  sql,
+  count,
+  or,
+  like,
+  type SQLWrapper,
+  gte,
+  lte,
+} from "drizzle-orm";
 import { z } from "zod";
 
 import {
@@ -13,6 +24,7 @@ import {
   userEvents,
   users,
 } from "~/server/db/schema";
+import { type Event } from "~/server/db/event.schema";
 import { TRPCError } from "@trpc/server";
 
 const eventRouterValidationSchema = {
@@ -47,6 +59,19 @@ const eventRouterValidationSchema = {
   }),
   getEvent: z.object({
     id: z.string(),
+  }),
+  getEventsWithFilters: z.object({
+    search: z.string().optional(),
+    page: z.number().min(1).default(1),
+    limit: z.number().min(1).max(100).default(10),
+    category: z.enum(["All", "Featured", "New", "Trending"]).default("All"),
+    companyId: z.string().optional(),
+    eventCategory: z.string().optional(),
+    eventLocation: z.string().optional(),
+    eventDate: z.object({
+      startDate: z.date().optional(),
+      endDate: z.date().optional(),
+    }),
   }),
 };
 
@@ -221,11 +246,103 @@ export const eventRouter = createTRPCRouter({
     .input(eventRouterValidationSchema.getEvent)
     .query(async ({ input, ctx }) => {
       const { id } = input;
+      const userId = ctx.session!.user.id;
       const companyEvents = await ctx.db
-        .select()
+        .select({
+          id: events.id,
+          name: events.name,
+          createdAt: events.createdAt,
+          description: events.description,
+          purpose: events.purpose,
+          location: events.location,
+          imageUrl: events.imageUrl,
+          goalAmount: events.goalAmount,
+          date: events.date,
+          companyId: events.companyId,
+          currentAmount: events.currentAmount,
+          currency: events.currency,
+          category: events.category,
+          withoutDonations: events.withoutDonations,
+          isUserApplied: sql<boolean>`CASE WHEN ${userEvents.userId} IS NOT NULL THEN true ELSE false END`,
+        })
         .from(events)
+        .leftJoin(
+          userEvents,
+          and(eq(events.id, userEvents.eventId), eq(userEvents.userId, userId)),
+        )
         .where(eq(events.companyId, id));
       return companyEvents;
+    }),
+
+  getEventsWithFilters: publicProcedure
+    .input(eventRouterValidationSchema.getEventsWithFilters)
+    .query(async ({ input, ctx }) => {
+      const {
+        search,
+        page,
+        limit,
+        category,
+        companyId,
+        eventDate,
+        eventCategory,
+        eventLocation,
+      } = input;
+      let filterEvents: Event[] = [];
+      let eventsCount = 0;
+
+      const whereStatement: Array<SQLWrapper | undefined> = [];
+
+      if (companyId) {
+        whereStatement.push(eq(events.companyId, companyId));
+      }
+
+      if (search) {
+        whereStatement.push(
+          or(
+            like(events.name, `${search}%`),
+            like(events.description, `${search}%`),
+            like(events.purpose, `${search}%`),
+          ),
+        );
+      }
+
+      if (eventCategory) {
+        whereStatement.push(eq(events.category, eventCategory));
+      }
+
+      if (eventCategory) {
+        whereStatement.push(like(events.location, `${eventLocation}%`));
+      }
+
+      if (eventDate.startDate) {
+        whereStatement.push(gte(events.date, new Date(eventDate.startDate)));
+      }
+
+      if (eventDate.endDate) {
+        whereStatement.push(lte(events.date, new Date(eventDate.endDate)));
+      }
+
+      switch (category) {
+        default:
+        case "All":
+          filterEvents = await ctx.db
+            .select()
+            .from(events)
+            .where(and(...whereStatement))
+            .limit(limit)
+            .offset((page - 1) * limit);
+          const countQuery = await ctx.db
+            .select({ count: count() })
+            .from(events);
+          eventsCount = countQuery?.[0]?.count ?? 0;
+          break;
+      }
+      return {
+        page: input.page,
+        limit: input.limit,
+        events: filterEvents,
+        eventsCount,
+      };
     }),
 
   applyToEvent: protectedProcedure

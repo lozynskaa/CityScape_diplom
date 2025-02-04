@@ -60,9 +60,9 @@ export default async function Home() {
               align: "start",
               axis: "x",
             }}
-            className="w-full py-4"
+            className="w-full"
           >
-            <CarouselContent>
+            <CarouselContent className="py-4">
               {quickCompanies.map((company, index) => (
                 <CarouselItem
                   key={index}

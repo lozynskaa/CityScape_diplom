@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { count, eq, like, or } from "drizzle-orm";
 import { z } from "zod";
 
 import {
@@ -8,6 +8,7 @@ import {
 } from "~/server/api/trpc";
 import { companies, events, users } from "~/server/db/schema";
 import { TRPCError } from "@trpc/server";
+import { Company } from "~/server/db/company.schema";
 
 const companyRouterValidationSchema = {
   createCompany: z.object({
@@ -47,6 +48,12 @@ const companyRouterValidationSchema = {
   }),
   getCompany: z.object({
     id: z.string(),
+  }),
+  getCompaniesWithFilters: z.object({
+    search: z.string().optional(),
+    page: z.number().min(1).default(1),
+    limit: z.number().min(1).max(100).default(10),
+    category: z.enum(["All", "Featured", "New", "Trending"]).default("All"),
   }),
 };
 
@@ -202,6 +209,94 @@ export const companyRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
       await ctx.db.delete(companies).where(eq(companies.id, id));
+    }),
+
+  getCompaniesWithFilters: publicProcedure
+    .input(companyRouterValidationSchema.getCompaniesWithFilters)
+    .query(async ({ ctx, input }) => {
+      let filterCompanies: Company[] = [];
+      let companiesCount = 0;
+
+      switch (input.category) {
+        // case "All":
+        //   filterCompanies = await ctx.db
+        //     .select()
+        //     .from(companies)
+        //     .where(
+        //       input.search
+        //         ? or(
+        //             eq(companies.name, input.search),
+        //             eq(companies.description, input.search),
+        //           )
+        //         : undefined,
+        //     )
+        //     .limit(input.limit)
+        //     .offset((input.page - 1) * input.limit);
+        //   const countQuery = await ctx.db
+        //     .select({ count: count() })
+        //     .from(companies);
+        //   companiesCount = countQuery?.[0]?.count ?? 0;
+        //   break;
+        // case "Featured":
+        //   filterCompanies = await ctx.db
+        //     .select()
+        //     .from(companies)
+        //     .limit(input.limit)
+        //     .offset((input.page - 1) * input.limit);
+        //   const countQuery2 = await ctx.db
+        //     .select({ count: count() })
+        //     .from(companies);
+        //   companiesCount = countQuery2?.[0]?.count ?? 0;
+        //   break;
+        // case "New":
+        //   filterCompanies = await ctx.db
+        //     .select()
+        //     .from(companies)
+        //     .limit(input.limit)
+        //     .offset((input.page - 1) * input.limit);
+        //   const countQuery3 = await ctx.db
+        //     .select({ count: count() })
+        //     .from(companies);
+        //   companiesCount = countQuery3?.[0]?.count ?? 0;
+        //   break;
+        // case "Trending":
+        //   filterCompanies = await ctx.db
+        //     .select()
+        //     .from(companies)
+        //     .limit(input.limit)
+        //     .offset((input.page - 1) * input.limit);
+        //   const countQuery4 = await ctx.db
+        //     .select({ count: count() })
+        //     .from(companies);
+        //   companiesCount = countQuery4?.[0]?.count ?? 0;
+        // break;
+        default:
+        case "All":
+          filterCompanies = await ctx.db
+            .select()
+            .from(companies)
+            .where(
+              input.search
+                ? or(
+                    like(companies.name, `${input.search}%`),
+                    like(companies.description, `${input.search}%`),
+                  )
+                : undefined,
+            )
+            .limit(input.limit)
+            .offset((input.page - 1) * input.limit);
+          const countQuery = await ctx.db
+            .select({ count: count() })
+            .from(companies);
+          companiesCount = countQuery?.[0]?.count ?? 0;
+          break;
+      }
+      return {
+        page: input.page,
+        limit: input.limit,
+        companies: filterCompanies,
+        companiesCount,
+      };
     }),
 
   getRandomCompanies: publicProcedure

@@ -1,4 +1,14 @@
-import { eq } from "drizzle-orm";
+import {
+  and,
+  eq,
+  gte,
+  like,
+  lt,
+  lte,
+  or,
+  desc,
+  type SQLWrapper,
+} from "drizzle-orm";
 import { z } from "zod";
 
 import {
@@ -23,6 +33,16 @@ const postRouterValidationSchema = {
   }),
   getCompanyPosts: z.object({
     id: z.string(),
+  }),
+  getFilteredPosts: z.object({
+    companyId: z.string(),
+    search: z.string().optional(),
+    cursor: z.string().nullish(),
+    limit: z.number().min(1).max(100).default(10),
+    postDate: z.object({
+      startDate: z.date().optional(),
+      endDate: z.date().optional(),
+    }),
   }),
 };
 
@@ -85,5 +105,56 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
       await ctx.db.delete(posts).where(eq(posts.id, id));
+    }),
+
+  getFilteredPosts: publicProcedure
+    .input(postRouterValidationSchema.getFilteredPosts)
+    .query(async ({ input, ctx }) => {
+      const { companyId, search, cursor, limit, postDate } = input;
+      const { startDate, endDate } = postDate;
+
+      const whereStatement: Array<SQLWrapper | undefined> = [];
+
+      if (search) {
+        whereStatement.push(
+          or(
+            like(posts.title, `%${search}%`),
+            like(posts.content, `%${search}%`),
+          ),
+        );
+      }
+      if (startDate) {
+        whereStatement.push(gte(posts.createdAt, startDate));
+      }
+      if (endDate) {
+        whereStatement.push(lte(posts.createdAt, endDate));
+      }
+      if (companyId) {
+        whereStatement.push(eq(posts.companyId, companyId));
+      }
+
+      // Apply the cursor (createdAt) for pagination
+      if (cursor) {
+        whereStatement.push(lt(posts.createdAt, new Date(cursor))); // Fetch older posts
+      }
+
+      // Query the database
+      const filteredPosts = await ctx.db
+        .select()
+        .from(posts)
+        .where(and(...whereStatement))
+        .orderBy(desc(posts.createdAt)) // Newest posts first
+        .limit(limit);
+
+      // Determine the next cursor
+      const nextCursor =
+        filteredPosts.length > 0
+          ? filteredPosts[filteredPosts.length - 1]?.createdAt?.toISOString()
+          : null;
+
+      return {
+        posts: filteredPosts,
+        nextCursor,
+      };
     }),
 });

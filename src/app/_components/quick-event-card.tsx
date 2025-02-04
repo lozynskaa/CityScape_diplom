@@ -30,14 +30,20 @@ export default function EventCard({
   return (
     <div className="flex h-full w-full flex-row justify-between gap-x-8 rounded-lg bg-white py-4">
       <div className="flex w-full flex-col gap-y-4">
-        <div>
-          <p className="text-lg font-bold text-gray-950">{event.name}</p>
-          <p className="line-clamp-1 text-base text-gray-600">
-            {event.purpose ?? event.description}
+        <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+          <p className="col-span-2 text-lg font-bold text-gray-950">
+            {event.name}
           </p>
-          <p className="line-clamp-2 text-base text-gray-950">
+          <p className="line-clamp-1 text-base text-gray-950">
+            {event.purpose}
+          </p>
+          <p className="line-clamp-1 text-base text-gray-600">
+            {event.description}
+          </p>
+          <p className="line-clamp-1 text-base text-gray-950">
             Location: {event.location}
-            <br />
+          </p>
+          <p className="line-clamp-1 text-base text-gray-950">
             Date:
             {format(event.date!, "dd/MM/yyyy")}
           </p>
@@ -87,6 +93,17 @@ export default function EventCard({
                 variant="ghost"
               >
                 Quick donate
+              </Button>
+            </Link>
+            <Link
+              href={`/company/${event.companyId}/events/${event.id}`}
+              className="w-30 inline-block h-10"
+            >
+              <Button
+                className="w-30 h-10 rounded-full text-sm font-bold"
+                variant="ghost"
+              >
+                Learn More
               </Button>
             </Link>
           </div>
