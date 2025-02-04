@@ -18,7 +18,7 @@ export default function ExploreCard({
   return (
     <Link
       href={link}
-      className="block w-[250px] w-full rounded-lg bg-white shadow"
+      className="block w-full min-w-[100%] rounded-lg bg-white shadow"
     >
       <Image
         src={imageUrl ?? DefaultCompanyImage}
@@ -26,7 +26,7 @@ export default function ExploreCard({
         onError={(e) => (e.currentTarget.src = DefaultCompanyImage.src)}
         width={250}
         height={140}
-        className="h-[140px] w-[250px] rounded-lg object-contain"
+        className="h-[140px] min-w-[100%] rounded-lg object-contain"
       />
       <div className="p-4">
         <p className="text-lg font-semibold text-gray-950">{name}</p>

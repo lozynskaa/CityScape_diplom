@@ -77,7 +77,7 @@ const eventRouterValidationSchema = {
     search: z.string().optional(),
     page: z.number().min(1).default(1),
     limit: z.number().min(1).max(100).default(10),
-    category: z.enum(["All", "Featured", "New", "Trending"]).default("All"),
+    category: z.enum(["all", "new", "my_applies"]).default("all"),
     companyId: z.string().optional(),
     eventCategory: z.string().optional(),
     eventLocation: z.string().optional(),
@@ -405,6 +405,7 @@ export const eventRouter = createTRPCRouter({
       } = input;
       let filterEvents: Array<{ event: Event; company?: Company | null }> = [];
       let eventsCount = 0;
+      const userId = ctx.session?.user?.id;
 
       const whereStatement: Array<SQLWrapper | undefined> = [];
 
@@ -426,8 +427,8 @@ export const eventRouter = createTRPCRouter({
         whereStatement.push(eq(events.category, eventCategory));
       }
 
-      if (eventCategory) {
-        whereStatement.push(like(events.location, `${eventLocation}%`));
+      if (eventLocation) {
+        whereStatement.push(like(events.location, eventLocation));
       }
 
       if (eventDate.startDate) {
@@ -438,21 +439,48 @@ export const eventRouter = createTRPCRouter({
         whereStatement.push(lte(events.date, new Date(eventDate.endDate)));
       }
 
+      let countQuery: {
+        count: number;
+      }[] = [];
+
       switch (category) {
-        default:
-        case "All":
+        case "new":
           filterEvents = await ctx.db
             .select()
             .from(events)
             .where(and(...whereStatement))
             .leftJoin(companies, eq(events.companyId, companies.id))
             .limit(limit)
-            .offset((page - 1) * limit);
-          const countQuery = await ctx.db
-            .select({ count: count() })
-            .from(events);
+            .offset((page - 1) * limit)
+            .orderBy(desc(events.createdAt));
+          countQuery = await ctx.db.select({ count: count() }).from(events);
           eventsCount = countQuery?.[0]?.count ?? 0;
           break;
+        case "my_applies":
+          if (userId) {
+            whereStatement.push(eq(userEvents.userId, userId));
+          }
+        case "all":
+        default:
+          const eventsQueryList = await ctx.db
+            .select({
+              event: events,
+              userEventCount: count(userEvents.eventId),
+              company: companies,
+            })
+            .from(events)
+            .where(and(...whereStatement))
+            .leftJoin(companies, eq(events.companyId, companies.id))
+            .leftJoin(userEvents, eq(events.id, userEvents.eventId))
+            .groupBy(events.id, companies.id)
+            .orderBy(desc(count(userEvents.eventId)))
+            .limit(limit)
+            .offset((page - 1) * limit);
+
+          filterEvents = eventsQueryList.map(({ event, company }) => ({
+            event,
+            company,
+          }));
       }
       const mappedEvents = filterEvents.map(({ event, company }) => {
         return {

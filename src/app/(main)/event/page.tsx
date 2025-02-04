@@ -19,7 +19,11 @@ import { useDebounce } from "~/hooks/use-debounce";
 import { useWritableSearchParams } from "~/hooks/use-writable-search-params";
 import { api } from "~/trpc/react";
 
-const categories = ["All", "New", "My applies"];
+const categories = [
+  { label: "All", value: "all" },
+  { label: "New", value: "new" },
+  { label: "My applies", value: "my_applies" },
+];
 
 //TODO: Add event category filter and event location filter input
 export default function EventsListPage() {
@@ -35,11 +39,10 @@ export default function EventsListPage() {
     page: Number(searchParams.get("page")) || 1,
     limit: Number(searchParams.get("limit")) || 10,
     companyId: searchParams.get("companyId") ?? "",
-    category: (searchParams.get("category") ?? "All") as
-      | "Featured"
-      | "New"
-      | "Trending"
-      | "All",
+    category: (searchParams.get("category") ?? "all") as
+      | "all"
+      | "new"
+      | "my_applies",
     eventCategory: searchParams.get("eventCategory") ?? "",
     eventLocation: debouncedLocation ?? "",
     eventDate: {
@@ -77,16 +80,16 @@ export default function EventsListPage() {
       <div className="space-y-4">
         <h1 className="text-3xl font-bold">Explore events</h1>
         <div className="flex flex-row items-center gap-x-4">
-          {categories.map((category) => (
+          {categories.map(({ label, value }) => (
             <CategoryBadge
-              selected={category === input.category}
-              key={category}
-              category={category}
-              onClick={() => handleChangeFilter("category", category)}
+              selected={value === input.category}
+              key={value}
+              category={label}
+              onClick={() => handleChangeFilter("category", value)}
             />
           ))}
         </div>
-        <LabeledItem label="Event Category">
+        <LabeledItem label={categoriesData?.length ? "Event Category" : ""}>
           <div className="flex flex-row items-center gap-x-4">
             {categoriesData.map((category) => (
               <CategoryBadge

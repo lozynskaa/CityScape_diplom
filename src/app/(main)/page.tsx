@@ -78,11 +78,11 @@ export default async function Home() {
             }}
             className="w-full"
           >
-            <CarouselContent className="py-4">
+            <CarouselContent className="px-2 py-4">
               {quickCompanies.map((company, index) => (
                 <CarouselItem
                   key={index}
-                  className="basis-1/2 pl-4 md:basis-1/3 lg:basis-1/4"
+                  className="basis-full pl-4 md:basis-1/3 lg:basis-1/4"
                 >
                   <CompanyCard company={company} />
                 </CarouselItem>
@@ -92,7 +92,7 @@ export default async function Home() {
         </div>
 
         <div>
-          <h1 className="text-2xl font-bold text-gray-950">Closest events</h1>
+          <h1 className="text-2xl font-bold text-gray-950">Featured events</h1>
           <Carousel
             opts={{
               align: "start",
