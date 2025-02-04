@@ -28,7 +28,7 @@ export type CompanyInfoState = {
     file: string;
     fileName: string;
   };
-  stripeAccountId?: string;
+  braintreeAccountId?: string;
   //event
   category: string;
   eventName: string;
@@ -83,7 +83,7 @@ const DEFAULT_STATE: CompanyInfoState = {
   description: "",
   companyEmail: "",
   website: "",
-  stripeAccountId: "",
+  braintreeAccountId: "",
   //event
   category: "",
   eventName: "",
@@ -104,8 +104,6 @@ export default function Onboarding() {
 
   const { mutate: completeOnboarding } =
     api.company.completeOnboarding.useMutation();
-  const { mutateAsync: createStripeCompany } =
-    api.company.createStripeCompany.useMutation();
 
   const {
     component: StepContent,
@@ -117,12 +115,8 @@ export default function Onboarding() {
 
   const handleNextStep = async () => {
     if (step === 2) {
-      const { companyAccount } = await createStripeCompany({
-        email: companyInfo.companyEmail,
-      });
       completeOnboarding({
         ...companyInfo,
-        stripeAccountId: companyAccount.id,
       });
       return router.push("/");
     }

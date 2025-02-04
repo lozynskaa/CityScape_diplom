@@ -101,9 +101,7 @@ export default async function Header() {
           </DropdownMenu>
         ) : (
           <Link href="/api/auth/sign-in">
-            <Button className="w-22 h-8 rounded-full text-gray-950">
-              Sign in
-            </Button>
+            <Button className="w-22 h-8 rounded-full">Sign in</Button>
           </Link>
         )}
       </nav>

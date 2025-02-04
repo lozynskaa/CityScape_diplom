@@ -23,8 +23,10 @@ export const companies = createTable("company", {
     mode: "date",
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
-  stripeAccountId: varchar("stripe_account_id", { length: 255 }).notNull(),
-  stripeLinked: boolean("stripe_linked").default(false),
+  braintreeAccountId: varchar("braintree_account_id", {
+    length: 255,
+  }).notNull(),
+  braintreeLinked: boolean("braintree_linked").default(false),
 });
 
 export type Company = typeof companies.$inferSelect;

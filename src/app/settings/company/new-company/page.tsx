@@ -36,8 +36,6 @@ export default function NewCompanyPage() {
   });
 
   const { mutate: createCompany } = api.company.createCompany.useMutation();
-  const { mutateAsync: createStripeCompany } =
-    api.company.createStripeCompany.useMutation();
 
   const handleLoadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -57,16 +55,12 @@ export default function NewCompanyPage() {
     }
   };
   const handleCreateCompany = async () => {
-    const { companyAccount } = await createStripeCompany({
-      email: companyDetails.companyEmail,
-    });
     createCompany({
       name: companyDetails.name,
       companyEmail: companyDetails.companyEmail,
       website: companyDetails.website,
       description: companyDetails.description,
       image: companyDetails.companyImage,
-      stripeAccountId: companyAccount.id,
     });
   };
 

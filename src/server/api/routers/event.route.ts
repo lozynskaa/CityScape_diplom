@@ -206,7 +206,7 @@ export const eventRouter = createTRPCRouter({
           .select({
             event: events,
             isUserApplied: sql<boolean>`CASE WHEN ${userEvents.userId} IS NOT NULL THEN true ELSE false END`,
-            paymentEnabled: sql<boolean>`CASE WHEN ${companies.stripeLinked} IS true THEN true ELSE false END`,
+            paymentEnabled: sql<boolean>`CASE WHEN ${companies.braintreeLinked} IS true THEN true ELSE false END`,
           })
           .from(events)
           .leftJoin(companies, eq(events.companyId, companies.id))
@@ -220,7 +220,7 @@ export const eventRouter = createTRPCRouter({
           .limit(limit)
           .orderBy(desc(events.createdAt));
         return randomEvents.map((event) => ({
-          ...event,
+          ...event.event,
           paymentEnabled: !!event.paymentEnabled,
           isUserApplied: !!event.isUserApplied,
         }));
@@ -340,7 +340,7 @@ export const eventRouter = createTRPCRouter({
         .select({
           event: events,
           isUserApplied: sql<boolean>`CASE WHEN ${userEvents.userId} IS NOT NULL THEN true ELSE false END`,
-          paymentEnabled: sql<boolean>`CASE WHEN ${companies.stripeLinked} IS true THEN true ELSE false END`,
+          paymentEnabled: sql<boolean>`CASE WHEN ${companies.braintreeLinked} IS true THEN true ELSE false END`,
         })
         .from(events)
         .leftJoin(companies, eq(events.companyId, companies.id))
@@ -350,7 +350,7 @@ export const eventRouter = createTRPCRouter({
         )
         .where(eq(events.companyId, id));
       return companyEvents.map((event) => ({
-        ...event,
+        ...event.event,
         paymentEnabled: !!event.paymentEnabled,
         isUserApplied: !!event.isUserApplied,
       }));
@@ -451,7 +451,7 @@ export const eventRouter = createTRPCRouter({
       const mappedEvents = filterEvents.map(({ event, company }) => {
         return {
           ...event,
-          paymentEnabled: !!company?.stripeLinked,
+          paymentEnabled: !!company?.braintreeLinked,
         };
       });
       return {

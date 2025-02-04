@@ -4,7 +4,12 @@ import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 import { db } from "~/server/db";
-import { accounts, users, verificationTokens, type User as UserDB } from "~/server/db/schema";
+import {
+  accounts,
+  users,
+  verificationTokens,
+  type User as UserDB,
+} from "~/server/db/schema";
 import { type JWT } from "@auth/core/jwt";
 
 /**
@@ -19,7 +24,7 @@ declare module "next-auth" {
     token: JWT;
     user: {
       id: string;
-      
+
       // ...other properties
       // role: UserRole;
     } & UserDB;
@@ -61,10 +66,10 @@ export const authConfig = {
 
         // Handle credential-based sign-in
 
-        const isPasswordValid = /*await Bun.password.verify(
+        const isPasswordValid = await Bun.password.verify(
           password,
           user.passwordHash,
-        ); */ true;
+        );
 
         if (!isPasswordValid) {
           return null;
@@ -90,13 +95,17 @@ export const authConfig = {
     verificationTokensTable: verificationTokens,
   }),
   callbacks: {
-    session: async({ token, session, user }) => {
-      const [dbUser] = await db.select().from(users).where(eq(users.id, token.sub!)).limit(1);
+    session: async ({ token, session, user }) => {
+      const [dbUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, token.sub!))
+        .limit(1);
       return {
         ...session,
         token,
         user: {
-          ...dbUser
+          ...dbUser,
         },
       };
     },

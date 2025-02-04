@@ -15,9 +15,10 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    STRIPE_PUBLIC_KEY: z.string(),
-    STRIPE_SECRET_KEY: z.string(),
-    STRIPE_WEBHOOK_SECRET: z.string(),
+    BRAINTREE_MERCHANT_ID: z.string(),
+    BRAINTREE_PUBLIC_KEY: z.string(),
+    BRAINTREE_SECRET_KEY: z.string(),
+    BRAINTREE_WEBHOOK_SECRET: z.string(),
   },
 
   /**
@@ -37,9 +38,10 @@ export const env = createEnv({
     AUTH_SECRET: process.env.AUTH_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
-    STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY,
-    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+    BRAINTREE_MERCHANT_ID: process.env.BRAINTREE_MERCHANT_ID,
+    BRAINTREE_PUBLIC_KEY: process.env.BRAINTREE_PUBLIC_KEY,
+    BRAINTREE_SECRET_KEY: process.env.BRAINTREE_SECRET_KEY,
+    BRAINTREE_WEBHOOK_SECRET: process.env.BRAINTREE_WEBHOOK_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -74,15 +74,15 @@ export default async function SignUp() {
           <div className="flex w-full flex-col items-start justify-between gap-3 sm:flex-row">
             <Button
               className="flex-1 rounded-full text-sm font-bold"
-              variant="ghost"
+              variant="outline"
             >
               Google
             </Button>
             <Button
               className="flex-1 rounded-full text-sm font-bold"
-              variant="ghost"
+              variant="outline"
             >
-              LinkedIn
+              Facebook
             </Button>
           </div>
         </form>
@@ -103,10 +103,7 @@ export default async function SignUp() {
             className="rounded-full"
           />
           <Textarea name="bio" label="Bio" className="rounded-xl" />
-          <Button
-            className="w-96 rounded-full text-sm font-bold text-gray-950"
-            type="submit"
-          >
+          <Button className="w-96 rounded-full text-sm font-bold" type="submit">
             Create new account
           </Button>
         </form>

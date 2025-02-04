@@ -1,0 +1,2 @@
+ALTER TABLE "work-diplom_company" RENAME COLUMN "stripe_account_id" TO "braintree_account_id";--> statement-breakpoint
+ALTER TABLE "work-diplom_company" RENAME COLUMN "stripe_linked" TO "braintree_linked";

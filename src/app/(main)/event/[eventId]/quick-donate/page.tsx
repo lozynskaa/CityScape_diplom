@@ -1,35 +1,53 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useState } from "react";
-import EmbeddedUIProvider from "~/app/_components/stripe/embedded-ui-provider";
+import { useRef, useState } from "react";
 import { Button } from "~/app/_components/ui/button";
 import { Input } from "~/app/_components/ui/input";
 import { Spinner } from "~/app/_components/ui/spinner";
 import { api } from "~/trpc/react";
+import DropIn from "braintree-web-drop-in-react";
+import { type Dropin } from "braintree-web-drop-in";
 
 export default function QuickDonatePage() {
   const [step, setStep] = useState(1);
   const [amountValue, setAmountValue] = useState<number>(0);
   const { eventId } = useParams<{ eventId: string }>();
+  const braintreeInstanceRef = useRef<Dropin>();
+
   const { data: event, isFetching } = api.event.getEvent.useQuery({
     id: eventId,
   });
-  const { mutateAsync: createPaymentIntends } =
-    api.donation.createPaymentIntends.useMutation();
+  const { mutateAsync: createBraintreeTransaction } =
+    api.donation.createBraintreeTransaction.useMutation();
+  const { data: clientToken } = api.donation.generateClientSecret.useQuery();
 
   if (isFetching) {
     return <Spinner />;
   }
 
-  const handleCreateIntend = async () => {
-    const paymentSession = await createPaymentIntends({
-      amount: amountValue,
-      currency: "usd",
-      eventCompanyId: event!.companyId,
-      eventId: event!.id,
+  const handlePaymentSubmit = async () => {
+    if (!braintreeInstanceRef.current || !event) return;
+
+    // Request a nonce from the Drop-in UI
+    braintreeInstanceRef.current.requestPaymentMethod(async (err, payload) => {
+      if (err) {
+        console.error("Payment method error:", err);
+        return;
+      }
+
+      // Call the backend to create the transaction
+      const result = await createBraintreeTransaction({
+        amount: amountValue,
+        currency: "USD", // Adjust currency if needed
+        eventId,
+        eventCompanyId: event.companyId,
+        anonymous: false, // Adjust if you want to capture anonymous donations
+        nonce: payload.nonce,
+      });
+
+      console.log("Transaction result:", result);
     });
-    return paymentSession.client_secret!;
   };
 
   return (
@@ -57,7 +75,16 @@ export default function QuickDonatePage() {
         <div className="flex flex-col items-center justify-center gap-y-4">
           <h1 className="text-4xl font-bold">{event?.name}</h1>
           <p className="text-2xl font-bold">Amount: ${amountValue}</p>
-          <EmbeddedUIProvider fetchClientSecret={handleCreateIntend} />
+          <DropIn
+            options={{ authorization: clientToken!.clientToken }}
+            onInstance={(instance) => (braintreeInstanceRef.current = instance)}
+          />
+          <Button
+            className="w-22 rounded-full font-bold"
+            onClick={handlePaymentSubmit}
+          >
+            Donate
+          </Button>
         </div>
       )}
     </div>

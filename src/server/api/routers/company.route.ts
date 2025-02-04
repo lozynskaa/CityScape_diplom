@@ -14,8 +14,8 @@ import {
 } from "~/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { type Company } from "~/server/db/company.schema";
-import { stripe } from "~/server/stripe";
 import { createImageURL } from "~/lib/createImageURL";
+import { gateway } from "~/server/payment/braintree";
 
 const companyRouterValidationSchema = {
   createCompany: z.object({
@@ -29,7 +29,6 @@ const companyRouterValidationSchema = {
         fileName: z.string(),
       })
       .optional(),
-    stripeAccountId: z.string(),
   }),
   updateCompany: z.object({
     name: z.string().min(1),
@@ -44,15 +43,8 @@ const companyRouterValidationSchema = {
       .optional(),
     id: z.string(),
   }),
-  createStripeCompany: z.object({
-    email: z.string().email(),
-  }),
-  linkStripeCompany: z.object({
-    stripeAccountId: z.string(),
-    id: z.string(),
-  }),
   linkWebhookTrigger: z.object({
-    stripeAccountId: z.string(),
+    braintreeAccountId: z.string(),
   }),
   completeOnboarding: z.object({
     name: z.string().min(1),
@@ -80,7 +72,6 @@ const companyRouterValidationSchema = {
       .optional(),
     goalAmount: z.number().min(0).default(0).optional(),
     currency: z.string().default("USD").optional(),
-    stripeAccountId: z.string(),
   }),
   getRandomCompanies: z.object({
     limit: z.number().min(1).max(100).default(10),
@@ -100,18 +91,35 @@ export const companyRouter = createTRPCRouter({
   createCompany: protectedProcedure
     .input(companyRouterValidationSchema.createCompany)
     .mutation(async ({ input, ctx }) => {
-      const {
-        name,
-        companyEmail,
-        description,
-        website,
-        image,
-        stripeAccountId,
-      } = input;
+      const { name, companyEmail, description, website, image } = input;
 
       if (!ctx.session.user.email) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
+      //TODO: add form for all this data here
+      const [firstName = "", lastName = ""] = name.split(" ");
+      const companyAccount = await gateway.merchantAccount.create({
+        individual: {
+          firstName, // Example, use actual data
+          lastName,
+          email: companyEmail,
+          dateOfBirth: "1980-01-01", // Example, adjust as necessary
+          ssn: "123-45-6789", // Example, adjust as necessary
+          address: {
+            streetAddress: "123 Main St",
+            locality: "Chicago",
+            region: "IL",
+            postalCode: "60622",
+          },
+        },
+        funding: {
+          destination: "bank", // Destination type, can be 'bank' or 'paypal'
+          email: companyEmail, // Bank email for payouts
+          mobilePhone: "123-456-7890", // Example, use actual number
+        },
+        masterMerchantAccountId: process.env.BRAINTREE_MERCHANT_ID!,
+        tosAccepted: true, // Terms of Service acceptance flag
+      });
 
       const [existingUser] = await ctx.db
         .select({ id: users.id })
@@ -141,7 +149,7 @@ export const companyRouter = createTRPCRouter({
           website,
           email: companyEmail,
           imageUrl,
-          stripeAccountId,
+          braintreeAccountId: companyAccount.merchantAccount.id,
         })
         .returning();
 
@@ -178,66 +186,27 @@ export const companyRouter = createTRPCRouter({
       return company;
     }),
 
-  createStripeCompany: protectedProcedure
-    .input(companyRouterValidationSchema.createStripeCompany)
-    .mutation(async ({ input }) => {
-      const { email } = input;
-      const companyAccount = await stripe.accounts.create({
-        type: "express", // You can also choose 'standard' or 'custom' depending on your needs
-        country: "US", // Specify the company’s country
-        email, // The business email
-        business_type: "individual", // You can adjust depending on the business type
-      });
-
-      return {
-        companyAccount,
-      };
-    }),
-
-  linkStripeCompany: protectedProcedure
-    .input(companyRouterValidationSchema.linkStripeCompany)
-    .mutation(async ({ input }) => {
-      const { stripeAccountId, id } = input;
-
-      const companyAccountLinkage = await stripe.accountLinks.create({
-        type: "account_onboarding", // You can also choose 'standard' or 'custom' depending on your needs
-        account: stripeAccountId,
-        return_url: `http://localhost:3000/settings/company/${id}`,
-        refresh_url: `http://localhost:3000/settings/company/${id}`,
-      });
-
-      return companyAccountLinkage;
-    }),
-
   linkWebhookTrigger: protectedProcedure
     .input(companyRouterValidationSchema.linkWebhookTrigger)
     .mutation(async ({ input, ctx }) => {
       const userId = ctx.session.user.id;
-      const { stripeAccountId } = input;
+      const { braintreeAccountId } = input;
 
       await ctx.db
         .update(companies)
         .set({
-          stripeLinked: true,
+          braintreeLinked: true,
         })
         .where(
           and(
             eq(companies.founderId, userId),
-            eq(companies.stripeAccountId, stripeAccountId),
+            eq(companies.braintreeAccountId, braintreeAccountId),
           ),
         );
 
       return {
         success: true,
       };
-    }),
-
-  createLoginLink: protectedProcedure
-    .input(companyRouterValidationSchema.linkWebhookTrigger)
-    .query(async ({ input }) => {
-      const { stripeAccountId } = input;
-      const loginLink = await stripe.accounts.createLoginLink(stripeAccountId);
-      return loginLink;
     }),
 
   completeOnboarding: protectedProcedure
@@ -259,7 +228,6 @@ export const companyRouter = createTRPCRouter({
         goalAmount,
         currency,
         category,
-        stripeAccountId,
       } = input;
 
       const userId = ctx.session.user.id;
@@ -281,6 +249,31 @@ export const companyRouter = createTRPCRouter({
         );
       }
 
+      const [firstName = "", lastName = ""] = name.split(" ");
+
+      const companyAccount = await gateway.merchantAccount.create({
+        individual: {
+          firstName, // Example, use actual data
+          lastName,
+          email: companyEmail,
+          dateOfBirth: "1980-01-01", // Example, adjust as necessary
+          ssn: "123-45-6789", // Example, adjust as necessary
+          address: {
+            streetAddress: "123 Main St",
+            locality: "Chicago",
+            region: "IL",
+            postalCode: "60622",
+          },
+        },
+        funding: {
+          destination: "bank", // Destination type, can be 'bank' or 'paypal'
+          email: companyEmail, // Bank email for payouts
+          mobilePhone: "123-456-7890", // Example, use actual number
+        },
+        masterMerchantAccountId: process.env.BRAINTREE_MERCHANT_ID!,
+        tosAccepted: true, // Terms of Service acceptance flag
+      });
+
       const [company] = await ctx.db
         .insert(companies)
         .values({
@@ -290,12 +283,14 @@ export const companyRouter = createTRPCRouter({
           website,
           email: companyEmail,
           imageUrl: companyImageURL,
-          stripeAccountId: stripeAccountId,
+          braintreeAccountId: companyAccount.merchantAccount.id,
         })
         .returning();
 
       if (!company) {
-        await stripe.accounts.del(stripeAccountId);
+        // await gateway.merchantAccount.update(companyAccount.merchantAccount.id, {
+        //   status: 'inactive', // Set status to inactive to deactivate the account
+        // });
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Company not found",

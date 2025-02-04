@@ -6,15 +6,16 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { companies } from "~/server/db/company.schema";
 import { donations } from "~/server/db/donations.schema";
 import { events } from "~/server/db/event.schema";
-import { stripe } from "~/server/stripe";
+import { gateway } from "~/server/payment/braintree";
 
 const donationRouterValidationSchema = {
-  createPaymentIntends: z.object({
+  createBraintreeTransaction: z.object({
     amount: z.number(),
     currency: z.string(),
     eventCompanyId: z.string(),
     eventId: z.string(),
     anonymous: z.boolean().optional().default(false),
+    nonce: z.string(),
   }),
   createDonation: z.object({
     amount: z.number(),
@@ -39,16 +40,17 @@ const donationRouterValidationSchema = {
 };
 
 export const donationRouter = createTRPCRouter({
-  createPaymentIntends: publicProcedure
-    .input(donationRouterValidationSchema.createPaymentIntends)
+  createBraintreeTransaction: publicProcedure
+    .input(donationRouterValidationSchema.createBraintreeTransaction)
     .mutation(async ({ input, ctx }) => {
-      const { amount, currency, eventId, eventCompanyId, anonymous } = input;
+      const { amount, currency, eventId, eventCompanyId, anonymous, nonce } =
+        input;
 
       const userId = ctx?.session?.user.id;
 
       const [company] = await ctx.db
         .select({
-          stripeAccountId: companies.stripeAccountId,
+          braintreeAccountId: companies.braintreeAccountId,
         })
         .from(companies)
         .where(eq(companies.id, eventCompanyId));
@@ -60,38 +62,47 @@ export const donationRouter = createTRPCRouter({
         });
       }
 
-      const session = await stripe.checkout.sessions.create({
-        mode: "payment",
-        line_items: [
-          {
-            price_data: {
-              currency: currency.toLowerCase(), // Change to your preferred currency
-              product_data: {
-                name: "Custom Donation",
-              },
-              unit_amount: amount * 100,
-            },
-            quantity: 1,
-          },
-        ],
-        payment_intent_data: {
-          application_fee_amount: Math.floor(amount * 0.05), // Example: 5% fee
-          transfer_data: {
-            destination: company.stripeAccountId, // Replace with your connected account ID
-          },
+      const transactionRequest = {
+        amount: amount.toFixed(2), // Total amount to be charged
+        currencyIsoCode: currency.toUpperCase(), // Currency code (Braintree expects uppercase)
+        paymentMethodNonce: nonce, // Payment method nonce (obtained from the client)
+        options: {
+          submitForSettlement: true, // Automatically submit the payment
         },
-        metadata: {
+        merchantAccountId: company.braintreeAccountId, // The connected sub-merchant account
+        customFields: {
           eventCompanyId,
           eventId,
           userId: userId ?? null,
           anonymous: (!userId || anonymous).toString(),
           amount: amount.toFixed(2),
         },
-        ui_mode: "embedded",
-        return_url: `http://localhost:3000/api/donation/handler?session_id={CHECKOUT_SESSION_ID}`,
-        redirect_on_completion: "always",
-      });
-      return session;
+        // Adding the platform fee (5% fee, similar to Stripe's application_fee_amount)
+        serviceFeeAmount: Math.floor(amount * 0.05).toFixed(2), // 5% service fee
+      };
+
+      try {
+        const result = await gateway.transaction.sale(transactionRequest);
+        if (result.success) {
+          console.log(
+            "Transaction created successfully:",
+            result.transaction.id,
+          );
+          return result.transaction; // Handle the successful transaction (you can return the transaction ID)
+        } else {
+          console.error("Transaction failed:", result.message);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: result.message,
+          });
+        }
+      } catch (err) {
+        console.error("Error creating transaction:", err);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error creating transaction",
+        });
+      }
     }),
 
   createDonation: publicProcedure
@@ -110,7 +121,7 @@ export const donationRouter = createTRPCRouter({
       const [company] = await ctx.db
         .select({
           id: companies.id,
-          stripeAccountId: companies.stripeAccountId,
+          braintreeAccountId: companies.braintreeAccountId,
         })
         .from(companies)
         .where(eq(companies.id, eventCompanyId));
@@ -165,11 +176,7 @@ export const donationRouter = createTRPCRouter({
         .where(eq(donations.transactionId, id));
     }),
 
-  getSession: publicProcedure
-    .input(donationRouterValidationSchema.getSession)
-    .query(async ({ input }) => {
-      const { id } = input;
-      const session = await stripe.checkout.sessions.retrieve(id);
-      return session;
-    }),
+  generateClientSecret: publicProcedure.query(async () => {
+    return await gateway.clientToken.generate({});
+  }),
 });

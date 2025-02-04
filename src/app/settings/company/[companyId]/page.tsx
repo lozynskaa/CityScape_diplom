@@ -14,12 +14,10 @@ import { Input } from "~/app/_components/ui/input";
 import { Textarea } from "~/app/_components/ui/textarea";
 import { type Company } from "~/server/db//company.schema";
 import { Spinner } from "~/app/_components/ui/spinner";
-import { useParams, useRouter } from "next/navigation";
-import { skipToken } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
 
 export default function Company() {
   const { companyId } = useParams<{ companyId: string }>();
-  const router = useRouter();
 
   const [updatedCompanyData, setUpdatedCompanyData] = useState<
     Partial<Company> & { imageFile?: { fileName: string; file: string } }
@@ -28,18 +26,8 @@ export default function Company() {
     api.company.getPrivateCompany.useQuery({
       id: companyId,
     });
-  const { data: loginLink, isFetching: isFetchingLogin } =
-    api.company.createLoginLink.useQuery(
-      !!currentCompany && currentCompany.stripeLinked
-        ? {
-            stripeAccountId: currentCompany.stripeAccountId,
-          }
-        : skipToken,
-    );
   const { mutateAsync: updateCompany } =
     api.company.updateCompany.useMutation();
-  const { mutateAsync: linkStripe } =
-    api.company.linkStripeCompany.useMutation();
 
   useEffect(() => {
     if (currentCompany) {
@@ -103,19 +91,15 @@ export default function Company() {
     }
   };
 
-  const handleLinkStripe = async () => {
+  const handleLinkBraintree = async () => {
     if (!currentCompany) return;
-    if (currentCompany.stripeLinked) {
-      return window.open(loginLink?.url, "_blank");
+    if (currentCompany.braintreeLinked && currentCompany.braintreeAccountId) {
+      const loginLink = `https://www.braintreegateway.com/login?merchant_id=${currentCompany.braintreeAccountId}`;
+      return window.open(loginLink, "_blank");
     }
-    const stripeLinkage = await linkStripe({
-      stripeAccountId: currentCompany.stripeAccountId,
-      id: currentCompany.id,
-    });
-    router.push(stripeLinkage.url);
   };
 
-  if (isFetching || isFetchingLogin) {
+  if (isFetching) {
     return <Spinner />;
   }
 
@@ -123,10 +107,10 @@ export default function Company() {
     <div className="w-full space-y-8 px-12 py-8">
       <div className="flex flex-row items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-950">Company Dashboard</h1>
-        <Button onClick={handleLinkStripe}>
-          {currentCompany?.stripeLinked
-            ? "Open Stripe Dashboard"
-            : "Connect with Stripe"}
+        <Button onClick={handleLinkBraintree}>
+          {currentCompany?.braintreeLinked
+            ? "Open Braintree Dashboard"
+            : "Connect with Braintree"}
         </Button>
       </div>
 
