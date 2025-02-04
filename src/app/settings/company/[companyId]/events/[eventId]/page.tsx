@@ -1,6 +1,16 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useParams } from "next/navigation";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import { Progress } from "~/app/_components/ui/progress";
 import { api } from "~/trpc/react";
 import { Spinner } from "~/app/_components/ui/spinner";
@@ -79,6 +89,42 @@ export default function EventPage() {
       }
     }
   };
+
+  const chartData = useMemo(() => {
+    if (!currentEvent) {
+      return [];
+    }
+
+    const donations = currentEvent.donationUsers ?? [];
+
+    const data = donations.reduce(
+      (acc, donation) => {
+        if (!donation.donationAmount || !donation.donationDate) return acc;
+        const date = new Date(donation.donationDate)
+          .toISOString()
+          .split("T")[0];
+        const existing = acc.find((item) => item.date === date);
+        if (existing) {
+          existing.amount += Number(donation.donationAmount);
+          existing.count += 1;
+        } else if (date) {
+          acc.push({
+            date,
+            amount: Number(donation.donationAmount),
+            count: 1,
+          });
+        }
+        return acc;
+      },
+      [] as { date: string; amount: number; count: number }[],
+    );
+
+    data.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+
+    return data;
+  }, [currentEvent]);
 
   useEffect(() => {
     if (currentEvent && isFetched) {
@@ -166,9 +212,35 @@ export default function EventPage() {
         )}
       </div>
 
+      <div className="h-[300px] w-full">
+        <ResponsiveContainer>
+          <LineChart
+            data={chartData}
+            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line
+              type="monotone"
+              dataKey="amount"
+              stroke="#8884d8"
+              activeDot={{ r: 8 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="count"
+              stroke="#82ca9d"
+              activeDot={{ r: 8 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
       <div className="flex flex-row items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-950">Edit Event</h1>
-
         <Button onClick={handleSave}>Save changes</Button>
       </div>
 

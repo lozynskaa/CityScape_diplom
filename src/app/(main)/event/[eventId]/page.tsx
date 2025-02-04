@@ -2,6 +2,17 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useMemo } from "react";
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import ApplicantItem from "~/app/_components/applicant-item";
 import DonorItem, { type DonationItemType } from "~/app/_components/donor-item";
 import EventBlock from "~/app/_components/event-block";
@@ -32,6 +43,42 @@ export default function EventPage() {
       void refetch();
     },
   });
+
+  const chartData = useMemo(() => {
+    if (!event) {
+      return [];
+    }
+
+    const donations = event.donationUsers ?? [];
+
+    const data = donations.reduce(
+      (acc, donation) => {
+        if (!donation.donationAmount || !donation.donationDate) return acc;
+        const date = new Date(donation.donationDate)
+          .toISOString()
+          .split("T")[0];
+        const existing = acc.find((item) => item.date === date);
+        if (existing) {
+          existing.amount += Number(donation.donationAmount);
+          existing.count += 1;
+        } else if (date) {
+          acc.push({
+            date,
+            amount: Number(donation.donationAmount),
+            count: 1,
+          });
+        }
+        return acc;
+      },
+      [] as { date: string; amount: number; count: number }[],
+    );
+
+    data.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+
+    return data;
+  }, [event]);
 
   if (isLoadingEvent || !event) {
     return <FullPageSpinner />;
@@ -139,6 +186,35 @@ export default function EventPage() {
           <p className="text-sm text-gray-600">
             No users applied to event yet.
           </p>
+        </If>
+
+        <If condition={!event.withoutDonations}>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer>
+              <LineChart
+                data={chartData}
+                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="amount"
+                  stroke="#8884d8"
+                  activeDot={{ r: 8 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#82ca9d"
+                  activeDot={{ r: 8 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </If>
       </div>
     </div>
