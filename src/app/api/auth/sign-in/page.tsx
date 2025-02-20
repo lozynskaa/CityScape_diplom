@@ -63,12 +63,18 @@ export default async function SignUp() {
       <div className="flex flex-col items-start gap-16 lg:flex-row">
         <div className="flex flex-col items-center gap-y-3 px-4 py-3">
           <form action={handleSignIn} className="flex flex-col gap-y-3">
-            <Input name="email" label="Email" className="rounded-full" />
+            <Input
+              name="email"
+              label="Email"
+              className="rounded-full"
+              placeholder="Enter your email"
+            />
             <Input
               name="password"
               label="Password"
               type="password"
               className="rounded-full"
+              placeholder="Enter your password"
             />
             <Button
               className="w-96 rounded-full text-sm font-bold"
@@ -94,17 +100,34 @@ export default async function SignUp() {
               name="firstName"
               label="First Name"
               className="rounded-full"
+              placeholder="Enter your first name"
             />
-            <Input name="lastName" label="Last Name" className="rounded-full" />
+            <Input
+              name="lastName"
+              label="Last Name"
+              className="rounded-full"
+              placeholder="Enter your last name"
+            />
           </div>
-          <Input name="email" label="Email" className="rounded-full" />
+          <Input
+            name="email"
+            label="Email"
+            className="rounded-full"
+            placeholder="Enter your email"
+          />
           <Input
             name="password"
             label="Password"
             type="password"
             className="rounded-full"
+            placeholder="Enter your password"
           />
-          <Textarea name="bio" label="Bio" className="rounded-xl" />
+          <Textarea
+            name="bio"
+            label="Bio"
+            className="rounded-xl"
+            placeholder="Tell us about yourself..."
+          />
           <Button className="w-96 rounded-full text-sm font-bold" type="submit">
             Create new account
           </Button>
