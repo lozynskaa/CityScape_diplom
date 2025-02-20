@@ -58,7 +58,7 @@ export const env = createEnv({
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST,
     HERE_APP_ID: process.env.HERE_APP_ID,
-    HERE_API_KEY: process.env.NEXT_PUBLIC_HERE_API_KEY,
+    HERE_API_KEY: process.env.HERE_API_KEY,
     SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
     SENDGRID_DEFAULT_SENDER: process.env.SENDGRID_DEFAULT_SENDER,
     VERCEL_URL: process.env.VERCEL_URL,

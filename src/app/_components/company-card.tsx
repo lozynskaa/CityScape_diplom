@@ -16,7 +16,7 @@ export default function CompanyCard({ company }: Props) {
       <Image
         src={company.imageUrl ?? DefaultCompanyImage}
         alt={company.name}
-        onError={(e) => (e.currentTarget.src = DefaultCompanyImage.src)}
+        loading={"lazy"}
         width={250}
         height={140}
         className="h-[140px] min-w-[100%] rounded-lg object-cover"

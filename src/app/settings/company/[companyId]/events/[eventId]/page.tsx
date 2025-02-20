@@ -55,6 +55,7 @@ export default function EventPage() {
     data: currentEvent = null,
     isFetching,
     isFetched,
+    refetch,
   } = api.event.getPrivateEvent.useQuery({
     id: eventId,
   });
@@ -98,6 +99,7 @@ export default function EventPage() {
 
       if (result) {
         eventDetailsRef.current = result;
+        await refetch();
       }
     }
   };

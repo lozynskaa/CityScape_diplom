@@ -1,4 +1,4 @@
-import { and, count, eq, like, or, sql, sum } from "drizzle-orm";
+import { and, count, eq, like, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   createTRPCRouter,

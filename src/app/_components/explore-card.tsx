@@ -23,7 +23,6 @@ export default function ExploreCard({
       <Image
         src={imageUrl ?? DefaultCompanyImage}
         alt={name}
-        onError={(e) => (e.currentTarget.src = DefaultCompanyImage.src)}
         width={250}
         height={140}
         className="h-[140px] min-w-[100%] rounded-lg object-cover"

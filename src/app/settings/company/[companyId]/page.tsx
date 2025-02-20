@@ -40,10 +40,13 @@ export default function Company() {
   const [disabled, setDisabled] = useState(true);
   const companyDetailsRef = useRef<CreateCompanyDetails>({});
 
-  const { data: currentCompany = null, isFetching } =
-    api.company.getPrivateCompany.useQuery({
-      id: companyId,
-    });
+  const {
+    data: currentCompany = null,
+    isFetching,
+    refetch,
+  } = api.company.getPrivateCompany.useQuery({
+    id: companyId,
+  });
   const { mutateAsync: updateCompany } =
     api.company.updateCompany.useMutation();
 
@@ -70,6 +73,7 @@ export default function Company() {
 
       if (result) {
         companyDetailsRef.current = result;
+        await refetch();
       }
     }
   };

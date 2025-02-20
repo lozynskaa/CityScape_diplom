@@ -143,7 +143,6 @@ export default function EventCard({
       <Image
         src={event.imageUrl ?? DefaultCompanyImage}
         alt={event.name}
-        onError={(e) => (e.currentTarget.src = DefaultCompanyImage.src)}
         width={356}
         height={200}
         className="h-auto max-h-[200px] w-full max-w-[356px] rounded-lg object-contain"

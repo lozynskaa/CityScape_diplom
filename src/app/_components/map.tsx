@@ -64,6 +64,7 @@ const Map = memo(({ zoom = 14, markers = [] }: HereMapProps) => {
     markers.forEach(({ lat, lng, title, id }, index) => {
       const marker = new H.map.Marker({ lat, lng });
       marker.setData(title);
+      console.log("🚀 ~ markers.forEach ~ marker:", lat, lng);
       if (id) {
         marker.addEventListener(
           "longpress",

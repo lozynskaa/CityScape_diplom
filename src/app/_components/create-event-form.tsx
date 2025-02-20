@@ -142,8 +142,8 @@ export default function CreateEventForm({
 
   const mapMarkers = useMemo(() => {
     const [
-      latitude = eventDetails.latitude,
       longitude = eventDetails.longitude,
+      latitude = eventDetails.latitude,
     ] = eventDetails.location ?? [];
     if (!latitude || !longitude) {
       return [];
@@ -152,13 +152,13 @@ export default function CreateEventForm({
       {
         lat: Number(latitude) ?? 0,
         lng: Number(longitude) ?? 0,
-        title: eventDetails.name,
+        title: eventDetails.locationName,
       },
     ] as Marker[];
   }, [
     eventDetails.latitude,
     eventDetails.longitude,
-    eventDetails.name,
+    eventDetails.locationName,
     eventDetails.location,
   ]);
 

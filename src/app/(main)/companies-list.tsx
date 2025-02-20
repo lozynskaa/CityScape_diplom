@@ -34,7 +34,7 @@ export default function CompaniesList() {
   return (
     <div className="space-y-2">
       <h1 className="text-2xl font-bold text-gray-950">Featured projects</h1>
-      <If condition={[].length > 0}>
+      <If condition={quickCompanies.length > 0}>
         <Carousel
           opts={{
             align: "start",
@@ -58,7 +58,7 @@ export default function CompaniesList() {
           </CarouselContent>
         </Carousel>
       </If>
-      <If condition={![].length}>
+      <If condition={!quickCompanies.length}>
         <p className="text-sm text-gray-600">
           Seems like there are no companies.
         </p>
