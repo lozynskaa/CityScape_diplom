@@ -6,6 +6,7 @@ import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import Head from "next/head";
+import Script from "next/script";
 
 const jakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -31,6 +32,26 @@ export default function RootLayout({
         />
       </Head>
       <body>
+        <Script
+          type="text/javascript"
+          strategy="beforeInteractive"
+          src="https://js.api.here.com/v3/3.1/mapsjs-core.js"
+        />
+        <Script
+          type="text/javascript"
+          strategy="beforeInteractive"
+          src="https://js.api.here.com/v3/3.1/mapsjs-service.js"
+        />
+        <Script
+          type="text/javascript"
+          strategy="beforeInteractive"
+          src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"
+        />
+        <Script
+          type="text/javascript"
+          strategy="beforeInteractive"
+          src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"
+        />
         <div className="min-h-screen overflow-y-auto bg-gray-900 p-8">
           <div className="flex min-h-[calc(100vh-4rem)] w-full flex-1 flex-col items-center justify-center rounded-2xl bg-gray-50">
             <TRPCReactProvider>{children}</TRPCReactProvider>

@@ -48,10 +48,7 @@ const eventCategories = [
 
 const currencies = Object.values(currencyMap);
 
-export type CreateEventDetails = Omit<
-  Partial<Event>,
-  "imageUrl" | "location"
-> & {
+export type CreateEventDetails = Omit<Partial<Event>, "imageUrl"> & {
   imageFile?: { file: string; fileName: string };
   longitude?: string;
   latitude?: string;
@@ -103,6 +100,12 @@ export default function CreateEventForm({
     }
   }, [predefinedEvent]);
 
+  useEffect(() => {
+    if (predefinedEvent?.locationName) {
+      handleChangeLocationValue(predefinedEvent?.locationName);
+    }
+  }, [predefinedEvent?.locationName]);
+
   const handleChangeLocationValue = (value: string) => {
     set("location", value);
   };
@@ -138,17 +141,26 @@ export default function CreateEventForm({
   );
 
   const mapMarkers = useMemo(() => {
-    if (!eventDetails.latitude || !eventDetails.longitude) {
+    const [
+      latitude = eventDetails.latitude,
+      longitude = eventDetails.longitude,
+    ] = eventDetails.location ?? [];
+    if (!latitude || !longitude) {
       return [];
     }
     return [
       {
-        lat: Number(eventDetails.latitude) ?? 0,
-        lng: Number(eventDetails.longitude) ?? 0,
+        lat: Number(latitude) ?? 0,
+        lng: Number(longitude) ?? 0,
         title: eventDetails.name,
       },
     ] as Marker[];
-  }, [eventDetails.latitude, eventDetails.longitude, eventDetails.name]);
+  }, [
+    eventDetails.latitude,
+    eventDetails.longitude,
+    eventDetails.name,
+    eventDetails.location,
+  ]);
 
   return (
     <form className="grid w-full grid-cols-2 gap-5">
@@ -208,7 +220,7 @@ export default function CreateEventForm({
         <AutoComplete
           items={addressAutosuggestions}
           isLoading={isLoading || pending}
-          searchValue={locationValue}
+          searchValue={locationValue ?? eventDetails?.locationName}
           selectedValue={eventDetails.locationId ?? ""}
           onSearchValueChange={handleChangeLocationValue}
           onSelectedValueChange={(value) => {
@@ -253,7 +265,7 @@ export default function CreateEventForm({
       <div
         className={clsx(
           "col-span-2",
-          mapMarkers.length === 0 && "invisible h-0",
+          // mapMarkers.length === 0 && "invisible h-0",
         )}
       >
         <Map markers={mapMarkers} />

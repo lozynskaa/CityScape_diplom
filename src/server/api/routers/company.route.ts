@@ -328,9 +328,9 @@ export const companyRouter = createTRPCRouter({
         .select({
           company: companies,
           totalEvents: count(events).as("totalEvents"),
-          totalDonations: count(
-            and(eq(donations.status, "completed"), donations.id),
-          ).as("totalDonations"),
+          totalDonations: count(and(eq(donations.status, "completed"))).as(
+            "totalDonations",
+          ),
           totalApplicants: count(userEvents.userId).as("totalApplicants"),
         })
         .from(companies)

@@ -89,26 +89,6 @@ const Map = memo(({ zoom = 14, markers = [] }: HereMapProps) => {
 
   return (
     <>
-      <Script
-        type="text/javascript"
-        strategy="beforeInteractive"
-        src="https://js.api.here.com/v3/3.1/mapsjs-core.js"
-      />
-      <Script
-        type="text/javascript"
-        strategy="beforeInteractive"
-        src="https://js.api.here.com/v3/3.1/mapsjs-service.js"
-      />
-      <Script
-        type="text/javascript"
-        strategy="beforeInteractive"
-        src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"
-      />
-      <Script
-        type="text/javascript"
-        strategy="beforeInteractive"
-        src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"
-      />
       <div ref={mapRef} style={{ width: "100%", height: "500px" }} />
     </>
   );
