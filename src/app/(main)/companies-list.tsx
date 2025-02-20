@@ -9,6 +9,8 @@ import {
 import CompanyCard from "../_components/company-card";
 import { Skeleton } from "../_components/ui/skeleton";
 import { type Company } from "~/server/db/company.schema";
+import If from "../_components/ui/if";
+import NoValues from "../_components/no-values";
 
 const mockedCompanies = [
   {
@@ -33,28 +35,36 @@ export default function CompaniesList() {
   return (
     <div className="space-y-2">
       <h1 className="text-2xl font-bold text-gray-950">Featured projects</h1>
-      <Carousel
-        opts={{
-          align: "start",
-          axis: "x",
-        }}
-        className="w-full"
-      >
-        <CarouselContent className="p-2">
-          {quickCompanies.map((company, index) => (
-            <CarouselItem
-              key={index}
-              className="basis-full pl-4 md:basis-1/3 lg:basis-1/4"
-            >
-              {isLoading ? (
-                <Skeleton className="h-[288px] w-full" />
-              ) : (
-                <CompanyCard company={company as Company} />
-              )}
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
+      <If condition={quickCompanies.length > 0}>
+        <Carousel
+          opts={{
+            align: "start",
+            axis: "x",
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="p-2">
+            {quickCompanies.map((company, index) => (
+              <CarouselItem
+                key={index}
+                className="basis-full pl-4 md:basis-1/3 lg:basis-1/4"
+              >
+                {isLoading ? (
+                  <Skeleton className="h-[288px] w-full" />
+                ) : (
+                  <CompanyCard company={company as Company} />
+                )}
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+      </If>
+      <If condition={!quickCompanies.length}>
+        <NoValues
+          title="No companies found"
+          message="Seems like there are no companies."
+        />
+      </If>
     </div>
   );
 }
