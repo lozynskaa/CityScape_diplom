@@ -226,6 +226,7 @@ export default function CreateEventForm({
           onSelect={(date) =>
             setEventDetails((prev) => ({ ...prev, date: date }))
           }
+          placeholder="Pick a start date"
         />
       </LabeledItem>
 

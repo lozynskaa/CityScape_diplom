@@ -114,6 +114,7 @@ export default function CreateCompanyForm({
           onSelect={(date) =>
             setCompanyDetails((prev) => ({ ...prev, dateOfBirth: date }))
           }
+          placeholder="Date of Birth"
         />
       </LabeledItem>
 
