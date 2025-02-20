@@ -1,5 +1,4 @@
 import { useRouter } from "next/navigation";
-import Script from "next/script";
 import { memo, useEffect, useRef } from "react";
 import { DEFAULT_LOCATION } from "~/lib/location";
 
@@ -27,7 +26,7 @@ declare global {
   }
 }
 
-const apiKey = "01kwiBkfBE52HAkRv1UQ0yZr976MyJ15c2WR0FA19ac";
+const apiKey = process.env.NEXT_PUBLIC_HERE_API_KEY;
 
 const Map = memo(({ zoom = 14, markers = [] }: HereMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
