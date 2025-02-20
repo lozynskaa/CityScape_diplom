@@ -83,15 +83,16 @@ export default function Company() {
       <h1 className="text-2xl font-bold text-gray-950">Company Dashboard</h1>
 
       <div className="flex flex-row items-center gap-x-4">
-        <Avatar className="h-40 w-40 rounded-full object-cover">
+        <Avatar className="h-40 w-40 rounded-full bg-gray-200">
           <AvatarImage
+            className="object-contain"
             src={currentCompany?.imageUrl ?? DefaultCompanyImage.src}
             alt="@shadcn"
           />
           <AvatarFallback>
-            <Avatar className="h-40 w-40 rounded-full object-cover">
-              <AvatarImage src={DefaultCompanyImage.src} alt="@shadcn" />
-            </Avatar>
+            <div className="flex h-40 w-40 items-center justify-center rounded-full bg-gray-200 text-center text-3xl font-bold uppercase">
+              {currentCompany?.name?.charAt(0)}{" "}
+            </div>
           </AvatarFallback>
         </Avatar>
         <div>

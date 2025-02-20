@@ -15,10 +15,12 @@ export default function EventBlock({ event }: Props) {
   return (
     <div className="space-y-2">
       <div className="flex flex-row items-center gap-x-4">
-        <Avatar className="h-36 w-36 cursor-pointer rounded-full">
+        <Avatar className="h-36 w-36 cursor-pointer rounded-full bg-gray-200">
           <AvatarImage src={imageUrl ?? ""} alt="@shadcn" />
-          <AvatarFallback className="text-5xl font-bold uppercase">
-            {name.charAt(0)}
+          <AvatarFallback>
+            <div className="flex h-36 w-36 items-center justify-center rounded-full bg-gray-200 text-center text-3xl font-bold uppercase">
+              {name.charAt(0)}
+            </div>
           </AvatarFallback>
         </Avatar>
         <div className="flex-1 space-y-1">
