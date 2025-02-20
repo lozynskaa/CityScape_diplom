@@ -10,7 +10,6 @@ import CompanyCard from "../_components/company-card";
 import { Skeleton } from "../_components/ui/skeleton";
 import { type Company } from "~/server/db/company.schema";
 import If from "../_components/ui/if";
-import NoValues from "../_components/no-values";
 
 const mockedCompanies = [
   {
@@ -35,7 +34,7 @@ export default function CompaniesList() {
   return (
     <div className="space-y-2">
       <h1 className="text-2xl font-bold text-gray-950">Featured projects</h1>
-      <If condition={quickCompanies.length > 0}>
+      <If condition={[].length > 0}>
         <Carousel
           opts={{
             align: "start",
@@ -59,11 +58,10 @@ export default function CompaniesList() {
           </CarouselContent>
         </Carousel>
       </If>
-      <If condition={!quickCompanies.length}>
-        <NoValues
-          title="No companies found"
-          message="Seems like there are no companies."
-        />
+      <If condition={![].length}>
+        <p className="text-sm text-gray-600">
+          Seems like there are no companies.
+        </p>
       </If>
     </div>
   );

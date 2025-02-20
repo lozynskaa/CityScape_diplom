@@ -28,7 +28,7 @@ export default function EventSelect() {
         title="No events found"
         message="Seems like you don't have any events. You can create one."
         buttonText="Create event"
-        redirectUrl={`/settings/company/${companyId}/new-event`}
+        redirectUrl={`/settings/company/${companyId}/events/new-event`}
       />
     );
   }

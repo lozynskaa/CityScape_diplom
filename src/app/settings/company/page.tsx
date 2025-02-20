@@ -26,7 +26,7 @@ export default function CompanySelect() {
         title="No companies found"
         message="Seems like you don't have any companies. You can create one."
         buttonText="Create company"
-        redirectUrl="/settings/new-company"
+        redirectUrl="/settings/company/new-company"
       />
     );
   }

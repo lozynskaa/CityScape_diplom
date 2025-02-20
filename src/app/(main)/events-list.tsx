@@ -10,7 +10,6 @@ import EventCard from "../_components/quick-event-card";
 import { type Event } from "~/server/db/event.schema";
 import { Skeleton } from "../_components/ui/skeleton";
 import If from "../_components/ui/if";
-import NoValues from "../_components/no-values";
 
 type Props = {
   userId: string | undefined;
@@ -68,10 +67,7 @@ export default function EventsList({ userId, handleApplyToEvent }: Props) {
         </Carousel>
       </If>
       <If condition={!quickEvents.length}>
-        <NoValues
-          title="No events found"
-          message="Seems like there is no events."
-        />
+        <p className="text-sm text-gray-600">Seems like there are no events.</p>
       </If>
     </div>
   );

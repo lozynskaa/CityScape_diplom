@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import If from "./ui/if";
@@ -27,7 +29,7 @@ export default function NoValues({
       <If condition={!!buttonText}>
         <Button
           className="w-22 rounded-full font-bold"
-          formAction={handleRedirect}
+          onClick={handleRedirect}
         >
           {buttonText}
         </Button>
