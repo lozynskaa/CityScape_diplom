@@ -26,6 +26,7 @@ import {
 import If from "~/app/_components/ui/if";
 import { Progress } from "~/app/_components/ui/progress";
 import { FullPageSpinner } from "~/app/_components/ui/spinner";
+import { currencyMap } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
 export default function EventPage() {
@@ -113,14 +114,17 @@ export default function EventPage() {
     mutate({ id: event.id });
   };
 
+  const currencySymbol =
+    currencyMap[(event.currency as keyof typeof currencyMap) || "USD"]?.symbol;
+
   return (
     <div className="w-full flex-1 space-y-8 px-12 py-8">
       <EventBlock event={event} />
       <If condition={!event.withoutDonations}>
         <div className="space-y-2">
           <p className="text-base font-medium text-gray-950">
-            Raised {Math.round(+event.currentAmount)} {event.currency} of{" "}
-            {Math.round(+event.goalAmount)} {event.currency}
+            Raised {Math.round(+event.currentAmount)} {currencySymbol} of{" "}
+            {Math.round(+event.goalAmount)} {currencySymbol}
           </p>
           <Progress
             value={Math.round((+event.currentAmount / +event.goalAmount) * 100)}

@@ -7,6 +7,7 @@ import { Input } from "~/app/_components/ui/input";
 import { LabeledItem } from "~/app/_components/ui/labeled-item";
 import { Spinner } from "~/app/_components/ui/spinner";
 import { Switch } from "~/app/_components/ui/switch";
+import { currencyMap } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
 export default function QuickDonatePage() {
@@ -45,6 +46,9 @@ export default function QuickDonatePage() {
     }
   };
 
+  const currencySymbol =
+    currencyMap[(event?.currency as keyof typeof currencyMap) || "USD"]?.symbol;
+
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -74,7 +78,7 @@ export default function QuickDonatePage() {
           <p>
             Total Donated:{" "}
             <span className="font-bold">
-              {event?.currentAmount}/{event?.goalAmount} {event?.currency}
+              {event?.currentAmount}/{event?.goalAmount} {currencySymbol}
             </span>
           </p>
         </div>

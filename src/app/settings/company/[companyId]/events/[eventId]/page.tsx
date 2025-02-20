@@ -25,6 +25,7 @@ import ApplicantItem from "~/app/_components/applicant-item";
 import CreateEventForm, {
   type CreateEventDetails,
 } from "~/app/_components/create-event-form";
+import { currencyMap } from "~/lib/utils";
 
 const requiredFields = [
   "name",
@@ -137,6 +138,10 @@ export default function EventPage() {
     return data;
   }, [currentEvent]);
 
+  const currencySymbol =
+    currencyMap[(currentEvent?.currency as keyof typeof currencyMap) || "USD"]
+      ?.symbol;
+
   useEffect(() => {
     if (currentEvent && isFetched) {
       eventDetailsRef.current = currentEvent;
@@ -153,9 +158,8 @@ export default function EventPage() {
 
       <div className="space-y-2">
         <p className="text-base font-medium text-gray-950">
-          Raised {Math.round(+currentEvent.currentAmount)}{" "}
-          {currentEvent.currency} of {Math.round(+currentEvent.goalAmount)}{" "}
-          {currentEvent.currency}
+          Raised {Math.round(+currentEvent.currentAmount)} {currencySymbol} of{" "}
+          {Math.round(+currentEvent.goalAmount)} {currencySymbol}
         </p>
         <Progress
           value={Math.round(

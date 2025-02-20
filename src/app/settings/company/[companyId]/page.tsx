@@ -102,18 +102,16 @@ export default function Company() {
       </div>
       <div className="flex w-full flex-col items-center gap-5 md:flex-row">
         <div className="w-full space-y-2 rounded-lg bg-gray-100 p-4 md:basis-1/3">
-          <p className="text-lg font-semibold">Total Raised</p>
-          <p className="text-xl font-bold">${currentCompany?.totalRaised}</p>
+          <p className="text-lg font-semibold">Total Events</p>
+          <p className="text-xl font-bold">{currentCompany?.totalEvents}</p>
         </div>
         <div className="w-full space-y-2 rounded-lg bg-gray-100 p-4 md:basis-1/3">
           <p className="text-lg font-semibold">Total Donations</p>
-          <p className="text-xl font-bold">${currentCompany?.totalDonations}</p>
+          <p className="text-xl font-bold">{currentCompany?.totalDonations}</p>
         </div>
         <div className="w-full space-y-2 rounded-lg bg-gray-100 p-4 md:basis-1/3">
           <p className="text-lg font-semibold">Total Applicants</p>
-          <p className="text-xl font-bold">
-            ${currentCompany?.totalApplicants}
-          </p>
+          <p className="text-xl font-bold">{currentCompany?.totalApplicants}</p>
         </div>
       </div>
 

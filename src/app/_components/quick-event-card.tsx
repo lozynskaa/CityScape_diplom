@@ -8,6 +8,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { Progress } from "./ui/progress";
+import { currencyMap } from "~/lib/utils";
 
 type Props = {
   event: Event & { isUserApplied?: boolean; paymentEnabled?: boolean | null };
@@ -97,6 +98,8 @@ export default function EventCard({
     return baseList;
   }, [userId, event, localApplied, settingsTab]);
 
+  const currencySymbol =
+    currencyMap[(event.currency as keyof typeof currencyMap) || "USD"]?.symbol;
   return (
     <div className="flex h-full w-full flex-col gap-8 rounded-lg bg-white p-4 shadow-md md:flex-row md:justify-between">
       <div className="flex w-full flex-col gap-y-4">
@@ -121,7 +124,7 @@ export default function EventCard({
         {!event.withoutDonations && (
           <div className="space-y-2">
             <p className="text-sm text-gray-600">
-              {event.currentAmount}/{event.goalAmount} {event.currency}
+              {event.currentAmount}/{event.goalAmount} {currencySymbol}
             </p>
             <Progress
               value={

@@ -12,12 +12,12 @@ import { AutoComplete } from "./autocomplete";
 import { ItemSelectBlock } from "./item-select";
 import Map, { type Marker } from "./map";
 import DatePicker from "./ui/date-picker";
-import If from "./ui/if";
 import { Input } from "./ui/input";
 import { LabeledItem } from "./ui/labeled-item";
 import { Switch } from "./ui/switch";
 import { Textarea } from "./ui/textarea";
 import clsx from "clsx";
+import { currencyMap } from "~/lib/utils";
 
 const eventCategories = [
   {
@@ -46,33 +46,7 @@ const eventCategories = [
   },
 ];
 
-const currencies = [
-  {
-    name: "USD",
-    id: "USD",
-    symbol: "$",
-  },
-  {
-    name: "EUR",
-    id: "EUR",
-    symbol: "€",
-  },
-  {
-    name: "GBP",
-    id: "GBP",
-    symbol: "£",
-  },
-  {
-    name: "UAH",
-    id: "UAH",
-    symbol: "₴",
-  },
-  {
-    name: "PLN",
-    id: "PLN",
-    symbol: "zł",
-  },
-];
+const currencies = Object.values(currencyMap);
 
 export type CreateEventDetails = Omit<
   Partial<Event>,

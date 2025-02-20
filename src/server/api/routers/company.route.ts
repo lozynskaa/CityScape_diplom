@@ -327,8 +327,10 @@ export const companyRouter = createTRPCRouter({
       const [companyData] = await ctx.db
         .select({
           company: companies,
-          totalRaised: sum(events.goalAmount).as("totalRaised"),
-          totalDonations: sum(donations.amount).as("totalDonations"),
+          totalEvents: count(events).as("totalEvents"),
+          totalDonations: count(
+            and(eq(donations.status, "completed"), donations.id),
+          ).as("totalDonations"),
           totalApplicants: count(userEvents.userId).as("totalApplicants"),
         })
         .from(companies)
@@ -346,7 +348,7 @@ export const companyRouter = createTRPCRouter({
       }
       return {
         ...companyData?.company,
-        totalRaised: companyData?.totalRaised ?? 0,
+        totalEvents: companyData?.totalEvents ?? 0,
         totalDonations: companyData?.totalDonations ?? 0,
         totalApplicants: companyData?.totalApplicants ?? 0,
       };

@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import If from "./ui/if";
 import { format } from "date-fns";
 import { getUserInitials } from "~/lib/name";
+import { currencyMap } from "~/lib/utils";
 
 export type DonationItemType = Pick<User, "name" | "email" | "image"> & {
   donationAmount: Donation["amount"];
@@ -18,6 +19,11 @@ type Props = {
 
 export default function DonorItem({ donation }: Props) {
   const { initials } = getUserInitials(donation?.name);
+
+  const currencySymbol =
+    currencyMap[(donation.currency as keyof typeof currencyMap) || "USD"]
+      ?.symbol;
+
   return (
     <div className="flex flex-row items-center gap-x-4">
       <Avatar className="h-12 w-12 cursor-pointer">
@@ -28,7 +34,7 @@ export default function DonorItem({ donation }: Props) {
         <h3 className="text-lg font-bold">{donation.name ?? "Anonymous"}</h3>
         <If condition={!Number.isNaN(+donation.donationAmount)}>
           <p className="text-sm text-gray-600">
-            {donation.donationAmount} {donation.currency}
+            {donation.donationAmount} {currencySymbol}
           </p>
         </If>
       </div>
