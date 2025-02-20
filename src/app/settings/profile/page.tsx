@@ -20,6 +20,7 @@ import {
   CarouselItem,
 } from "~/app/_components/ui/carousel";
 import DonorItem from "~/app/_components/donor-item";
+import { getUserInitials } from "~/lib/name";
 
 const requiredFields = ["name", "email"];
 
@@ -54,11 +55,7 @@ export default function Profile() {
     return <Spinner />;
   }
 
-  const [firstName = "U", lastName = "U"] = user?.name
-    ? user.name.split(" ")
-    : ["U", "U"];
-
-  const initials = firstName.charAt(0) + lastName.charAt(0);
+  const { initials } = getUserInitials(user?.name);
 
   const handleLoadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

@@ -31,7 +31,7 @@ async function handleSignUp(formData: FormData) {
   "use server";
 
   const firstName = formData.get("firstName") as string;
-  const lastName = formData.get("firstName") as string;
+  const lastName = formData.get("lastName") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const bio = formData.get("bio");

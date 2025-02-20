@@ -13,6 +13,7 @@ import {
 import { LogOut, SquareChartGantt, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import If from "./ui/if";
+import { getUserInitials } from "~/lib/name";
 
 const headerLinks = [
   {
@@ -31,11 +32,8 @@ const headerLinks = [
 
 export default async function Header() {
   const session = await auth();
-  const [firstName = "U", lastName = "U"] = session?.user?.name
-    ? session.user.name.split(" ")
-    : ["U", "U"];
 
-  const initials = firstName.charAt(0) + lastName.charAt(0);
+  const { initials } = getUserInitials(session?.user?.name);
 
   const handleLogout = async () => {
     "use server";

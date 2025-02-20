@@ -3,6 +3,7 @@ import { type User } from "~/server/db/user.schema";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import If from "./ui/if";
 import { format } from "date-fns";
+import { getUserInitials } from "~/lib/name";
 
 export type DonationItemType = Pick<User, "name" | "email" | "image"> & {
   donationAmount: Donation["amount"];
@@ -16,11 +17,7 @@ type Props = {
 };
 
 export default function DonorItem({ donation }: Props) {
-  const [firstName = "U", lastName = "U"] = donation?.name
-    ? donation.name.split(" ")
-    : ["U", "U"];
-
-  const initials = firstName.charAt(0) + lastName.charAt(0);
+  const { initials } = getUserInitials(donation?.name);
   return (
     <div className="flex flex-row items-center gap-x-4">
       <Avatar className="h-12 w-12 cursor-pointer">
