@@ -32,6 +32,7 @@ export async function GET(
 
     const stream = fs.createReadStream(filePath);
 
+    //@ts-expect-error Here can be error related to stream
     return new Response(stream, {
       headers: {
         "Content-Type": contentType,
