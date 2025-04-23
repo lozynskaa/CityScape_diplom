@@ -43,21 +43,21 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgresql@db:5432/diplom
-      - AUTH_SECRET=1kmQL7B8Ec5k6UCLGXvQSK5f5fwGJlf/icn/9qAeYXI=
-      - OAUTH_CLIENT_ID=1094050481038-chejip4sppoo51an12l2vun57hfhm5rr.apps.googleusercontent.com
-      - OAUTH_CLIENT_SECRET=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
-      - CHECKOUT_PRIVATE_KEY=sk_sbox_5khfurmbfwspd5gti6z2wodicyk
-      - CHECKOUT_CHANNEL_ID=pc_jdqqmongbnqeljbi54whdzenmi
-      - CHECKOUT_AUTHORIZATION=0de2e922-9d69-4c8d-96d8-281c651361fc
-      - CHECKOUT_SIGNATURE_SECRET=d2b2334d-1738-4a41-96f2-0626da613355
-      - NEXTAUTH_URL=http://localhost:3000
-      - AUTH_TRUST_HOST=http://localhost:3000
-      - NEXTAUTH_SECRET=marichka_secret
-      - HERE_APP_ID=tnlocw9L5CaZ18rKRDbM
-      - HERE_API_KEY=DPlThiZyJRk3Pe2S2hKmiRqPi45f6LzrMYu6r8C0uyE
-      - SENDGRID_API_KEY=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
-      - SENDGRID_DEFAULT_SENDER=igor.com2003@gmail.com
+      - DATABASE_URL=${DATABASE_URL}
+      - AUTH_SECRET=${AUTH_SECRET}
+      - OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}
+      - OAUTH_CLIENT_SECRET=${OAUTH_CLIENT_SECRET}
+      - CHECKOUT_PRIVATE_KEY=${CHECKOUT_PRIVATE_KEY}
+      - CHECKOUT_CHANNEL_ID=${CHECKOUT_CHANNEL_ID}
+      - CHECKOUT_AUTHORIZATION=${CHECKOUT_AUTHORIZATION}
+      - CHECKOUT_SIGNATURE_SECRET=${CHECKOUT_SIGNATURE_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - AUTH_TRUST_HOST=${AUTH_TRUST_HOST}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - HERE_APP_ID=${HERE_APP_ID}
+      - HERE_API_KEY=${HERE_API_KEY}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - SENDGRID_DEFAULT_SENDER=${SENDGRID_DEFAULT_SENDER}
     networks:
       - app-network
     depends_on:
