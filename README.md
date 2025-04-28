@@ -1,29 +1,68 @@
-# Create T3 App
+# 🏙️ Charity Coordination Platform
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+This project is a web platform for organizations and volunteers, enabling the creation of events, publishing of posts, coordination of activities, and collection of donations through integration with Checkout.com.
 
-## What's next? How do I make an app with this?
+---
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+## ⚙️ Technology Stack
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+- **Frontend**: [Next.js 15](https://nextjs.org/), [React 18](https://react.dev/), [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [TailwindCSS](https://tailwindcss.com/), [Radix UI](https://www.radix-ui.com/)
+- **API Layer**: [tRPC](https://trpc.io/) (End-to-end type-safe APIs)
+- **Authentication**: [NextAuth.js (Auth.js)](https://authjs.dev/)
+- **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
+- **Database**: [PostgreSQL](https://www.postgresql.org/) with [PostGIS](https://postgis.net/) extension for geolocation support
+- **Payments**: [Checkout.com](https://www.checkout.com/) (payment processing, webhook handling)
+- **Geolocation API**: [HERE Maps API](https://developer.here.com/)
+- **Containerization**: [Docker](https://www.docker.com/)
+- **Hosting**: [Vercel](https://vercel.com/) (for production frontend hosting)
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+---
 
-## Learn More
+## 🚀 Running Locally with Docker
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+1. **Clone the repository**
+2. **Create a `.env` file** based on `.env.example`
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+Make sure to set the following variables:
+- DATABASE_URL
+- NEXTAUTH_SECRET
+- NEXTAUTH_URL
+- CHECKOUT_PUBLIC_KEY
+- CHECKOUT_SECRET_KEY
+- HERE_API_KEY
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+3. **Start the Docker containers**
 
-## How do I deploy this?
+```bash
+docker-compose up --build
+```
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+> This will spin up the backend, frontend, and a PostgreSQL database with the required configuration.
+
+4. **Done!**
+- Frontend will be available at: [http://localhost:3000](http://localhost:3000)
+- PostgreSQL will be available at: `localhost:5432`
+
+---
+
+## 📦 Useful Project Scripts
+
+- `yarn run dev` — start the development server
+- `yarn run build` — build the project for production
+- `yarn run db:push` — synchronize database schema
+- `yarn run db:studio` — open Drizzle Studio GUI for inspecting the database
+
+---
+
+## 🧩 Key Features
+
+- User registration and authentication
+- Creation of organizations, events, and posts
+- Interactive event map
+- Donation acceptance via Checkout.com
+- Activity analytics
+- Secure payment handling through webhooks
+- Full Docker-based deployment for easy setup
+
+---
