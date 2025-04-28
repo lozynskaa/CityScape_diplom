@@ -48,7 +48,7 @@ export default function PostsListPage() {
       ) {
         fetchNextPage()
           .then(() => {
-            console.log("fetch next page");
+            console.log("Next page fetched successfully");
           })
           .catch((error) => {
             console.error("Error fetching next page:", error);

@@ -28,7 +28,7 @@ export default function PostSelect() {
         title="No posts found"
         message="Seems like you don't have any posts. You can create one."
         buttonText="Create post"
-        redirectUrl={`/settings/company/${companyId}/new-post`}
+        redirectUrl={`/settings/company/${companyId}/posts/new-post`}
       />
     );
   }

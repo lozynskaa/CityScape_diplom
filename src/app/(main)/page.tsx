@@ -35,7 +35,7 @@ export default async function Home() {
         <ClosestEventsList />
 
         <EventsList
-          userId={session?.user.id}
+          userId={session?.user?.id}
           handleApplyToEvent={handleApplyToEvent}
         />
       </div>

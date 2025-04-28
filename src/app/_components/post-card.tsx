@@ -7,7 +7,7 @@ type Props = {
   images?: Array<{ fileName: string; file: string } | string>;
 };
 
-export default function Post({ title, content, images }: Props) {
+export default function Post({ title, content, images = [] }: Props) {
   return (
     <div className="space-y-2 rounded-xl bg-white p-6 shadow-md">
       <h2 className="text-2xl font-bold text-gray-950">
@@ -16,9 +16,9 @@ export default function Post({ title, content, images }: Props) {
       <p className="text-sm text-gray-600">
         {content?.length ? content : "Unknown content"}
       </p>
-      <If condition={Array.isArray(images)}>
+      <If condition={images.length > 0}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {images!.map((image, index) => (
+          {images.map((image, index) => (
             <Image
               key={index}
               src={typeof image === "string" ? image : image.file}

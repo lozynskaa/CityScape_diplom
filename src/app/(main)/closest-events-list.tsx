@@ -48,7 +48,7 @@ export default function ClosestEventsList() {
 
       return {
         title: event.name,
-        id: event.id,
+        id: event?.id,
         lat: latitude,
         lng: longitude,
       };

@@ -11,10 +11,8 @@ import CreateEventForm, {
 const requiredFields = [
   "name",
   "description",
-  "goalAmount",
   "currency",
   "purpose",
-  "imageFile",
   "category",
   "locationName",
   "latitude",
