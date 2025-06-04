@@ -1,7 +1,6 @@
 "use client";
 
 import { type Event } from "~/server/db/event.schema";
-import DefaultCompanyImage from "~/assets/default-company-bg.png";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import Link from "next/link";
@@ -140,13 +139,19 @@ export default function EventCard({
           {buttonsList.map((button) => button)}
         </div>
       </div>
-      <Image
-        src={event.imageUrl ?? DefaultCompanyImage}
-        alt={event.name}
-        width={356}
-        height={200}
-        className="h-auto max-h-[200px] w-full max-w-[356px] rounded-lg object-contain"
-      />
+      {event.imageUrl ? (
+        <Image
+          src={event.imageUrl}
+          alt={event.name}
+          width={356}
+          height={200}
+          className="h-auto max-h-[200px] w-full max-w-[356px] rounded-lg object-contain"
+        />
+      ) : (
+        <div className="flex h-[200px] w-full max-w-[356px] items-center justify-center rounded-2xl bg-gray-200 text-center text-3xl font-bold uppercase">
+          {event?.name?.charAt(0)}{" "}
+        </div>
+      )}
     </div>
   );
 }

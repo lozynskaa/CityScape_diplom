@@ -15,8 +15,6 @@ const requiredFields = [
   "purpose",
   "category",
   "locationName",
-  "latitude",
-  "longitude",
   "date",
 ] as const;
 
@@ -37,6 +35,7 @@ export default function NewEventPage() {
     if (!disabledCallback(eventDetailsRef.current)) {
       const filledEventDetails =
         eventDetailsRef.current as Required<CreateEventDetails>;
+      const [currentLongitude, currentLatitude] = filledEventDetails.location;
       const newEvent = await createEvent({
         name: filledEventDetails.name,
         description: filledEventDetails.description ?? "",
@@ -44,8 +43,8 @@ export default function NewEventPage() {
         currency: filledEventDetails.currency ?? "USD",
         purpose: filledEventDetails.purpose ?? "",
         image: filledEventDetails.imageFile,
-        longitude: filledEventDetails.longitude ?? "",
-        latitude: filledEventDetails.latitude ?? "",
+        longitude: currentLongitude.toString() ?? "",
+        latitude: currentLatitude.toString() ?? "",
         companyId,
         category: filledEventDetails.category ?? "",
         includeDonations: !filledEventDetails.withoutDonations,

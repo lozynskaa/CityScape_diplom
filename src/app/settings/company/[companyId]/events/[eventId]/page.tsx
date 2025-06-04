@@ -34,8 +34,6 @@ const requiredFields = [
   "currency",
   "purpose",
   "category",
-  "longitude",
-  "latitude",
   "date",
   "locationName",
 ] as const;

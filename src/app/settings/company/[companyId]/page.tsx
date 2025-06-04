@@ -8,7 +8,6 @@ import {
 } from "~/app/_components/ui/avatar";
 import { Button } from "~/app/_components/ui/button";
 import { api } from "~/trpc/react";
-import DefaultCompanyImage from "~/assets/default-company-bg.png";
 import { type Company } from "~/server/db//company.schema";
 import { Spinner } from "~/app/_components/ui/spinner";
 import { useParams } from "next/navigation";
@@ -21,7 +20,6 @@ const requiredFields = [
   "email",
   "website",
   "description",
-  "imageFile",
   "iBan",
   "okpo",
   "phone",
@@ -90,12 +88,12 @@ export default function Company() {
         <Avatar className="h-40 w-40 rounded-full bg-gray-200">
           <AvatarImage
             className="object-contain"
-            src={currentCompany?.imageUrl ?? DefaultCompanyImage.src}
+            src={currentCompany?.imageUrl ?? ""}
             alt="@shadcn"
           />
           <AvatarFallback>
             <div className="flex h-40 w-40 items-center justify-center rounded-full bg-gray-200 text-center text-3xl font-bold uppercase">
-              {currentCompany?.name?.charAt(0)}{" "}
+              {currentCompany?.name?.charAt(0)}
             </div>
           </AvatarFallback>
         </Avatar>

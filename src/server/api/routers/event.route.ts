@@ -283,22 +283,26 @@ export const eventRouter = createTRPCRouter({
   getClosestEvents: publicProcedure
     .input(eventRouterValidationSchema.getClosestEvents)
     .query(async ({ input, ctx }) => {
-      const { longitude, latitude, limit } = input;
+      try {
+        const { longitude, latitude, limit } = input;
 
-      const closestEvents = await ctx.db
-        .select({
-          event: events,
-          distance: sql`ST_Distance(${events.location}, ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326))`,
-        })
-        .from(events)
-        .orderBy(
-          sql`${events.location} <-> ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)`,
-        )
-        .limit(limit); // Get the 5 closest events
+        const closestEvents = await ctx.db
+          .select({
+            event: events,
+            distance: sql`ST_Distance(${events.location}, ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326))`,
+          })
+          .from(events)
+          .orderBy(
+            sql`${events.location} <-> ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)`,
+          )
+          .limit(limit); // Get the 5 closest events
 
-      return closestEvents.map((event) => ({
-        ...event.event,
-      }));
+        return closestEvents.map((event) => ({
+          ...event.event,
+        }));
+      } catch (e) {
+        console.log("Error fetching closest events", e);
+      }
     }),
 
   getEvent: publicProcedure
